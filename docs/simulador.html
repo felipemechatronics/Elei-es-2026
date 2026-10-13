@@ -143,13 +143,28 @@ tbody tr{cursor:pointer}
 tbody tr:hover{background:color-mix(in srgb,var(--ink) 4%,transparent)}
 .method{max-width:760px}
 .method p{font-size:15.5px;color:var(--ink-2);margin:0 0 .7em}
-footer{margin-top:56px;padding:24px 0 48px;border-top:1px solid var(--line);font:400 13px/1.6 "Archivo",system-ui,sans-serif;color:var(--muted)}
+footer{padding-bottom:140px !important;margin-top:56px;padding:24px 0 48px;border-top:1px solid var(--line);font:400 13px/1.6 "Archivo",system-ui,sans-serif;color:var(--muted)}
 
 .tip{position:fixed;z-index:50;pointer-events:none;background:var(--surface);color:var(--ink);border:1px solid var(--line-2);border-radius:10px;padding:9px 11px;font-size:12.5px;line-height:1.4;box-shadow:0 6px 22px rgba(0,0,0,.14);max-width:280px;opacity:0}
 .tip .tt{font-weight:700;font-size:13.5px;margin-bottom:3px}
 .tip .tr{display:flex;justify-content:space-between;gap:14px}
 .tip .tr i{width:8px;height:8px;border-radius:2px;display:inline-block;margin-right:6px}
 .tip .tm{color:var(--muted);margin-top:3px}
+.state{margin-top:12px;padding:12px;border-radius:10px;background:color-mix(in srgb,var(--ink) 5%,transparent)}
+.duel.sm{height:10px;margin:8px 0 6px}
+.sline{display:flex;justify-content:space-between;gap:10px;font-size:12.5px}
+.sline span{display:flex;flex-direction:column}
+.sline span:last-child{text-align:right}
+.sline b{font-size:16px;font-variant-numeric:tabular-nums}
+.snote{font-size:12.5px;line-height:1.45;color:var(--ink-2);margin:6px 0 0}
+.snote b{color:var(--ink)}
+.score{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:30;width:min(720px,calc(100% - 24px));background:var(--surface);border:1px solid var(--line-2);border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.18);padding:10px 14px;font-family:"Archivo",system-ui,sans-serif}
+.score .top2{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:13px}
+.score .top2 b{font-size:20px;font-weight:800;font-variant-numeric:tabular-nums}
+.score .duel{height:10px;margin:6px 0}
+.score .mg{font-size:12.5px;color:var(--ink-2);display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.score .mg b{color:var(--ink)}
+.score .lbl{font-size:11.5px;color:var(--muted)}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);font:500 14px "Archivo",system-ui,sans-serif;padding:10px 16px;border-radius:999px;opacity:0;transition:opacity .2s;pointer-events:none}
 
 @media (max-width:960px){
@@ -240,6 +255,7 @@ footer{margin-top:56px;padding:24px 0 48px;border-top:1px solid var(--line);font
 </main>
 <footer><div class="wrap">Dados do 1º turno: TSE, votação por seção. Mapas: IBGE. A simulação roda só no seu navegador; o link copiado guarda a divisão geral e as divisões por município.</div></footer>
 <div class="tip" id="tip" role="tooltip"></div>
+<div class="score" id="score" aria-live="polite" hidden></div>
 <div class="toast" id="toast" role="status"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
@@ -285,17 +301,26 @@ function writeHash(){
 }
 
 // ---------- cálculo ----------
-function sim(m){
-  const s = S.own.get(m.id) || S.g;
+function sim(m, force){
+  const s = force || S.own.get(m.id) || S.g;
   const tv = m.vt[T.k];
   const outros = m.v - m.vt[A.k] - m.vt[C.k] - tv;
   const pool = tv + (S.inc ? outros : 0);
   const a = m.vt[A.k] + pool*s.a/100, c = m.vt[C.k] + pool*s.c/100;
   return {a, c, v:a+c, toA:pool*s.a/100, toC:pool*s.c/100, toN:pool*(100-s.a-s.c)/100 + (S.inc?0:outros), pool, s, own:S.own.has(m.id)};
 }
-function total(){
-  let a=0,c=0,toA=0,toC=0,toN=0; D.munis.forEach(m=>{ const r=sim(m); a+=r.a; c+=r.c; toA+=r.toA; toC+=r.toC; toN+=r.toN; });
+function total(onlyGeneral){
+  let a=0,c=0,toA=0,toC=0,toN=0; D.munis.forEach(m=>{ const r=sim(m, onlyGeneral?S.g:null); a+=r.a; c+=r.c; toA+=r.toA; toC+=r.toC; toN+=r.toN; });
   return {a,c,v:a+c,toA,toC,toN};
+}
+// efeito de uma divisão própria sobre a diferença estadual (votos de A menos votos de C)
+function effect(m){ const o = sim(m), g = sim(m, S.g); return (o.a-o.c)-(g.a-g.c); }
+const lead = t => t.a>=t.c ? A : C;
+const marginTxt = t => Math.abs(t.a-t.c)<0.5 ? "empate" : `${lead(t).nome} à frente por ${nf.format(Math.round(Math.abs(t.a-t.c)))} votos (${pf(100*Math.abs(t.a-t.c)/t.v)} pontos)`;
+const signed = x => (x>=0?"+":"−")+nf.format(Math.round(Math.abs(x)));
+function effTxt(x){
+  if (Math.abs(x)<0.5) return "não muda a diferença no estado";
+  return `desloca ${nf.format(Math.round(Math.abs(x)))} votos de diferença no estado a favor de ${esc((x>0?A:C).nome)}`;
 }
 
 // ---------- barra dinâmica ----------
@@ -377,8 +402,17 @@ $("#presets").addEventListener("click", e=>{ const b=e.target.closest("button");
 $("#incOutros").addEventListener("change", e=>{ S.inc = e.target.checked; gbar.draw(); update(); });
 
 // ---------- resultado ----------
+function renderScore(t){
+  const el = $("#score"); if (!el) return;
+  const tg = total(true), d = (t.a-t.c)-(tg.a-tg.c);
+  el.innerHTML = `<div class="lbl">Cenário do 2º turno no estado</div>
+    <div class="top2"><span>${esc(A.nome)} <b>${pf(100*t.a/t.v)}%</b></span><span><b>${pf(100*t.c/t.v)}%</b> ${esc(C.nome)}</span></div>
+    <div class="duel"><i style="flex:${t.a};background:${varOf(A)}"></i><i style="flex:${t.c};background:${varOf(C)}"></i></div>
+    <div class="mg"><span><b>${marginTxt(t)}</b></span>${S.own.size?`<span>Divisões municipais: ${Math.abs(d)<0.5?"sem efeito":`${signed(Math.abs(d))} para ${esc((d>0?A:C).nome)}`} (${S.own.size} ${S.own.size===1?"município":"municípios"})</span>`:""}</div>`;
+}
 function renderResult(){
   const t = total();
+  renderScore(t);
   const pa = 100*t.a/t.v, pc = 100*t.c/t.v;
   const lead = t.a>=t.c ? A : C, diff = Math.abs(t.a-t.c);
   const row = (c,v,p,g) => `<div class="row"><i class="sw" style="background:${varOf(c)}"></i><span><span class="nm">${esc(c.nome)}</span><span class="pt">${esc(c.partido)}</span></span><span class="pc">${pf(p)}%</span>
@@ -437,7 +471,8 @@ function select(id){
     <div class="ptitle">Votos de ${esc(T.nome)} neste município</div>
     <div class="split" id="psplit"></div>
     <div class="status"><span id="pstat"></span><button type="button" class="btn" id="preset">Usar a divisão geral</button></div>
-    <div class="ptitle">Resultado simulado</div><div class="mini" id="psim"></div>`;
+    <div class="state" id="pstate"></div>
+    <div class="ptitle">Resultado simulado em ${esc(m.n)}</div><div class="mini" id="psim"></div>`;
   pbar = makeSplit($("#psplit"), ()=> S.own.get(id) || S.g, s=>{ S.own.set(id, s); update(); }, {pool:()=>sim(m).pool});
   $("#preset").addEventListener("click", ()=>{ S.own.delete(id); pbar.draw(); update(); });
   renderPanelSim(); paintMap();
@@ -448,6 +483,15 @@ function renderPanelSim(){
   $("#pstat").innerHTML = r.own ? `<span class="own">Divisão própria</span>` : `Usando a divisão geral`;
   $("#preset").style.visibility = r.own ? "visible" : "hidden";
   $("#psim").innerHTML = [[A,r.a],[C,r.c]].map(([c,v])=>`<div class="r"><span>${esc(c.nome)}</span><span><b>${pf(100*v/r.v)}%</b> <span class="v">${nf.format(Math.round(v))}</span></span><span class="bar"><i style="width:${100*v/r.v}%;background:${varOf(c)}"></i></span></div>`).join("");
+  const t = total(), ef = effect(m);
+  const without = {a:t.a - (r.a - sim(m,S.g).a), c:t.c - (r.c - sim(m,S.g).c)}; without.v = without.a + without.c;
+  $("#pstate").innerHTML = `<div class="ptitle" style="margin-top:0">Cenário no estado</div>
+    <div class="duel sm"><i style="flex:${t.a};background:${varOf(A)}"></i><i style="flex:${t.c};background:${varOf(C)}"></i></div>
+    <div class="sline"><span><b>${pf(100*t.a/t.v)}%</b>${esc(A.nome)}</span><span><b>${pf(100*t.c/t.v)}%</b>${esc(C.nome)}</span></div>
+    <p class="snote"><b>${marginTxt(t)}</b>.</p>
+    <p class="snote">${r.own
+      ? `A divisão própria de ${esc(m.n)} ${effTxt(ef)}, em comparação com a divisão geral. Sem ela: ${marginTxt(without)}.`
+      : `${esc(m.n)} usa a divisão geral. Mexa na barra acima para ver o efeito no estado.`}</p>`;
   if (pbar) pbar.draw();
 }
 $("#muniList").innerHTML = D.munis.map(m=>`<option value="${esc(m.n)}">`).join("");
@@ -460,7 +504,7 @@ function renderLists(){
   $("#flips").innerHTML = (fl.length ? `<div class="it" style="color:var(--ink-2);border-top:0">${fl.length} ${fl.length===1?"município troca":"municípios trocam"} de posição.</div>` : "") + (fl.length ? fl.map(x=>`<div class="it"><button type="button" class="link" data-id="${x.m.id}">${esc(x.m.n)}</button><span>${chip(x.before)} → ${chip(x.after)}</span></div>`).join("")
     : `<div class="it" style="color:var(--muted)">Nenhum município troca de posição nesta simulação.</div>`);
   $("#ownSub").textContent = S.own.size ? "Toque em um nome para editar; use o botão para voltar à divisão geral." : "Nenhum ainda. Todos usam a divisão geral.";
-  $("#owns").innerHTML = [...S.own].map(([id,s])=>{ const m=munById.get(id); return `<div class="it"><button type="button" class="link" data-id="${id}">${esc(m.n)}</button><span style="display:flex;gap:10px;align-items:center"><span>${s.a}% / ${100-s.a-s.c}% / ${s.c}%</span><button type="button" class="btn" data-rm="${id}">Usar geral</button></span></div>`; }).join("")+
+  $("#owns").innerHTML = [...S.own].map(([id,s])=>{ const m=munById.get(id); return `<div class="it"><button type="button" class="link" data-id="${id}">${esc(m.n)}</button><span style="display:flex;gap:10px;align-items:center"><span>${s.a}% / ${100-s.a-s.c}% / ${s.c}%<br><span style="color:var(--muted);font-size:12px">${(()=>{const e=effect(m); return Math.abs(e)<0.5?"sem efeito no estado":`${signed(Math.abs(e))} para ${esc((e>0?A:C).nome)} no estado`;})()}</span></span><button type="button" class="btn" data-rm="${id}">Usar geral</button></span></div>`; }).join("")+
     (S.own.size>1?`<div class="it"><span></span><button type="button" class="btn" id="rmAll">Voltar todos à divisão geral</button></div>`:"");
 }
 document.querySelector(".lists").addEventListener("click", e=>{
@@ -515,6 +559,9 @@ btn.addEventListener("click", ()=>{ const t = curTheme()==="dark"?"light":"dark"
 matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ()=>{ syncBtn(); readColors(); update(); });
 syncBtn();
 
+const resCard = $("#result");
+function toggleScore(){ const r = resCard.getBoundingClientRect(); $("#score").hidden = r.bottom > 160; }
+addEventListener("scroll", toggleScore, {passive:true}); addEventListener("resize", toggleScore);
 readHash();
 $("#incOutros").checked = S.inc;
 readColors(); sizeMap(); gbar.draw(); renderPanelSim(); update();
