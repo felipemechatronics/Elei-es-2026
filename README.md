@@ -10,6 +10,7 @@ Resultados do 1º turno (4/10/2026) no Rio Grande do Norte por município, bairr
 | Governador | [abrir](https://felipemechatronics.github.io/Elei-es-2026/?cargo=governador) | [relatorio/governador/RELATORIO.md](relatorio/governador/RELATORIO.md) |
 
 - **Site** (`docs/`): mapa do estado que desce até os bairros e os locais de votação, em percentual ou em quantidade de votos, com destaques, gráficos, tabela de todos os municípios e seletor de cargo.
+- **Simulador do 2º turno para Governador** (`docs/simulador.html`, [abrir](https://felipemechatronics.github.io/Elei-es-2026/simulador.html)): barra arrastável para dividir os votos de Álvaro Dias entre Allyson Bezerra, Cadu de Lula e "nenhum dos dois", no estado todo ou com divisão própria em cada município. Mostra o resultado estadual, o mapa, os municípios que trocam de posição e um link para compartilhar a simulação.
 - **Relatórios** (`relatorio/<cargo>/`): o mesmo conteúdo em texto, tabelas e figuras, legível direto no GitHub.
 - **Dados** (`docs/dados/<cargo>/`): resultados por município, bairro e local de votação, em CSV.
 

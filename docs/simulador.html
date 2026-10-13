@@ -1,0 +1,525 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulador do 2º turno para governador</title>
+<meta name="description" content="Simule para onde vão os votos de Álvaro Dias no 2º turno para governador do Rio Grande do Norte, no estado e em cada município.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme: light;
+  --bg:#f5f7f8; --surface:#ffffff; --ink:#15212c; --ink-2:#4a5966; --muted:#7a8792;
+  --line:#dce2e6; --line-2:#c3ccd3;
+  --c0:#2a78d6; --c1:#eb6834; --c2:#1baf7a; --outros:#c3c9ce; --none:#b3bcc4;
+  --empty:#eceff1; --focus:#2a78d6;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --bg:#0e151b; --surface:#121a21; --ink:#e9eef1; --ink-2:#b4c0c9; --muted:#7f8c96;
+    --line:#24313b; --line-2:#33424e;
+    --c0:#3987e5; --c1:#d95926; --c2:#199e70; --outros:#444d55; --none:#55616b;
+    --empty:#1a242c;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --bg:#0e151b; --surface:#121a21; --ink:#e9eef1; --ink-2:#b4c0c9; --muted:#7f8c96;
+  --line:#24313b; --line-2:#33424e;
+  --c0:#3987e5; --c1:#d95926; --c2:#199e70; --outros:#444d55; --none:#55616b;
+  --empty:#1a242c;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 17px/1.6 "Literata",Georgia,serif;-webkit-font-smoothing:antialiased}
+h1,h2,h3,button,input,table,.tip,nav,.ui{font-family:"Archivo",system-ui,sans-serif}
+a{color:inherit;text-underline-offset:3px}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.wrap{max-width:1240px;margin:0 auto;padding:0 24px}
+
+.top{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;gap:24px;height:52px}
+.brand{font:700 15px/1 "Archivo",system-ui,sans-serif;font-stretch:112%;text-decoration:none}
+.top nav{display:flex;gap:18px;font-size:14px;color:var(--ink-2)}
+.top nav a{text-decoration:none;white-space:nowrap}
+.top nav a[aria-current]{color:var(--ink);font-weight:600}
+.theme{margin-left:auto;background:none;border:1px solid var(--line-2);color:var(--ink-2);border-radius:999px;font-size:13px;padding:5px 12px;cursor:pointer}
+
+header.intro{padding:36px 0 8px;max-width:760px}
+.kicker{font:500 14px/1.3 "Archivo",system-ui,sans-serif;color:var(--ink-2);margin:0 0 12px}
+h1{font-weight:800;font-stretch:118%;font-size:clamp(32px,4.2vw,50px);line-height:1;letter-spacing:-.025em;margin:0 0 16px}
+.lede{font-size:18px;color:var(--ink-2);margin:0}
+h2{font-weight:800;font-stretch:115%;font-size:clamp(22px,2.6vw,30px);line-height:1.1;letter-spacing:-.02em;margin:0 0 10px}
+h3{font:700 17px/1.25 "Archivo",system-ui,sans-serif;margin:0 0 6px}
+.sub{font:400 14px/1.5 "Archivo",system-ui,sans-serif;color:var(--ink-2);margin:0 0 14px}
+section{padding:36px 0 0}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+
+/* barra dinâmica */
+.split{font-family:"Archivo",system-ui,sans-serif;user-select:none;-webkit-user-select:none}
+.track{position:relative;height:44px;border-radius:10px;display:flex;overflow:visible;margin:22px 10px 10px;touch-action:none;cursor:pointer}
+.track .seg{height:100%;display:flex;align-items:center;justify-content:center;font:700 14px "Archivo",system-ui,sans-serif;color:#fff;overflow:hidden;white-space:nowrap;min-width:0}
+.track .seg:first-child{border-radius:10px 0 0 10px}
+.track .seg:last-child{border-radius:0 10px 10px 0}
+.track .sN{background:var(--none);color:var(--ink)}
+.h{position:absolute;top:-8px;width:22px;height:60px;margin-left:-11px;border-radius:8px;border:2px solid var(--ink);background:var(--surface);cursor:ew-resize;padding:0;touch-action:none;box-shadow:0 2px 8px rgba(0,0,0,.18)}
+.h::after{content:"";position:absolute;left:50%;top:50%;width:2px;height:20px;margin:-10px 0 0 -1px;background:var(--ink);border-radius:1px;box-shadow:-4px 0 0 var(--ink),4px 0 0 var(--ink);opacity:.5}
+.split-legend{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px;font-size:13px;color:var(--ink-2)}
+.split-legend div{display:flex;flex-direction:column;gap:2px}
+.split-legend div:nth-child(2){text-align:center}
+.split-legend div:nth-child(3){text-align:right}
+.split-legend b{font:800 22px/1 "Archivo",system-ui,sans-serif;font-stretch:110%;color:var(--ink);font-variant-numeric:tabular-nums}
+.split-legend span{font-variant-numeric:tabular-nums}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:16px}
+.chips button,.btn{font-size:12.5px;border:1px solid var(--line-2);border-radius:999px;background:none;color:var(--ink-2);padding:5px 11px;cursor:pointer}
+.chips button:hover,.btn:hover{border-color:var(--ink);color:var(--ink)}
+.btn.primary{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+label.chk{display:flex;gap:8px;align-items:flex-start;font:400 13px/1.4 "Archivo",system-ui,sans-serif;color:var(--ink-2);margin-top:14px}
+
+/* resultado */
+.res .row{display:grid;grid-template-columns:12px 1fr auto;gap:4px 10px;align-items:baseline;padding:10px 0;border-top:1px solid var(--line)}
+.res .row:first-of-type{border-top:0}
+.res .sw{width:12px;height:12px;border-radius:3px;align-self:center}
+.res .nm{font:600 17px/1.2 "Archivo",system-ui,sans-serif}
+.res .pt{font:500 13px "Archivo",system-ui,sans-serif;color:var(--muted);margin-left:6px}
+.res .pc{font:800 34px/1 "Archivo",system-ui,sans-serif;font-stretch:110%;font-variant-numeric:tabular-nums}
+.res .vv{grid-column:2/4;font:400 13px/1.3 "Archivo",system-ui,sans-serif;color:var(--ink-2)}
+.duel{display:flex;height:14px;border-radius:7px;overflow:hidden;gap:2px;margin:14px 0 6px;position:relative}
+.duel i{display:block;height:100%}
+.duel::after{content:"";position:absolute;left:50%;top:-4px;bottom:-4px;width:2px;background:var(--ink);opacity:.55}
+.verdict{font:500 15px/1.45 "Archivo",system-ui,sans-serif;margin:10px 0 0}
+.note{font:400 12.5px/1.5 "Archivo",system-ui,sans-serif;color:var(--muted);margin-top:10px}
+
+/* mapa + painel */
+.mapwrap{display:grid;grid-template-columns:1fr 340px;background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.mapsvg{position:relative;min-height:460px}
+.mapsvg > svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.legend{position:absolute;left:14px;bottom:12px;font:400 12px/1.3 "Archivo",system-ui,sans-serif;color:var(--ink-2);background:color-mix(in srgb,var(--surface) 90%,transparent);padding:8px 10px;border-radius:8px;pointer-events:none}
+.legend .lt{font-weight:600;color:var(--ink);margin-bottom:5px}
+.legend .lrow{display:flex;align-items:center;gap:6px;margin:2px 0}
+.legend .ramp{display:flex;gap:2px}
+.legend .ramp span{width:22px;height:10px;border-radius:2px}
+.legend .ticks{display:flex;justify-content:space-between;width:96px}
+.maptools{position:absolute;top:12px;left:12px;right:12px;display:flex;gap:8px;flex-wrap:wrap}
+.maptools input{font-size:13px;padding:6px 12px;border-radius:999px;border:1px solid var(--line-2);background:var(--bg);color:var(--ink);width:200px}
+.panel{border-left:1px solid var(--line);padding:16px;font-family:"Archivo",system-ui,sans-serif;max-height:640px;overflow:auto}
+.panel h3{font-size:22px;font-weight:800;font-stretch:112%;margin:0}
+.panel .meta{font-size:12.5px;color:var(--muted);margin:2px 0 10px}
+.panel .split .track{height:34px;margin:18px 8px 8px}
+.panel .split .h{height:48px;top:-7px}
+.panel .split-legend b{font-size:17px}
+.status{font-size:12.5px;color:var(--ink-2);display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:12px;padding-top:10px;border-top:1px solid var(--line)}
+.status .own{font-weight:600;color:var(--ink)}
+.mini .r{display:grid;grid-template-columns:1fr auto;font-size:13px;gap:2px 8px;margin:6px 0}
+.mini .r .bar{grid-column:1/3;height:5px;background:var(--empty);border-radius:3px;overflow:hidden}
+.mini .r .bar i{display:block;height:100%}
+.mini .r b{font-variant-numeric:tabular-nums}
+.mini .r span.v{color:var(--muted);font-variant-numeric:tabular-nums}
+.ptitle{font-size:12.5px;font-weight:600;color:var(--ink-2);margin:14px 0 2px}
+.empty{color:var(--muted);font-size:14px;padding:30px 4px;line-height:1.5}
+
+/* listas e tabela */
+.lists{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.list{max-height:430px;overflow:auto}
+.list .it{display:flex;justify-content:space-between;gap:10px;align-items:center;border-top:1px solid var(--line);padding:7px 0;font:400 13.5px "Archivo",system-ui,sans-serif}
+.list .it button.link{background:none;border:0;padding:0;color:var(--ink);font:inherit;cursor:pointer;text-align:left;text-decoration:underline;text-decoration-color:var(--line-2);text-underline-offset:3px}
+.chip{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.chip i{width:9px;height:9px;border-radius:2px;display:inline-block}
+.tablebox{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.tabletools{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:12px 14px;border-bottom:1px solid var(--line);font:400 13px "Archivo",system-ui,sans-serif;color:var(--ink-2)}
+.tabletools input{font-size:13px;padding:6px 12px;border-radius:999px;border:1px solid var(--line-2);background:var(--bg);color:var(--ink);width:220px}
+.tscroll{max-height:520px;overflow:auto}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th,td{padding:8px 12px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+th:first-child,td:first-child{text-align:left}
+th{position:sticky;top:0;background:var(--surface);font-weight:600;color:var(--ink-2);cursor:pointer;z-index:1}
+th[aria-sort="ascending"]::after{content:" ▲";font-size:9px}
+th[aria-sort="descending"]::after{content:" ▼";font-size:9px}
+tbody tr{cursor:pointer}
+tbody tr:hover{background:color-mix(in srgb,var(--ink) 4%,transparent)}
+.method{max-width:760px}
+.method p{font-size:15.5px;color:var(--ink-2);margin:0 0 .7em}
+footer{margin-top:56px;padding:24px 0 48px;border-top:1px solid var(--line);font:400 13px/1.6 "Archivo",system-ui,sans-serif;color:var(--muted)}
+
+.tip{position:fixed;z-index:50;pointer-events:none;background:var(--surface);color:var(--ink);border:1px solid var(--line-2);border-radius:10px;padding:9px 11px;font-size:12.5px;line-height:1.4;box-shadow:0 6px 22px rgba(0,0,0,.14);max-width:280px;opacity:0}
+.tip .tt{font-weight:700;font-size:13.5px;margin-bottom:3px}
+.tip .tr{display:flex;justify-content:space-between;gap:14px}
+.tip .tr i{width:8px;height:8px;border-radius:2px;display:inline-block;margin-right:6px}
+.tip .tm{color:var(--muted);margin-top:3px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);font:500 14px "Archivo",system-ui,sans-serif;padding:10px 16px;border-radius:999px;opacity:0;transition:opacity .2s;pointer-events:none}
+
+@media (max-width:960px){
+  .grid2,.lists{grid-template-columns:1fr}
+  .mapwrap{grid-template-columns:1fr}
+  .panel{border-left:0;border-top:1px solid var(--line);max-height:none}
+}
+@media (max-width:560px){
+  .wrap{padding:0 16px}
+  .top nav{gap:12px;font-size:13px}
+  .brand{display:none}
+  .mapsvg{min-height:360px}
+  .maptools input{width:100%}
+  .res .pc{font-size:28px}
+  .split-legend b{font-size:18px}
+}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="brand" href="index.html">RN 2026</a>
+  <nav aria-label="Páginas"><a href="index.html?cargo=governador">Resultados</a><a href="simulador.html" aria-current="page">Simulador do 2º turno</a></nav>
+  <button class="theme" id="themeBtn" type="button">Tema escuro</button>
+</div></header>
+
+<main class="wrap">
+  <header class="intro">
+    <p class="kicker">Governador do Rio Grande do Norte · simulação</p>
+    <h1>Simulador do 2º turno para governador</h1>
+    <p class="lede" id="lede"></p>
+  </header>
+
+  <section>
+    <div class="grid2">
+      <div class="card">
+        <h2 id="splitTitle">Para onde vão os votos</h2>
+        <p class="sub" id="splitSub"></p>
+        <div class="split" id="gsplit"></div>
+        <div class="chips" id="presets" role="group" aria-label="Divisões prontas"></div>
+        <label class="chk"><input type="checkbox" id="incOutros" checked> <span id="incOutrosTxt"></span></label>
+      </div>
+      <div class="card res" id="result" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Município a município</h2>
+    <p class="sub">Cada município usa a divisão geral, a menos que você defina uma própria. Toque em um município no mapa (ou busque pelo nome) e arraste a barra dele. Municípios com divisão própria aparecem com contorno escuro.</p>
+    <div class="mapwrap">
+      <div class="mapsvg" id="mapsvg">
+        <svg id="map" role="img" aria-label="Mapa do resultado simulado por município"></svg>
+        <div class="maptools"><input id="q" list="muniList" placeholder="Buscar município" aria-label="Buscar município"><datalist id="muniList"></datalist></div>
+        <div class="legend" id="legend"></div>
+      </div>
+      <aside class="panel" id="panel"></aside>
+    </div>
+  </section>
+
+  <section>
+    <div class="lists">
+      <div>
+        <h3>Municípios que trocam de posição</h3>
+        <p class="sub">Comparação entre os dois candidatos: quem tinha mais votos no 1º turno e quem fica à frente na simulação.</p>
+        <div class="list" id="flips"></div>
+      </div>
+      <div>
+        <h3>Municípios com divisão própria</h3>
+        <p class="sub" id="ownSub"></p>
+        <div class="list" id="owns"></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Todos os municípios</h2>
+    <div class="tablebox">
+      <div class="tabletools"><input id="tq" placeholder="Filtrar por nome" aria-label="Filtrar municípios"><span id="tcount"></span><button class="btn" id="share" type="button">Copiar link desta simulação</button></div>
+      <div class="tscroll"><table id="tbl"><thead></thead><tbody></tbody></table></div>
+    </div>
+  </section>
+
+  <section class="method">
+    <h2>Como funciona</h2>
+    <p id="m1"></p>
+    <p>A simulação parte dos votos de cada município no 1º turno: os eleitores de cada um dos dois finalistas repetem o voto, e os votos do terceiro colocado (e, se marcado, dos demais candidatos) são divididos conforme a barra. A parte "Nenhum dos dois" reúne quem anularia, votaria em branco ou deixaria de votar; ela sai dos votos válidos.</p>
+    <p>É um exercício de cenários, não uma pesquisa nem uma projeção. A simulação não considera mudanças de comparecimento nem eleitores que troquem de candidato entre os dois finalistas.</p>
+  </section>
+</main>
+<footer><div class="wrap">Dados do 1º turno: TSE, votação por seção. Mapas: IBGE. A simulação roda só no seu navegador; o link copiado guarda a divisão geral e as divisões por município.</div></footer>
+<div class="tip" id="tip" role="tooltip"></div>
+<div class="toast" id="toast" role="status"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script src="geo.js"></script>
+<script src="governador.js"></script>
+<script>
+(() => {
+const D = window.DADOS, G = window.GEO;
+const nf = new Intl.NumberFormat("pt-BR");
+const pf = (x,d=1) => x.toLocaleString("pt-BR",{minimumFractionDigits:d,maximumFractionDigits:d});
+const $ = s => document.querySelector(s);
+const esc = s => String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+// os dois primeiros vão ao 2º turno; o terceiro tem os votos redistribuídos
+const ord = [...D.cands].sort((a,b)=>D.estado.vt[b.k]-D.estado.vt[a.k]);
+const A = ord[0], C = ord[1], T = ord[2];
+const fin = [A, C];
+const varOf = c => c.cor!=null ? `var(--c${c.cor})` : "var(--outros)";
+let COL = {};
+function readColors(){ COL = {A:css(`--c${A.cor}`), C:css(`--c${C.cor}`), T:css(`--c${T.cor}`), none:css("--none"), surface:css("--surface"), ink:css("--ink"), empty:css("--empty"), muted:css("--muted")}; }
+
+// ---------- estado da simulação ----------
+const S = { g:{a:40,c:40}, inc:true, own:new Map(), sel:null };
+function readHash(){
+  const h = new URLSearchParams(location.hash.slice(1));
+  const g = (h.get("g")||"").split(",").map(Number);
+  if (g.length===2 && g.every(x=>x>=0) && g[0]+g[1]<=100) S.g = {a:g[0], c:g[1]};
+  if (h.has("o")) S.inc = h.get("o")!=="0";
+  (h.get("m")||"").split(";").filter(Boolean).forEach(p=>{
+    const [id, v] = p.split(":"); const [a,c] = (v||"").split(",").map(Number);
+    if (D.munis.some(m=>m.id===id) && a>=0 && c>=0 && a+c<=100) S.own.set(id,{a,c});
+  });
+}
+let hashT;
+function writeHash(){
+  clearTimeout(hashT);
+  hashT = setTimeout(()=>{
+    const p = [`g=${S.g.a},${S.g.c}`, `o=${S.inc?1:0}`];
+    if (S.own.size) p.push("m="+[...S.own].map(([id,s])=>`${id}:${s.a},${s.c}`).join(";"));
+    history.replaceState(null,"","#"+p.join("&"));
+  }, 200);
+}
+
+// ---------- cálculo ----------
+function sim(m){
+  const s = S.own.get(m.id) || S.g;
+  const tv = m.vt[T.k];
+  const outros = m.v - m.vt[A.k] - m.vt[C.k] - tv;
+  const pool = tv + (S.inc ? outros : 0);
+  const a = m.vt[A.k] + pool*s.a/100, c = m.vt[C.k] + pool*s.c/100;
+  return {a, c, v:a+c, toA:pool*s.a/100, toC:pool*s.c/100, toN:pool*(100-s.a-s.c)/100 + (S.inc?0:outros), pool, s, own:S.own.has(m.id)};
+}
+function total(){
+  let a=0,c=0,toA=0,toC=0,toN=0; D.munis.forEach(m=>{ const r=sim(m); a+=r.a; c+=r.c; toA+=r.toA; toC+=r.toC; toN+=r.toN; });
+  return {a,c,v:a+c,toA,toC,toN};
+}
+
+// ---------- barra dinâmica ----------
+function makeSplit(el, get, set, opts={}){
+  el.innerHTML = `<div class="track"><div class="seg sA"></div><div class="seg sN"></div><div class="seg sC"></div>
+    <button type="button" class="h h1" role="slider" aria-valuemin="0" aria-valuemax="100"></button>
+    <button type="button" class="h h2" role="slider" aria-valuemin="0" aria-valuemax="100"></button></div>
+    <div class="split-legend"><div class="la"></div><div class="ln"></div><div class="lc"></div></div>`;
+  const tr = el.querySelector(".track"), h1 = el.querySelector(".h1"), h2 = el.querySelector(".h2");
+  const sA = el.querySelector(".sA"), sN = el.querySelector(".sN"), sC = el.querySelector(".sC");
+  sA.style.background = varOf(A); sC.style.background = varOf(C);
+  h1.setAttribute("aria-label", `Parte que vai para ${A.nome}`); h2.setAttribute("aria-label", `Parte que vai para ${C.nome}`);
+  function draw(){
+    const s = get(), n = 100-s.a-s.c, pool = opts.pool ? opts.pool() : null;
+    sA.style.flex = `0 0 ${s.a}%`; sN.style.flex = `0 0 ${n}%`; sC.style.flex = `0 0 ${s.c}%`;
+    sA.textContent = s.a>=8 ? s.a+"%" : ""; sN.textContent = n>=8 ? n+"%" : ""; sC.textContent = s.c>=8 ? s.c+"%" : "";
+    h1.style.left = s.a+"%"; h2.style.left = (100-s.c)+"%";
+    h1.setAttribute("aria-valuenow", s.a); h1.setAttribute("aria-valuetext", `${s.a}% para ${A.nome}`);
+    h2.setAttribute("aria-valuenow", s.c); h2.setAttribute("aria-valuetext", `${s.c}% para ${C.nome}`);
+    const vv = p => pool!=null ? `<span>${nf.format(Math.round(pool*p/100))} votos</span>` : "";
+    el.querySelector(".la").innerHTML = `<span>${esc(A.nome)}</span><b>${s.a}%</b>${vv(s.a)}`;
+    el.querySelector(".ln").innerHTML = `<span>Nenhum dos dois</span><b>${n}%</b>${vv(n)}`;
+    el.querySelector(".lc").innerHTML = `<span>${esc(C.nome)}</span><b>${s.c}%</b>${vv(s.c)}`;
+  }
+  const pctAt = x => { const r = tr.getBoundingClientRect(); return Math.round(Math.max(0,Math.min(100,100*(x-r.left)/r.width))); };
+  function move(which, p){
+    const s = {...get()};
+    // a alça empurra a outra quando passa por ela
+    if (which===1){ s.a = p; s.c = Math.min(s.c, 100-p); } else { s.c = 100-p; s.a = Math.min(s.a, p); }
+    set(s); draw();
+  }
+  let drag = null;
+  [h1,h2].forEach((h,i)=>{
+    h.addEventListener("pointerdown", e=>{ e.preventDefault(); e.stopPropagation(); drag=i+1; h.setPointerCapture(e.pointerId); h.focus(); });
+    h.addEventListener("pointermove", e=>{ if (drag===i+1) move(drag, pctAt(e.clientX)); });
+    h.addEventListener("pointerup", ()=>{ drag=null; });
+    h.addEventListener("keydown", e=>{
+      const st = e.shiftKey ? 10 : 1; const s = get();
+      const cur = i===0 ? s.a : 100-s.c;
+      let p = null;
+      if (e.key==="ArrowRight"||e.key==="ArrowUp") p = cur+st;
+      if (e.key==="ArrowLeft"||e.key==="ArrowDown") p = cur-st;
+      if (e.key==="Home") p = 0; if (e.key==="End") p = 100;
+      if (p!=null){ e.preventDefault(); move(i+1, Math.max(0,Math.min(100,p))); }
+    });
+  });
+  tr.addEventListener("pointerdown", e=>{
+    if (e.target.classList.contains("h")) return;
+    const p = pctAt(e.clientX), s = get();
+    const which = Math.abs(p-s.a) <= Math.abs(p-(100-s.c)) ? 1 : 2;
+    move(which, p); drag = which; tr.setPointerCapture(e.pointerId);
+  });
+  tr.addEventListener("pointermove", e=>{ if (drag && !e.target.classList.contains("h")) move(drag, pctAt(e.clientX)); });
+  tr.addEventListener("pointerup", ()=>{ drag=null; });
+  draw();
+  return {draw};
+}
+
+// ---------- textos fixos ----------
+const E = D.estado;
+const outrosE = E.v - E.vt[A.k] - E.vt[C.k] - E.vt[T.k];
+$("#lede").textContent = `No 1º turno, ${A.nome} (${A.partido}) e ${C.nome} (${C.partido}) foram os mais votados. ${T.nome} (${T.partido}), terceiro colocado, teve ${nf.format(E.vt[T.k])} votos. Arraste a barra para decidir como esses eleitores se dividem no 2º turno, no estado todo ou em cada município, e veja o resultado.`;
+$("#splitTitle").textContent = `Para onde vão os votos de ${T.nome}`;
+$("#splitSub").textContent = `${nf.format(E.vt[T.k])} votos no 1º turno. Arraste as alças para dividir entre os dois finalistas e quem não votaria em nenhum deles. Também funciona com as setas do teclado.`;
+$("#incOutrosTxt").textContent = `Dividir da mesma forma os votos dos demais candidatos (${nf.format(outrosE)} votos). Desmarcado, esses eleitores não votam em nenhum dos dois.`;
+$("#m1").textContent = `Percentuais sobre os votos válidos simulados, isto é, a soma dos votos de ${A.nome} e de ${C.nome}.`;
+
+// ---------- barra geral ----------
+const gbar = makeSplit($("#gsplit"), ()=>S.g, s=>{ S.g=s; update(); }, {pool:()=>E.vt[T.k] + (S.inc?outrosE:0)});
+const PRE = [
+  {l:"Metade para cada", f:()=>({a:50,c:50})},
+  {l:"40% / 20% / 40%", f:()=>({a:40,c:40})},
+  {l:"Proporcional ao 1º turno", f:()=>{ const n = 100-S.g.a-S.g.c; const a = Math.round((100-n)*E.vt[A.k]/(E.vt[A.k]+E.vt[C.k])); return {a, c:100-n-a}; }},
+  {l:`Todos para ${A.nome}`, f:()=>({a:100,c:0})},
+  {l:`Todos para ${C.nome}`, f:()=>({a:0,c:100})},
+];
+$("#presets").innerHTML = PRE.map((p,i)=>`<button type="button" data-i="${i}">${esc(p.l)}</button>`).join("");
+$("#presets").addEventListener("click", e=>{ const b=e.target.closest("button"); if(!b) return; S.g = PRE[+b.dataset.i].f(); gbar.draw(); update(); });
+$("#incOutros").addEventListener("change", e=>{ S.inc = e.target.checked; gbar.draw(); update(); });
+
+// ---------- resultado ----------
+function renderResult(){
+  const t = total();
+  const pa = 100*t.a/t.v, pc = 100*t.c/t.v;
+  const lead = t.a>=t.c ? A : C, diff = Math.abs(t.a-t.c);
+  const row = (c,v,p,g) => `<div class="row"><i class="sw" style="background:${varOf(c)}"></i><span><span class="nm">${esc(c.nome)}</span><span class="pt">${esc(c.partido)}</span></span><span class="pc">${pf(p)}%</span>
+    <span class="vv">${nf.format(Math.round(v))} votos · ${nf.format(E.vt[c.k])} no 1º turno + ${nf.format(Math.round(g))} recebidos</span></div>`;
+  $("#result").innerHTML = `<h2>Resultado simulado</h2>`+row(A,t.a,pa,t.toA)+row(C,t.c,pc,t.toC)+
+    `<div class="duel" aria-hidden="true"><i style="flex:${t.a};background:${varOf(A)}"></i><i style="flex:${t.c};background:${varOf(C)}"></i></div>`+
+    `<p class="verdict">${diff<0.5?"Empate":`${esc(lead.nome)} à frente por ${nf.format(Math.round(diff))} votos (${pf(Math.abs(pa-pc))} pontos)`}. ${S.own.size?`${S.own.size} ${S.own.size===1?"município usa":"municípios usam"} divisão própria.`:""}</p>`+
+    `<p class="note">${nf.format(Math.round(t.toN))} eleitores de ${esc(T.nome)}${S.inc?" e dos demais candidatos":" e todos os dos demais candidatos"} não votam em nenhum dos dois nesta simulação.</p>`;
+}
+
+// ---------- mapa ----------
+const munById = new Map(D.munis.map(m=>[m.id,m]));
+const svg = d3.select("#map"), g0 = svg.append("g");
+const proj = d3.geoMercator(), path = d3.geoPath(proj);
+const MB=[5,15,30], MST=[0.38,0.58,0.8,1];
+function fill(m){
+  const r = sim(m); if (!r.v) return COL.empty;
+  const mg = 100*Math.abs(r.a-r.c)/r.v, i = mg<MB[0]?0:mg<MB[1]?1:mg<MB[2]?2:3;
+  return d3.interpolateRgb(COL.surface, r.a>=r.c?COL.A:COL.C)(MST[i]);
+}
+const tip = $("#tip");
+function showTip(ev, html){ tip.innerHTML=html; tip.style.opacity=1; const w=tip.offsetWidth,h=tip.offsetHeight; let x=ev.clientX+14,y=ev.clientY+14; if(x+w>innerWidth-8)x=ev.clientX-w-14; if(y+h>innerHeight-8)y=ev.clientY-h-14; tip.style.left=Math.max(8,x)+"px"; tip.style.top=Math.max(8,y)+"px"; }
+const hideTip = () => tip.style.opacity = 0;
+function tipFor(m){
+  const r = sim(m);
+  return `<div class="tt">${esc(m.n)}</div>`+
+    [[A,r.a],[C,r.c]].map(([c,v])=>`<div class="tr"><span><i style="background:${varOf(c)}"></i>${esc(c.nome)}</span><b>${pf(100*v/r.v)}% <span style="color:var(--muted);font-weight:400">${nf.format(Math.round(v))}</span></b></div>`).join("")+
+    `<div class="tm">${nf.format(m.vt[T.k])} votos de ${esc(T.nome)} · divisão ${r.own?"própria":"geral"}: ${r.s.a}% / ${100-r.s.a-r.s.c}% / ${r.s.c}%</div>`;
+}
+const paths = g0.selectAll("path").data(G.mapa.features).join("path")
+  .attr("vector-effect","non-scaling-stroke").style("cursor","pointer")
+  .on("mousemove",(ev,f)=>showTip(ev, tipFor(munById.get(f.properties.id))))
+  .on("mouseleave",hideTip)
+  .on("click",(ev,f)=>{ hideTip(); select(f.properties.id); });
+function sizeMap(){
+  const b = $("#mapsvg").getBoundingClientRect(); const W=Math.max(280,b.width), H=Math.max(320,b.height);
+  svg.attr("viewBox",`0 0 ${W} ${H}`); proj.fitExtent([[14,56],[W-14,H-14]], G.mapa); paths.attr("d",path);
+}
+function paintMap(){
+  paths.attr("fill", f=>fill(munById.get(f.properties.id)))
+    .attr("stroke", f=> (S.own.has(f.properties.id) || S.sel===f.properties.id) ? COL.ink : COL.surface)
+    .attr("stroke-width", f=> S.sel===f.properties.id ? 2.2 : S.own.has(f.properties.id) ? 1.4 : 0.6);
+  paths.filter(f=>S.own.has(f.properties.id)).raise(); paths.filter(f=>S.sel===f.properties.id).raise();
+  $("#legend").innerHTML = `<div class="lt">À frente na simulação</div>`+fin.map(c=>`<div class="lrow"><div class="ramp">${MST.map(t=>`<span style="background:${d3.interpolateRgb(COL.surface, c===A?COL.A:COL.C)(t)}"></span>`).join("")}</div>${esc(c.nome)}</div>`).join("")+
+    `<div class="ticks"><span>&lt;5</span><span>15</span><span>30+ p.p.</span></div>`;
+}
+
+// ---------- painel do município ----------
+let pbar = null;
+function select(id){
+  S.sel = id; const m = munById.get(id);
+  $("#q").value = m.n;
+  const t1 = m.v;
+  $("#panel").innerHTML = `<h3>${esc(m.n)}</h3><div class="meta">${nf.format(m.ap)} eleitores aptos · ${nf.format(m.v)} votos válidos no 1º turno</div>
+    <div class="ptitle">1º turno</div><div class="mini">${[A,C,T].map(c=>`<div class="r"><span>${esc(c.nome)}</span><span><b>${pf(100*m.vt[c.k]/t1)}%</b> <span class="v">${nf.format(m.vt[c.k])}</span></span><span class="bar"><i style="width:${100*m.vt[c.k]/t1}%;background:${varOf(c)}"></i></span></div>`).join("")}</div>
+    <div class="ptitle">Votos de ${esc(T.nome)} neste município</div>
+    <div class="split" id="psplit"></div>
+    <div class="status"><span id="pstat"></span><button type="button" class="btn" id="preset">Usar a divisão geral</button></div>
+    <div class="ptitle">Resultado simulado</div><div class="mini" id="psim"></div>`;
+  pbar = makeSplit($("#psplit"), ()=> S.own.get(id) || S.g, s=>{ S.own.set(id, s); update(); }, {pool:()=>sim(m).pool});
+  $("#preset").addEventListener("click", ()=>{ S.own.delete(id); pbar.draw(); update(); });
+  renderPanelSim(); paintMap();
+}
+function renderPanelSim(){
+  if (!S.sel) { $("#panel").innerHTML = `<div class="empty">Toque em um município no mapa para ver o 1º turno dele e definir uma divisão própria dos votos de ${esc(T.nome)}.</div>`; return; }
+  const m = munById.get(S.sel), r = sim(m);
+  $("#pstat").innerHTML = r.own ? `<span class="own">Divisão própria</span>` : `Usando a divisão geral`;
+  $("#preset").style.visibility = r.own ? "visible" : "hidden";
+  $("#psim").innerHTML = [[A,r.a],[C,r.c]].map(([c,v])=>`<div class="r"><span>${esc(c.nome)}</span><span><b>${pf(100*v/r.v)}%</b> <span class="v">${nf.format(Math.round(v))}</span></span><span class="bar"><i style="width:${100*v/r.v}%;background:${varOf(c)}"></i></span></div>`).join("");
+  if (pbar) pbar.draw();
+}
+$("#muniList").innerHTML = D.munis.map(m=>`<option value="${esc(m.n)}">`).join("");
+$("#q").addEventListener("change", e=>{ const n=e.target.value.trim().toLowerCase(); const m=D.munis.find(m=>m.n.toLowerCase()===n); if(m) select(m.id); });
+
+// ---------- listas ----------
+const chip = c => `<span class="chip"><i style="background:${varOf(c)}"></i>${esc(c.nome)}</span>`;
+function renderLists(){
+  const fl = D.munis.filter(m=>m.v).map(m=>{ const r=sim(m); const before = m.vt[A.k]>=m.vt[C.k]?A:C, after = r.a>=r.c?A:C; return {m,before,after,r}; }).filter(x=>x.before!==x.after).sort((a,b)=>b.m.v-a.m.v);
+  $("#flips").innerHTML = (fl.length ? `<div class="it" style="color:var(--ink-2);border-top:0">${fl.length} ${fl.length===1?"município troca":"municípios trocam"} de posição.</div>` : "") + (fl.length ? fl.map(x=>`<div class="it"><button type="button" class="link" data-id="${x.m.id}">${esc(x.m.n)}</button><span>${chip(x.before)} → ${chip(x.after)}</span></div>`).join("")
+    : `<div class="it" style="color:var(--muted)">Nenhum município troca de posição nesta simulação.</div>`;
+  $("#ownSub").textContent = S.own.size ? "Toque em um nome para editar; use o botão para voltar à divisão geral." : "Nenhum ainda. Todos usam a divisão geral.";
+  $("#owns").innerHTML = [...S.own].map(([id,s])=>{ const m=munById.get(id); return `<div class="it"><button type="button" class="link" data-id="${id}">${esc(m.n)}</button><span style="display:flex;gap:10px;align-items:center"><span>${s.a}% / ${100-s.a-s.c}% / ${s.c}%</span><button type="button" class="btn" data-rm="${id}">Usar geral</button></span></div>`; }).join("")+
+    (S.own.size>1?`<div class="it"><span></span><button type="button" class="btn" id="rmAll">Voltar todos à divisão geral</button></div>`:"");
+}
+document.querySelector(".lists").addEventListener("click", e=>{
+  const b = e.target.closest("[data-id]"); if (b){ select(b.dataset.id); document.getElementById("mapsvg").scrollIntoView({block:"center"}); return; }
+  const r = e.target.closest("[data-rm]"); if (r){ S.own.delete(r.dataset.rm); if (S.sel===r.dataset.rm && pbar) pbar.draw(); update(); return; }
+  if (e.target.id==="rmAll"){ S.own.clear(); if (pbar) pbar.draw(); update(); }
+});
+
+// ---------- tabela ----------
+const cols = [
+  {k:"n", l:"Município", v:m=>m.n, f:m=>esc(m.n)},
+  {k:"t", l:`Votos de ${T.nome}`, v:m=>m.vt[T.k], f:m=>nf.format(m.vt[T.k])},
+  {k:"a", l:A.nome, v:m=>{const r=sim(m);return r.v?r.a/r.v:0}, f:m=>{const r=sim(m);return r.v?pf(100*r.a/r.v)+"%":"–"}},
+  {k:"c", l:C.nome, v:m=>{const r=sim(m);return r.v?r.c/r.v:0}, f:m=>{const r=sim(m);return r.v?pf(100*r.c/r.v)+"%":"–"}},
+  {k:"w", l:"À frente", v:m=>{const r=sim(m);return r.v?(r.a-r.c)/r.v:0}, f:m=>{const r=sim(m); if(!r.v) return "–"; const c=r.a>=r.c?A:C; return `${chip(c)} +${nf.format(Math.round(Math.abs(r.a-r.c)))}`;}},
+  {k:"d", l:"Divisão", v:m=>S.own.has(m.id)?1:0, f:m=>S.own.has(m.id)?"própria":"geral"},
+];
+const ts = {k:"t", dir:-1, q:""};
+function renderTable(){
+  $("#tbl thead").innerHTML = `<tr>${cols.map(c=>`<th scope="col" data-k="${c.k}" tabindex="0" ${ts.k===c.k?`aria-sort="${ts.dir>0?"ascending":"descending"}"`:""}>${esc(c.l)}</th>`).join("")}</tr>`;
+  const col = cols.find(c=>c.k===ts.k);
+  const q = ts.q.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
+  const rows = D.munis.filter(m=>!q || m.n.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().includes(q))
+    .sort((a,b)=>{ const x=col.v(a), y=col.v(b); return (typeof x==="string"?x.localeCompare(y,"pt-BR"):x-y)*ts.dir; });
+  $("#tbl tbody").innerHTML = rows.map(m=>`<tr data-id="${m.id}">${cols.map(c=>`<td>${c.f(m)}</td>`).join("")}</tr>`).join("");
+  $("#tcount").textContent = `${rows.length} de ${D.munis.length} municípios.`;
+}
+$("#tbl thead").addEventListener("click", e=>{ const th=e.target.closest("th"); if(!th) return; const k=th.dataset.k; ts.dir = ts.k===k?-ts.dir:(k==="n"?1:-1); ts.k=k; renderTable(); });
+$("#tbl thead").addEventListener("keydown", e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); e.target.click(); } });
+$("#tbl tbody").addEventListener("click", e=>{ const tr=e.target.closest("tr"); if(!tr) return; select(tr.dataset.id); document.getElementById("mapsvg").scrollIntoView({block:"center"}); });
+$("#tq").addEventListener("input", e=>{ ts.q=e.target.value; renderTable(); });
+
+$("#share").addEventListener("click", async ()=>{
+  writeHash(); await new Promise(r=>setTimeout(r,250));
+  let ok = false; try { await navigator.clipboard.writeText(location.href); ok = true; } catch(e){}
+  const t = $("#toast"); t.textContent = ok ? "Link copiado" : "Copie o endereço da barra do navegador"; t.style.opacity = 1; setTimeout(()=>t.style.opacity=0, 1800);
+});
+
+// ---------- atualização ----------
+let raf = null;
+function update(){
+  if (raf) return;
+  raf = requestAnimationFrame(()=>{ raf=null; renderResult(); paintMap(); renderPanelSim(); renderLists(); renderTable(); writeHash(); });
+}
+
+// tema
+const btn = $("#themeBtn");
+const curTheme = () => document.documentElement.dataset.theme || (matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");
+const syncBtn = () => btn.textContent = curTheme()==="dark" ? "Tema claro" : "Tema escuro";
+try { const t = localStorage.getItem("tema"); if (t) document.documentElement.dataset.theme = t; } catch(e){}
+btn.addEventListener("click", ()=>{ const t = curTheme()==="dark"?"light":"dark"; document.documentElement.dataset.theme=t; try{localStorage.setItem("tema",t)}catch(e){} syncBtn(); readColors(); update(); });
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ()=>{ syncBtn(); readColors(); update(); });
+syncBtn();
+
+readHash();
+$("#incOutros").checked = S.inc;
+readColors(); sizeMap(); gbar.draw(); renderPanelSim(); update();
+addEventListener("resize", ()=>{ sizeMap(); });
+})();
+</script>
+</body>
+</html>
