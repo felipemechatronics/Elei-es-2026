@@ -1,69 +1,64 @@
-# Como o RN votou em 2026
+# Eleições 2026 Rio Grande do Norte
 
-Resultados das eleições de 2026 no Rio Grande do Norte por município, bairro e local de votação, a partir dos boletins por seção do TSE.
+Resultados do 1º turno (4/10/2026) no Rio Grande do Norte por município, bairro e local de votação, a partir dos boletins por seção do TSE.
 
-**Conteúdo atual: Governador, 1º turno (4/10/2026).** O projeto foi feito para qualquer cargo majoritário. Para gerar a versão de Presidente, basta rodar os scripts com o arquivo da eleição federal (veja [Gerar para Presidente](#gerar-para-presidente)).
+**Site interativo:** https://felipemechatronics.github.io/Elei-es-2026/
 
-- **Site interativo** (`docs/`): mapa do estado que desce até os bairros e locais de votação, destaques, gráficos e tabela de todos os municípios. Feito para o GitHub Pages.
-- **Relatório** ([`relatorio/RELATORIO.md`](relatorio/RELATORIO.md)): o mesmo conteúdo em texto, tabelas e figuras estáticas, legível direto no GitHub.
-- **Dados** (`docs/dados/`): resultados por município, bairro e local de votação em CSV.
+| Cargo | Site | Relatório |
+|---|---|---|
+| Presidente | [abrir](https://felipemechatronics.github.io/Elei-es-2026/?cargo=presidente) | [relatorio/presidente/RELATORIO.md](relatorio/presidente/RELATORIO.md) |
+| Governador | [abrir](https://felipemechatronics.github.io/Elei-es-2026/?cargo=governador) | [relatorio/governador/RELATORIO.md](relatorio/governador/RELATORIO.md) |
 
-![Quem ficou à frente em cada município](relatorio/img/mapa_vencedor.png)
+- **Site** (`docs/`): mapa do estado que desce até os bairros e os locais de votação, destaques, gráficos e tabela de todos os municípios, com seletor de cargo.
+- **Relatórios** (`relatorio/<cargo>/`): o mesmo conteúdo em texto, tabelas e figuras, legível direto no GitHub.
+- **Dados** (`docs/dados/<cargo>/`): resultados por município, bairro e local de votação, em CSV.
 
-![Bairros das maiores cidades](relatorio/img/bairros_maiores_cidades.png)
+![Presidente: primeiro lugar em cada município](relatorio/presidente/img/mapa_vencedor.png)
 
-## Publicar no GitHub Pages
-
-1. Crie um repositório e envie esta pasta (`git init`, `git add .`, `git commit`, `git push`).
-2. No GitHub, abra **Settings → Pages**, escolha **Deploy from a branch**, branch `main` e pasta `/docs`.
-3. O site fica em `https://<seu-usuario>.github.io/<nome-do-repositorio>/`.
+![Presidente: bairros das maiores cidades](relatorio/presidente/img/bairros_maiores_cidades.png)
 
 ## Regerar os dados
 
-Requer Python 3.10+.
+Requer Python 3.10+ e os arquivos do TSE em `dados_tse/`, que não vão para o Git (veja `.gitignore`).
 
 ```bash
 pip install -r requirements.txt
-# baixe o votacao_secao do TSE e coloque em dados_tse/ (CSV ou ZIP)
-./gerar.sh dados_tse/votacao_secao_2026_RN.csv --cargo Governador --anulados 50,29
+python scripts/gerar_dados.py dados_tse/Urnas_Presidente.xlsx --cargo Presidente
+python scripts/gerar_dados.py dados_tse/votacao_secao_2026_RN.csv --cargo Governador --anulados 50,29
+python scripts/gerar_relatorio.py
 ```
-
-Esse é o comando que gerou a versão atual. Os votos dos candidatos 50 e 29 foram anulados na totalização e contam como nulos; com isso, os totais batem exatamente com o projeto de referência, por município e por local de votação.
-
-## Gerar para Presidente
-
-O arquivo `votacao_secao` da eleição estadual não traz os votos para Presidente: eles ficam no arquivo da eleição geral **federal** do TSE (coluna `DS_CARGO` = "Presidente"). Com ele em `dados_tse/`:
-
-```bash
-./gerar.sh dados_tse/<arquivo da eleição federal>.zip --cargo Presidente --turno 1
-```
-
-O script filtra o RN sozinho, então serve tanto o arquivo do RN quanto o nacional. Para nomes de urna, crie `config/candidatos_presidente.json` (mesmo formato de `config/candidatos_governador.json`). Para o 2º turno, use `--turno 2`.
-
-`gerar.sh` roda dois scripts:
 
 | Script | O que faz |
 |---|---|
-| `scripts/gerar_dados.py` | Lê o arquivo do TSE, filtra cargo, UF e turno, soma por local, bairro e município e grava `docs/dados.js`, os CSVs e `relatorio/resumo.json`. |
-| `scripts/gerar_relatorio.py` | Gera as figuras em `relatorio/img/` e o `relatorio/RELATORIO.md`. |
+| `scripts/gerar_dados.py` | Lê o arquivo do TSE, filtra cargo, UF e turno, soma por local, bairro e município e grava `docs/<cargo>.js`, os CSVs e `relatorio/<cargo>/resumo.json`. Cada cargo gerado entra no seletor do site. |
+| `scripts/gerar_relatorio.py` | Gera as figuras e o `RELATORIO.md` de cada cargo. |
 | `scripts/extrair_base.py` | (Só uma vez) monta a base geográfica em `base/` a partir do projeto de referência. |
 
-Opções úteis de `gerar_dados.py`:
+Formatos aceitos do Portal de Dados Abertos do TSE:
 
-- `--anulados 50,29`: números de candidatos com registro indeferido ou cassado; os votos deles passam a contar como nulos, como na totalização do TSE. O arquivo por seção não traz essa informação.
-- `config/candidatos_<cargo>.json`: nomes de urna e partidos, para corrigir os nomes curtos gerados automaticamente a partir do nome completo. Exemplo: `{"13": {"nome": "Fulano", "partido": "PT"}}`.
+- **Boletim de urna** (CSV, ZIP ou XLSX), com `DS_CARGO_PERGUNTA`, `QT_APTOS` e `QT_COMPARECIMENTO`. É o formato usado para Presidente. O eleitorado apto vem do próprio boletim.
+- **votacao_secao** (CSV ou ZIP), com `DS_CARGO`. É o formato usado para Governador. O eleitorado apto vem do cadastro de locais de votação.
 
-Os arquivos brutos do TSE ficam fora do Git (`.gitignore`), porque passam do limite de 100 MB por arquivo do GitHub.
+Opções úteis:
+
+- `--turno 2` para o 2º turno. O site ganha um cargo à parte, como "Presidente (2º turno)".
+- `--anulados 50,29`: números de candidatos com registro indeferido ou cassado, cujos votos passam a contar como nulos, como na totalização do TSE. Os arquivos por seção não trazem essa informação. Para Governador, isso faz os totais baterem exatamente com o projeto de referência.
+- `config/candidatos_<cargo>.json`: nome de urna, partido e cor de cada candidato. As cores seguem a paleta do site: 0 é azul, 1 é laranja e 2 é verde-água.
+
+## Verificação
+
+- Presidente: votos por candidato, brancos, nulos, aptos e comparecimento conferidos município a município contra a planilha do TSE, sem divergências.
+- Governador: conferido município a município e local a local contra o projeto de referência, sem divergências.
 
 ## Estrutura
 
 ```
-base/        municípios, bairros e locais de votação georreferenciados (não depende do cargo)
-config/      ajustes opcionais de nomes e partidos
+base/        municípios, bairros e locais de votação georreferenciados (comum a todos os cargos)
+config/      nomes de urna, partidos e cores por cargo
 dados_tse/   arquivos brutos do TSE (não versionados)
-docs/        site do GitHub Pages: index.html, dados.js e CSVs
-relatorio/   RELATORIO.md, resumo.json e figuras
-scripts/     geração dos dados e do relatório
+docs/        site do GitHub Pages: index.html, geo.js, cargos.js, <cargo>.js e CSVs
+relatorio/   um RELATORIO.md com figuras para cada cargo
+scripts/     geração dos dados e dos relatórios
 ```
 
 ## Metodologia
@@ -71,11 +66,14 @@ scripts/     geração dos dados e do relatório
 - Percentuais de candidatos são calculados sobre os votos válidos. Comparecimento e abstenção, sobre o eleitorado apto. Brancos e nulos, sobre o comparecimento.
 - O voto é atribuído ao local onde o eleitor vota, e não ao endereço onde mora.
 - Cada local de votação é posicionado pela coordenada do cadastro do TSE e atribuído ao bairro do IBGE (Censo 2022) que o contém. Locais sem coordenada válida aparecem em posição aproximada e não entram em nenhum bairro. Só há bairros nos municípios que têm bairros delimitados pelo IBGE.
-- O partido é inferido pelo número de urna do candidato.
+
+## Publicar no GitHub Pages
+
+Em **Settings → Pages**, escolha **Deploy from a branch**, branch `main` e pasta `/docs`.
 
 ## Fontes e créditos
 
-- Votos por seção e cadastro de locais de votação: [TSE, Portal de Dados Abertos](https://dadosabertos.tse.jus.br/).
+- Votos por seção, boletins de urna e cadastro de locais de votação: [TSE, Portal de Dados Abertos](https://dadosabertos.tse.jus.br/).
 - Malhas de municípios e bairros: [IBGE](https://www.ibge.gov.br/geociencias/downloads-geociencias.html).
-- Base geográfica (coordenadas dos locais, atribuição de bairros e eleitorado apto) organizada a partir do projeto [Como o RN votou para governador](https://sousapfe.github.io/eleicoesRN/) ([repositório](https://github.com/sousapfe/eleicoesRN)), de Peterson Sousa.
+- Base geográfica (coordenadas dos locais, atribuição de bairros e eleitorado apto por local) organizada a partir do projeto [Como o RN votou para governador](https://sousapfe.github.io/eleicoesRN/) ([repositório](https://github.com/sousapfe/eleicoesRN)), de Peterson Sousa.
 - Gráficos e mapas com [D3](https://d3js.org/) e matplotlib.

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Regera todos os dados, gráficos e o relatório.
-# Uso: ./gerar.sh dados_tse/votacao_secao_2026_BR.zip [--cargo Presidente] [--turno 1]
+# Regera dados, gráficos e relatórios de todos os cargos a partir dos arquivos em dados_tse/.
 set -euo pipefail
 cd "$(dirname "$0")"
-python scripts/gerar_dados.py "$@"
+python scripts/gerar_dados.py dados_tse/Urnas_Presidente.xlsx --cargo Presidente
+python scripts/gerar_dados.py dados_tse/votacao_secao_2026_RN.csv --cargo Governador --anulados 50,29
 python scripts/gerar_relatorio.py

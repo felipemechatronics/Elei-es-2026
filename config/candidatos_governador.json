@@ -1,5 +1,5 @@
 {
-  "44": {"nome": "Allyson Bezerra", "partido": "UNIÃO"},
-  "13": {"nome": "Cadu de Lula", "partido": "PT"},
-  "22": {"nome": "Álvaro Dias", "partido": "PL"}
+  "44": {"nome": "Allyson Bezerra", "partido": "UNIÃO", "cor": 0},
+  "13": {"nome": "Cadu de Lula", "partido": "PT", "cor": 1},
+  "22": {"nome": "Álvaro Dias", "partido": "PL", "cor": 2}
 }

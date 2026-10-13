@@ -1,11 +1,12 @@
-"""Gera o relatório estático (relatorio/RELATORIO.md) com gráficos e mapas em PNG.
+"""Gera o relatório estático de cada cargo (relatorio/<cargo>/RELATORIO.md) com gráficos e mapas em PNG.
 
-Usa o docs/dados.js produzido por gerar_dados.py, então rode aquele primeiro:
+Usa os docs/<cargo>.js produzidos por gerar_dados.py, então rode aquele primeiro:
 
-  python scripts/gerar_dados.py <arquivo do TSE>
-  python scripts/gerar_relatorio.py
+  python scripts/gerar_dados.py <arquivo do TSE> --cargo Presidente
+  python scripts/gerar_relatorio.py              # todos os cargos gerados
+  python scripts/gerar_relatorio.py presidente   # só um
 """
-import json
+import json, sys
 from pathlib import Path
 
 import matplotlib
@@ -17,7 +18,7 @@ from matplotlib.colors import to_rgb
 
 RAIZ = Path(__file__).resolve().parent.parent
 REL = RAIZ / "relatorio"
-IMG = REL / "img"
+SITE = "https://felipemechatronics.github.io/Elei-es-2026/"
 
 CORES = ["#2a78d6", "#eb6834", "#1baf7a"]
 OUTROS = "#c3c9ce"
@@ -44,13 +45,22 @@ def mix(c, t):
     return (1 - t + t * r, 1 - t + t * g, 1 - t + t * b)
 
 
-def carregar():
-    s = (RAIZ / "docs" / "dados.js").read_text(encoding="utf-8")
+def ler_js(nome):
+    s = (RAIZ / "docs" / nome).read_text(encoding="utf-8")
     return json.loads(s[s.index("=") + 1:].strip().rstrip(";"))
 
 
 def main():
-    D = carregar()
+    ids = sys.argv[1:] or [c["id"] for c in ler_js("cargos.js")]
+    geo = ler_js("geo.js")
+    for cid in ids:
+        D = ler_js(f"{cid}.js")
+        D.update(geo)
+        gerar(D, REL / cid)
+
+
+def gerar(D, PASTA):
+    IMG = PASTA / "img"
     IMG.mkdir(parents=True, exist_ok=True)
     C, E = D["cands"], D["estado"]
     NT = min(3, len(C))
@@ -60,7 +70,7 @@ def main():
     meta = D["meta"]
 
     def cor(k):
-        return CORES[k] if k < NT else OUTROS
+        return CORES[C[k]["cor"]] if (k < NT and C[k].get("cor") is not None) else OUTROS
 
     def rank(u):
         if not u["v"]:
@@ -93,7 +103,7 @@ def main():
     def legenda_margem(ax, loc="lower left"):
         h = []
         for c in TOP:
-            h.append(Patch(facecolor=mix(CORES[c["k"]], 1), label=c["nome"]))
+            h.append(Patch(facecolor=cor(c["k"]), label=c["nome"]))
         lg = ax.legend(handles=h, loc=loc, frameon=False, fontsize=9, title="Cor mais forte = vantagem maior",
                        title_fontsize=8.5)
         lg._legend_box.align = "left"
@@ -133,8 +143,8 @@ def main():
     axs = [axs] if NT == 1 else axs
     for ax, c in zip(axs, TOP):
         vals = [pct(munis[f["properties"]["id"]], c["k"]) for f in feats]
-        cm = matplotlib.colors.LinearSegmentedColormap.from_list("c", [mix(CORES[c["k"]], 0.12), CORES[c["k"]],
-                                                                         tuple(0.45 * x for x in to_rgb(CORES[c["k"]]))])
+        cm = matplotlib.colors.LinearSegmentedColormap.from_list("c", [mix(cor(c["k"]), 0.12), cor(c["k"]),
+                                                                         tuple(0.45 * x for x in to_rgb(cor(c["k"])))])
         nrm = matplotlib.colors.Normalize(0, max(vals))
         desenhar(ax, feats, [cm(nrm(v)) for v in vals])
         sm = plt.cm.ScalarMappable(norm=nrm, cmap=cm)
@@ -168,7 +178,7 @@ def main():
         ax.set_title(f"{m['n']}: {C[r['w']]['nome']} {br(r['pw'])}%", loc="left", fontsize=12, fontweight="bold")
     for ax in list(axs.flat)[len(cidades):]:
         ax.axis("off")
-    h = [Patch(facecolor=CORES[c["k"]], label=c["nome"]) for c in TOP] + [Patch(facecolor=VAZIO, label="Sem local de votação")]
+    h = [Patch(facecolor=cor(c["k"]), label=c["nome"]) for c in TOP] + [Patch(facecolor=VAZIO, label="Sem local de votação")]
     fig.legend(handles=h, loc="lower center", ncol=len(h), frameon=False)
     fig.suptitle("Bairros: quem ficou à frente nos locais de votação de cada bairro (cor mais forte = vantagem maior)",
                  x=0.02, ha="left", fontsize=12, fontweight="bold")
@@ -208,20 +218,17 @@ def main():
     # ---------- texto ----------
     L = []
     data = meta.get("data", "")
-    L.append(f"# Como o Rio Grande do Norte votou para {meta['cargo'].lower()}, {meta['turno']}º turno")
+    L.append(f"# Eleições 2026 Rio Grande do Norte: {meta['cargo']}, {meta['turno']}º turno")
     L.append("")
     L.append(f"Relatório gerado a partir dos boletins por seção do TSE ({meta.get('eleicao', '')}, {data}). "
              f"Percentuais de candidatos são sobre os votos válidos. Versão interativa, com mapa por bairro e por local de votação: "
-             f"veja `docs/index.html` (publicado pelo GitHub Pages).")
+             f"[{SITE}?cargo={meta['id']}]({SITE}?cargo={meta['id']}).")
     L.append("")
     L.append("## Resumo")
     L.append("")
-    L.append(f"- **{W['nome']} ({W['partido']})** teve **{br(r0['pw'])}%** dos votos válidos no estado, "
-             f"{n(E['vt'][W['k']] - E['vt'][S['k']])} votos ({br(r0['mg'])} pontos) à frente de **{S['nome']} ({S['partido']})**, "
-             f"com {br(pct(E, S['k']))}%.")
-    L.append(f"- {W['nome']} ficou à frente em **{wins.get(W['k'], 0)}** dos {len(D['munis'])} municípios; "
-             f"{S['nome']} em **{wins.get(S['k'], 0)}**" +
-             "".join(f"; {c['nome']} em **{wins.get(c['k'], 0)}**" for c in TOP[2:] if wins.get(c["k"])) + ".")
+    L.append("- Votos válidos no estado: " + "; ".join(f"{c['nome']} ({c['partido']}) {br(pct(E, c['k']))}%" for c in TOP) + ".")
+    L.append(f"- Primeiro lugar por município, entre os {len(D['munis'])} do estado: " +
+             "; ".join(f"{c['nome']} em {wins[c['k']]}" for c in C if wins.get(c["k"])) + ".")
     L.append(f"- Compareceram {n(E['cp'])} dos {n(E['ap'])} eleitores aptos ({br(100 * E['cp'] / E['ap'])}%). "
              f"Abstenção de {br(100 * E['ab'] / E['ap'])}%. Brancos: {br(100 * E['b'] / E['cp'])}%; nulos: {br(100 * E['nu'] / E['cp'])}% dos votos.")
     L.append("")
@@ -241,7 +248,7 @@ def main():
     L.append("")
     L.append("![Percentual por candidato](img/mapa_percentuais.png)")
     L.append("")
-    for c in TOP[:2]:
+    for c in TOP:
         best = sorted(ms, key=lambda m: -pct(m, c["k"]))[:5]
         L.append(f"- Maiores percentuais de **{c['nome']}**: " + ", ".join(f"{m['n']} ({br(pct(m, c['k']))}%)" for m in best) + ".")
     tight = sorted(ms, key=lambda m: rank(m)["mg"])[:5]
@@ -315,8 +322,8 @@ def main():
         L.append(f"- {meta['locais_sem_base']} locais não constam do cadastro georreferenciado: entram nos totais, mas não no mapa.")
     L.append("- Os partidos são inferidos pelo número de urna e podem ser corrigidos em `config/candidatos.json`.")
     L.append("")
-    (REL / "RELATORIO.md").write_text("\n".join(L), encoding="utf-8")
-    print("relatorio/RELATORIO.md e", len(list(IMG.glob("*.png"))), "figuras")
+    (PASTA / "RELATORIO.md").write_text("\n".join(L), encoding="utf-8")
+    print(PASTA / "RELATORIO.md", "e", len(list(IMG.glob("*.png"))), "figuras")
 
 
 if __name__ == "__main__":

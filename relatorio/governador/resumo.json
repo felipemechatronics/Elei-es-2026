@@ -1,10 +1,12 @@
 {
   "meta": {
+    "id": "governador",
     "cargo": "Governador",
     "uf": "RN",
     "turno": 1,
     "eleicao": "Eleições Gerais Estaduais 2026",
     "data": "04/10/2026",
+    "formato": "votacao_secao",
     "anulados": [
       29,
       50
@@ -17,49 +19,56 @@
       "nr": 44,
       "nome": "Allyson Bezerra",
       "completo": "Allyson Leandro Bezerra Silva",
-      "partido": "UNIÃO"
+      "partido": "UNIÃO",
+      "cor": 0
     },
     {
       "k": 1,
       "nr": 13,
       "nome": "Cadu de Lula",
       "completo": "Carlos Eduardo Xavier",
-      "partido": "PT"
+      "partido": "PT",
+      "cor": 1
     },
     {
       "k": 2,
       "nr": 22,
       "nome": "Álvaro Dias",
       "completo": "Álvaro Costa Dias",
-      "partido": "PL"
+      "partido": "PL",
+      "cor": 2
     },
     {
       "k": 3,
       "nr": 80,
       "nome": "Arinalda Medeiros",
       "completo": "Arinalda Vasconcelos de Medeiros",
-      "partido": "UP"
+      "partido": "UP",
+      "cor": null
     },
     {
       "k": 4,
       "nr": 16,
       "nome": "Dario Melo",
       "completo": "Dario Barbosa de Melo",
-      "partido": "PSTU"
+      "partido": "PSTU",
+      "cor": null
     },
     {
       "k": 5,
       "nr": 27,
       "nome": "Gladyer Godeiro",
       "completo": "Gladyer Linhares Godeiro",
-      "partido": "DC"
+      "partido": "DC",
+      "cor": null
     },
     {
       "k": 6,
       "nr": 36,
       "nome": "Karlo Vieira",
       "completo": "Karlo Rodrigo Lucio Vieira",
-      "partido": "AGIR"
+      "partido": "AGIR",
+      "cor": null
     }
   ],
   "estado": {

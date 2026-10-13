@@ -1,11 +1,11 @@
-# Como o Rio Grande do Norte votou para governador, 1º turno
+# Eleições 2026 Rio Grande do Norte: Governador, 1º turno
 
-Relatório gerado a partir dos boletins por seção do TSE (Eleições Gerais Estaduais 2026, 04/10/2026). Percentuais de candidatos são sobre os votos válidos. Versão interativa, com mapa por bairro e por local de votação: veja `docs/index.html` (publicado pelo GitHub Pages).
+Relatório gerado a partir dos boletins por seção do TSE (Eleições Gerais Estaduais 2026, 04/10/2026). Percentuais de candidatos são sobre os votos válidos. Versão interativa, com mapa por bairro e por local de votação: [https://felipemechatronics.github.io/Elei-es-2026/?cargo=governador](https://felipemechatronics.github.io/Elei-es-2026/?cargo=governador).
 
 ## Resumo
 
-- **Allyson Bezerra (UNIÃO)** teve **36,9%** dos votos válidos no estado, 15.509 votos (0,8 pontos) à frente de **Cadu de Lula (PT)**, com 36,2%.
-- Allyson Bezerra ficou à frente em **65** dos 167 municípios; Cadu de Lula em **73**; Álvaro Dias em **29**.
+- Votos válidos no estado: Allyson Bezerra (UNIÃO) 36,9%; Cadu de Lula (PT) 36,2%; Álvaro Dias (PL) 26,7%.
+- Primeiro lugar por município, entre os 167 do estado: Allyson Bezerra em 65; Cadu de Lula em 73; Álvaro Dias em 29.
 - Compareceram 2.167.714 dos 2.656.207 eleitores aptos (81,6%). Abstenção de 18,4%. Brancos: 3,5%; nulos: 4,8% dos votos.
 
 ![Resultado no estado](img/resultado_rn.png)
@@ -30,6 +30,7 @@ Relatório gerado a partir dos boletins por seção do TSE (Eleições Gerais Es
 
 - Maiores percentuais de **Allyson Bezerra**: Grossos (68,1%), Serra do Mel (62,1%), Serrinha (61,5%), Nísia Floresta (59,6%), Antônio Martins (59,2%).
 - Maiores percentuais de **Cadu de Lula**: Frutuoso Gomes (78,4%), Doutor Severiano (73,7%), Pilões (70,9%), Coronel João Pessoa (65,6%), Macau (59,5%).
+- Maiores percentuais de **Álvaro Dias**: São Tomé (56,7%), Galinhos (56,1%), Rafael Godeiro (55,6%), Venha-Ver (50,1%), Ruy Barbosa (49,1%).
 - Disputas mais apertadas: Rodolfo Fernandes (Cadu de Lula por 2 votos), Jaçanã (Cadu de Lula por 10 votos), São Rafael (Allyson Bezerra por 13 votos), Serra Negra do Norte (Cadu de Lula por 15 votos), Pedro Avelino (Álvaro Dias por 18 votos).
 
 ## Tamanho da cidade

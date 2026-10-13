@@ -1,0 +1,143 @@
+{
+  "meta": {
+    "id": "presidente",
+    "cargo": "Presidente",
+    "uf": "RN",
+    "turno": 1,
+    "eleicao": "Eleição Geral Federal 2026",
+    "data": "04/10/2026",
+    "formato": "boletim_urna",
+    "anulados": [],
+    "locais_sem_base": 0
+  },
+  "cands": [
+    {
+      "k": 0,
+      "nr": 13,
+      "nome": "Lula",
+      "completo": "Lula",
+      "partido": "PT",
+      "cor": 1
+    },
+    {
+      "k": 1,
+      "nr": 22,
+      "nome": "Flávio Bolsonaro",
+      "completo": "Flavio Bolsonaro",
+      "partido": "PL",
+      "cor": 0
+    },
+    {
+      "k": 2,
+      "nr": 70,
+      "nome": "Augusto Cury",
+      "completo": "Escritor Augusto Cury",
+      "partido": "AVANTE",
+      "cor": 2
+    },
+    {
+      "k": 3,
+      "nr": 14,
+      "nome": "Renan Santos",
+      "completo": "Renan Santos",
+      "partido": "MISSÃO",
+      "cor": null
+    },
+    {
+      "k": 4,
+      "nr": 55,
+      "nome": "Ronaldo Caiado",
+      "completo": "Ronaldo Caiado",
+      "partido": "PSD",
+      "cor": null
+    },
+    {
+      "k": 5,
+      "nr": 30,
+      "nome": "Zema",
+      "completo": "Zema",
+      "partido": "NOVO",
+      "cor": null
+    },
+    {
+      "k": 6,
+      "nr": 80,
+      "nome": "Samara",
+      "completo": "Samara",
+      "partido": "UP",
+      "cor": null
+    },
+    {
+      "k": 7,
+      "nr": 16,
+      "nome": "Hertz Dias",
+      "completo": "Hertz Dias",
+      "partido": "PSTU",
+      "cor": null
+    },
+    {
+      "k": 8,
+      "nr": 27,
+      "nome": "Clariana Barao",
+      "completo": "Clariana Barao",
+      "partido": "DC",
+      "cor": null
+    },
+    {
+      "k": 9,
+      "nr": 21,
+      "nome": "Edmilson Costa",
+      "completo": "Edmilson Costa",
+      "partido": "PCB",
+      "cor": null
+    },
+    {
+      "k": 10,
+      "nr": 35,
+      "nome": "Veterinário Wilson Grassi",
+      "completo": "Veterinário Wilson Grassi",
+      "partido": "DEMOCRATA",
+      "cor": null
+    },
+    {
+      "k": 11,
+      "nr": 29,
+      "nome": "Rui Costa Pimenta",
+      "completo": "Rui Costa Pimenta",
+      "partido": "PCO",
+      "cor": null
+    },
+    {
+      "k": 12,
+      "nr": 28,
+      "nome": "Leonardo Avalanche",
+      "completo": "Leonardo Avalanche",
+      "partido": "PRTB",
+      "cor": null
+    }
+  ],
+  "estado": {
+    "ap": 2659825,
+    "cp": 2171013,
+    "ab": 488812,
+    "v": 2071961,
+    "b": 33172,
+    "nu": 65880,
+    "se": 8115,
+    "vt": [
+      1237963,
+      720493,
+      57367,
+      35261,
+      16407,
+      1525,
+      1228,
+      572,
+      405,
+      315,
+      185,
+      177,
+      63
+    ]
+  }
+}

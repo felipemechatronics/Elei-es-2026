@@ -56,6 +56,7 @@ a{color:inherit;text-underline-offset:3px}
 /* abertura + mapa */
 .hero{display:grid;grid-template-columns:minmax(300px,400px) 1fr;gap:40px;padding:36px 0 24px;align-items:start}
 .kicker{font:500 14px/1.3 "Archivo",system-ui,sans-serif;color:var(--ink-2);margin:0 0 14px}
+.cargo{display:flex;align-items:center;gap:10px;margin:0 0 18px;font:500 13px/1 "Archivo",system-ui,sans-serif;color:var(--ink-2)}
 h1{font-weight:800;font-stretch:118%;font-size:clamp(34px,4.4vw,54px);line-height:.98;letter-spacing:-.025em;margin:0 0 18px}
 .lede{font-size:18px;color:var(--ink-2);margin:0 0 24px}
 .result-row{display:grid;grid-template-columns:12px 1fr auto;gap:4px 10px;align-items:baseline;padding:10px 0;border-top:1px solid var(--line)}
@@ -198,8 +199,9 @@ footer{margin-top:64px;padding:24px 0 48px;border-top:1px solid var(--line);font
 <main class="wrap">
   <div class="hero" id="mapa">
     <div>
+      <div class="cargo"><span id="cargoLbl">Cargo</span><div class="seg" id="cargoSeg" role="group" aria-labelledby="cargoLbl"></div></div>
+      <h1 id="headline">Eleições 2026 Rio Grande do Norte</h1>
       <p class="kicker" id="kicker"></p>
-      <h1 id="headline"></h1>
       <p class="lede" id="lede"></p>
       <div id="results"></div>
       <p class="turnout" id="turnout"></p>
@@ -269,9 +271,9 @@ footer{margin-top:64px;padding:24px 0 48px;border-top:1px solid var(--line);font
       <div class="tscroll"><table id="tbl"><thead></thead><tbody></tbody></table></div>
     </div>
     <div class="downloads">
-      <a href="dados/resultado_municipios.csv" download>Baixar por município (CSV)</a>
-      <a href="dados/resultado_bairros.csv" download>Por bairro (CSV)</a>
-      <a href="dados/resultado_locais.csv" download>Por local de votação (CSV)</a>
+      <a id="dl1" href="#" download>Baixar por município (CSV)</a>
+      <a id="dl2" href="#" download>Por bairro (CSV)</a>
+      <a id="dl3" href="#" download>Por local de votação (CSV)</a>
     </div>
   </section>
 
@@ -300,10 +302,21 @@ footer{margin-top:64px;padding:24px 0 48px;border-top:1px solid var(--line);font
 <div class="tip" id="tip" role="tooltip"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
-<script src="dados.js"></script>
+<script src="geo.js"></script>
+<script src="cargos.js"></script>
 <script>
 (() => {
-const D = window.DADOS;
+  const ids = (window.CARGOS||[]).map(c=>c.id);
+  let q = new URLSearchParams(location.search).get("cargo");
+  if (!ids.includes(q)) q = ids[0];
+  window.CARGO_ATUAL = q;
+  const sc = document.createElement("script");
+  sc.src = q + ".js";
+  sc.onload = () => window.iniciar();
+  document.body.appendChild(sc);
+})();
+window.iniciar = () => {
+const D = window.DADOS; D.mapa = window.GEO.mapa; D.bmapa = window.GEO.bmapa;
 const nf = new Intl.NumberFormat("pt-BR");
 const pf = (x, d=1) => (x).toLocaleString("pt-BR",{minimumFractionDigits:d,maximumFractionDigits:d});
 const pct = (a,b,d=1) => b ? pf(100*a/b,d)+"%" : "–";
@@ -327,7 +340,8 @@ function readColors(){
   COL = {k:[css("--c0"),css("--c1"),css("--c2")], outros:css("--outros"), empty:css("--empty"),
          surface:css("--surface"), ink:css("--ink"), muted:css("--muted"), line:css("--line"), abst:css("--abst"), bg:css("--bg")};
 }
-const candColor = k => k < NTOP ? COL.k[k] : COL.outros;
+const candColor = k => (k < NTOP && CANDS[k].cor!=null) ? COL.k[CANDS[k].cor] : COL.outros;
+const candVar = k => (k < NTOP && CANDS[k].cor!=null) ? `var(--c${CANDS[k].cor})` : "var(--outros)";
 const candName = k => k < NTOP ? CANDS[k].nome : "Outros";
 
 // parcelas: [top0, top1, top2, outros]
@@ -347,25 +361,24 @@ function marginFill(u){
 
 // ---------- texto da abertura ----------
 const r0 = rank(EST);
-const winner = CANDS[r0.w], second = CANDS[r0.s];
 const winsBy = d3.rollup(D.munis.filter(m=>m.v), v=>v.length, m=>rank(m).w);
 const mNatal = D.munis.find(m=>m.n==="Natal"), mMoss = D.munis.find(m=>m.n==="Mossoró");
 const dataTxt = D.meta.data ? ` de ${D.meta.data.slice(6)}` : "";
-document.title = `Como o RN votou para ${D.meta.cargo.toLowerCase()}`; $(".brand").textContent = `RN · ${D.meta.cargo}`;
-$("#kicker").textContent = `Eleição para ${D.meta.cargo.toLowerCase()}${dataTxt}, ${D.meta.turno}º turno, Rio Grande do Norte`;
-$("#headline").textContent = `${winner.nome} teve ${pf(r0.pw)}% dos votos válidos no RN`;
-$("#lede").textContent = `${winner.nome} ficou à frente em ${winsBy.get(r0.w)||0} dos ${D.munis.length} municípios`+
-  (second ? `, e ${second.nome} em ${winsBy.get(r0.s)||0}.` : ".")+
-  ` A diferença entre os dois foi de ${nf.format(EST.vt[r0.w]-EST.vt[r0.s])} votos (${pf(r0.mg)} pontos).`;
+document.title = `Eleições 2026 Rio Grande do Norte: ${D.meta.cargo}`;
+$("#kicker").textContent = `${D.meta.cargo}, ${D.meta.turno}º turno${D.meta.data?`, ${D.meta.data}`:""}`;
+$("#lede").textContent = `Votos por município, bairro e local de votação, a partir dos boletins de cada uma das ${nf.format(EST.se)} seções eleitorais do estado. Toque em um município no mapa para ver os detalhes.`;
+$("#cargoSeg").innerHTML = (window.CARGOS||[]).map(c=>`<button type="button" data-c="${c.id}" aria-pressed="${c.id===window.CARGO_ATUAL}">${esc(c.rotulo)}</button>`).join("");
+$("#cargoSeg").addEventListener("click", e=>{ const b=e.target.closest("button"); if(!b || b.dataset.c===window.CARGO_ATUAL) return; location.href = location.pathname + "?cargo=" + b.dataset.c; });
+["resultado_municipios","resultado_bairros","resultado_locais"].forEach((f,i)=>$("#dl"+(i+1)).href = `dados/${D.meta.id}/${f}.csv`);
 {
   const rows = CANDS.map(c=>({c, v:EST.vt[c.k]})).slice(0,5);
   const rest = EST.v - d3.sum(rows,r=>r.v);
   const maxv = rows[0].v;
   $("#results").innerHTML = rows.map(({c,v})=>`
-    <div class="result-row"><i class="sw" style="background:${c.k<NTOP?`var(--c${c.k})`:"var(--outros)"}"></i>
+    <div class="result-row"><i class="sw" style="background:${candVar(c.k)}"></i>
       <span><span class="nm">${esc(c.nome)}</span><span class="pt">${esc(c.partido)}</span></span>
       <span class="pc">${pf(100*v/EST.v)}%</span>
-      <span class="bar"><i style="width:${100*v/maxv}%;background:${c.k<NTOP?`var(--c${c.k})`:"var(--outros)"}"></i></span>
+      <span class="bar"><i style="width:${100*v/maxv}%;background:${candVar(c.k)}"></i></span>
       <span class="vv">${nf.format(v)} votos</span></div>`).join("") +
     (rest>0 ? `<div class="result-row"><i class="sw" style="background:var(--outros)"></i><span class="nm" style="font-weight:500">Demais candidatos (${CANDS.length-rows.length})</span><span class="pc" style="font-size:16px">${pf(100*rest/EST.v)}%</span><span class="vv">${nf.format(rest)} votos</span></div>`:"");
   $("#turnout").innerHTML = `Compareceram <b>${nf.format(EST.cp)}</b> dos ${nf.format(EST.ap)} eleitores aptos (${pct(EST.cp,EST.ap)}). Abstenção de <b>${pct(EST.ab,EST.ap)}</b>. Brancos: ${pct(EST.b,EST.cp)} e nulos: ${pct(EST.nu,EST.cp)} dos votos.`;
@@ -425,14 +438,14 @@ function fillFor(u){
 }
 function buildScale(){
   if (state.mode==="venc") { curScale=null; return; }
-  const col = state.mode==="abst" ? COL.abst : COL.k[+state.mode.slice(1)];
+  const col = state.mode==="abst" ? COL.abst : candColor(+state.mode.slice(1));
   const pool = state.mun ? [...(bairrosByMuni.get(state.mun)||[]).filter(b=>b.v), ...(locaisByMuni.get(state.mun)||[])] : D.munis;
   curScale = seqScale(pool.map(valueOf), col);
 }
 function legend(){
   const el = $("#legend");
   if (state.mode==="venc"){
-    const rowsC = TOP.map(c=>`<div class="lrow"><div class="ramp">${MSTEP.map(t=>`<span style="background:${d3.interpolateRgb(COL.surface,COL.k[c.k])(t)}"></span>`).join("")}</div>${esc(c.nome)}</div>`).join("");
+    const rowsC = TOP.map(c=>`<div class="lrow"><div class="ramp">${MSTEP.map(t=>`<span style="background:${d3.interpolateRgb(COL.surface,candColor(c.k))(t)}"></span>`).join("")}</div>${esc(c.nome)}</div>`).join("");
     el.innerHTML = `<div class="lt">Vantagem do 1º colocado</div>${rowsC}<div class="ticks" style="width:96px"><span>&lt;5</span><span>15</span><span>30+ p.p.</span></div>`;
   } else {
     const d = curScale.domain(), r = curScale.range();
@@ -587,25 +600,21 @@ function highlights(){
   const ms = D.munis.filter(m=>m.v);
   const out = [];
   const big = [...ms].sort((a,b)=>b.ap-a.ap);
-  const descr = m => { const r=rank(m); return `${esc(CANDS[r.w].nome)} venceu com ${pf(r.pw)}% (${pf(r.mg)} pontos à frente)`; };
+  const descr = m => TOP.map(c=>`${esc(c.nome)} ${pct(m.vt[c.k],m.v)}`).join(", ");
   if (mNatal) out.push(`<strong>Natal.</strong> ${descr(mNatal)}. A capital reúne ${pct(mNatal.ap,EST.ap,0)} do eleitorado do estado.`);
   if (mMoss) out.push(`<strong>Mossoró.</strong> ${descr(mMoss)}.`);
-  TOP.slice(0,2).forEach(c=>{
-    const best = d3.greatest(ms, m=>m.vt[c.k]/m.v);
-    out.push(`<strong>Reduto de ${esc(c.nome)}.</strong> O maior percentual foi em ${esc(best.n)}: ${pct(best.vt[c.k],best.v)} dos válidos.`);
-  });
+  const wl = TOP.filter(c=>winsBy.get(c.k)).map(c=>`${esc(c.nome)} em ${winsBy.get(c.k)}`).join(", ");
+  out.push(`<strong>Municípios.</strong> Primeiro lugar por município: ${wl}${CANDS.length>NTOP&&d3.sum([...winsBy].filter(([k])=>k>=NTOP),d=>d[1])?`, outros em ${d3.sum([...winsBy].filter(([k])=>k>=NTOP),d=>d[1])}`:""}.`);
+  out.push(`<strong>Maiores percentuais.</strong> ` + TOP.map(c=>{ const best = d3.greatest(ms, m=>m.vt[c.k]/m.v); return `${esc(c.nome)}: ${esc(best.n)} (${pct(best.vt[c.k],best.v)})`; }).join("; ") + ".");
   const tight = d3.least(ms, m=>rank(m).mg);
   out.push(`<strong>Disputa mais apertada.</strong> Em ${esc(tight.n)}, a diferença entre os dois primeiros foi de ${nf.format(Math.round(rank(tight).mg*tight.v/100))} votos (${pf(rank(tight).mg)} pontos).`);
   const ab = d3.greatest(ms, m=>m.ab/m.ap), abl = d3.least(ms, m=>m.ab/m.ap);
   out.push(`<strong>Abstenção.</strong> Variou de ${pct(abl.ab,abl.ap)} em ${esc(abl.n)} a ${pct(ab.ab,ab.ap)} em ${esc(ab.n)}. No estado foi de ${pct(EST.ab,EST.ap)}.`);
   const capRM = big.slice(0,4); const u = sumUnits(capRM); const ru = rank(u);
-  out.push(`<strong>As quatro maiores cidades</strong> (${capRM.map(m=>esc(m.n)).join(", ")}) somam ${pct(u.ap,EST.ap,0)} do eleitorado. Juntas, deram ${pf(100*u.vt[r0.w]/u.v)}% a ${esc(winner.nome)}, contra ${pf(r0.pw)}% no estado.`);
+  out.push(`<strong>As quatro maiores cidades</strong> (${capRM.map(m=>esc(m.n)).join(", ")}) somam ${pct(u.ap,EST.ap,0)} do eleitorado. Nelas: ${TOP.map(c=>`${esc(c.nome)} ${pct(u.vt[c.k],u.v)}`).join(", ")}. No estado: ${TOP.map(c=>`${pct(EST.vt[c.k],EST.v)}`).join(", ")}, na mesma ordem.`);
   if (mNatal){
     const bs = (bairrosByMuni.get(mNatal.id)||[]).filter(b=>b.v>2000);
-    TOP.slice(0,2).forEach(c=>{
-      const best = d3.greatest(bs, b=>b.vt[c.k]/b.v);
-      if (best) out.push(`<strong>Em Natal, ${esc(c.nome)}</strong> teve seu melhor resultado no bairro ${esc(best.n)}, com ${pct(best.vt[c.k],best.v)} dos válidos.`);
-    });
+    if (bs.length) out.push(`<strong>Bairros de Natal.</strong> Melhor resultado de cada um: ` + TOP.map(c=>{ const best = d3.greatest(bs, b=>b.vt[c.k]/b.v); return `${esc(c.nome)} em ${esc(best.n)} (${pct(best.vt[c.k],best.v)})`; }).join("; ") + ".");
   }
   $("#highlights").innerHTML = out.map(t=>`<p>${t}</p>`).join("");
 }
@@ -633,7 +642,7 @@ function cities(){
 }
 
 // ---------- gráficos ----------
-const keyHtml = () => [...TOP.map(c=>`<span><i style="background:${COL.k[c.k]}"></i>${esc(c.nome)}</span>`), CANDS.length>NTOP?`<span><i style="background:${COL.outros}"></i>Outros</span>`:""].join("");
+const keyHtml = () => [...TOP.map(c=>`<span><i style="background:${candColor(c.k)}"></i>${esc(c.nome)}</span>`), CANDS.length>NTOP?`<span><i style="background:${COL.outros}"></i>Outros</span>`:""].join("");
 function chartWidth(id){ return Math.max(280, document.getElementById(id).getBoundingClientRect().width); }
 
 function porte(){
@@ -668,8 +677,8 @@ let scK = 0;
 function scatter(){
   $("#scSeg").innerHTML = TOP.map(c=>`<button type="button" data-k="${c.k}" aria-pressed="${c.k===scK}">${esc(c.nome)}</button>`).join("");
   const c = CANDS[scK];
-  $("#scTitle").textContent = `${c.nome} por tamanho do município`;
-  $("#scSub").textContent = `Cada ponto é um município, com a cor de quem venceu nele. Eixo horizontal em escala logarítmica.`;
+  $("#scTitle").textContent = `Desempenho por tamanho do município`;
+  $("#scSub").textContent = `Percentual de ${c.nome} em cada município. Cada ponto tem a cor de quem ficou em primeiro ali. Eixo horizontal em escala logarítmica.`;
   const w = chartWidth("scatter"), h = Math.min(380, w*0.8), m = {l:40,r:12,t:10,b:34};
   const ms = D.munis.filter(m=>m.v);
   const x = d3.scaleLog().domain(d3.extent(ms,m=>m.ap)).nice().range([m.l,w-m.r]);
@@ -703,7 +712,7 @@ function topten(){
   rows.forEach((m,i)=>{
     const y=i*(bh+gap);
     s.append("text").attr("class","lbl").attr("x",lw-8).attr("y",y+bh/2).attr("text-anchor","end").attr("dominant-baseline","middle").style("fill","var(--ink)").text(m.n.length>22?m.n.slice(0,21)+"…":m.n);
-    s.append("rect").attr("x",lw).attr("y",y).attr("height",bh).attr("width",Math.max(2,x(val(m))-lw)).attr("rx",4).attr("fill",COL.k[tK]).style("cursor","pointer")
+    s.append("rect").attr("x",lw).attr("y",y).attr("height",bh).attr("width",Math.max(2,x(val(m))-lw)).attr("rx",4).attr("fill",candColor(tK)).style("cursor","pointer")
       .on("mousemove",ev=>showTip(ev, tipHtml(m.n,m))).on("mouseleave",hideTip)
       .on("click",()=>{ hideTip(); document.getElementById("mapa").scrollIntoView(); selectMuni(m.id); });
     s.append("text").attr("class","lbl").attr("x",x(val(m))+6).attr("y",y+bh/2).attr("dominant-baseline","middle").style("font-variant-numeric","tabular-nums")
@@ -763,7 +772,7 @@ $("#tq").addEventListener("input", e=>{ tstate.q=e.target.value; table(); });
 // ---------- textos finais ----------
 $("#anulTxt").textContent = D.meta.anulados.length
   ? `Votos dados a candidatos com registro indeferido ou cassado (números ${D.meta.anulados.join(", ")}) foram somados aos nulos, como na totalização do TSE.`
-  : `Nenhum candidato teve votos anulados nesta eleição; nulos são apenas os votos digitados como nulos.`;
+  : `Nulos são os votos digitados como nulos na urna.`;
 $("#foot").innerHTML = `Dados: TSE (${esc(D.meta.eleicao)}${D.meta.data?", "+esc(D.meta.data):""}). Mapas: IBGE. ${D.meta.locais_sem_base?`${D.meta.locais_sem_base} locais não constam do cadastro georreferenciado e ficam fora do mapa. `:""}Código aberto: os números desta página são gerados pelo script <code>scripts/gerar_dados.py</code> do repositório.`;
 
 // ---------- tema ----------
@@ -783,7 +792,7 @@ readColors(); highlights(); table();
 resize(); renderAll();
 let rt; addEventListener("resize", ()=>{ clearTimeout(rt); rt=setTimeout(()=>{ resize(); porte(); scatter(); topten(); margin(); }, 150); });
 const h = location.hash.match(/m=(\d{7})/); if (h && muniById.has(h[1])) selectMuni(h[1]);
-})();
+};
 </script>
 </body>
 </html>
