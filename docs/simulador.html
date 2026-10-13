@@ -73,6 +73,18 @@ section{padding:36px 0 0}
 .split-legend div:nth-child(2){text-align:center}
 .split-legend div:nth-child(3){text-align:right}
 .split-legend b{font:800 22px/1 "Archivo",system-ui,sans-serif;font-stretch:110%;color:var(--ink);font-variant-numeric:tabular-nums}
+.inp{display:inline-flex;align-items:baseline;gap:4px;border-bottom:1.5px dashed var(--line-2);padding-bottom:1px;cursor:text;max-width:100%}
+.la .inp{align-self:flex-start}
+.lc .inp{align-self:flex-end}
+.inp:focus-within{border-bottom:1.5px solid var(--focus)}
+.inp input{border:0;background:none;color:var(--ink);font:800 22px/1.1 "Archivo",system-ui,sans-serif;font-stretch:110%;font-variant-numeric:tabular-nums;width:6.2ch;padding:0;min-width:0}
+.lc .inp input{text-align:right}
+.inp input:focus{outline:none}
+.inp .u{font-style:normal;font-size:12px;color:var(--muted)}
+.unitrow{display:flex;align-items:center;gap:8px;font:400 13px "Archivo",system-ui,sans-serif;color:var(--ink-2);margin-top:4px}
+.useg{display:inline-flex;border:1px solid var(--line-2);border-radius:999px;padding:2px;gap:2px}
+.useg button{border:0;background:none;color:var(--ink-2);font-size:12.5px;font-weight:500;padding:4px 10px;border-radius:999px;cursor:pointer}
+.useg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
 .split-legend span{font-variant-numeric:tabular-nums}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:16px}
 .chips button,.btn{font-size:12.5px;border:1px solid var(--line-2);border-radius:999px;background:none;color:var(--ink-2);padding:5px 11px;cursor:pointer}
@@ -112,6 +124,7 @@ label.chk{display:flex;gap:8px;align-items:flex-start;font:400 13px/1.4 "Archivo
 .panel .split .track{height:34px;margin:18px 8px 8px}
 .panel .split .h{height:48px;top:-7px}
 .panel .split-legend b{font-size:17px}
+.panel .inp input{font-size:17px;width:7ch}
 .status{font-size:12.5px;color:var(--ink-2);display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:12px;padding-top:10px;border-top:1px solid var(--line)}
 .status .own{font-weight:600;color:var(--ink)}
 .mini .r{display:grid;grid-template-columns:1fr auto;font-size:13px;gap:2px 8px;margin:6px 0}
@@ -202,6 +215,7 @@ footer{padding-bottom:140px !important;margin-top:56px;padding:24px 0 48px;borde
       <div class="card">
         <h2 id="splitTitle">Para onde vão os votos</h2>
         <p class="sub" id="splitSub"></p>
+        <div class="unitrow"><span>Editar em</span><div class="useg" id="unitSeg" role="group" aria-label="Unidade"><button type="button" data-u="pct" aria-pressed="true">Percentual</button><button type="button" data-u="votos" aria-pressed="false">Votos</button></div></div>
         <div class="split" id="gsplit"></div>
         <div class="chips" id="presets" role="group" aria-label="Divisões prontas"></div>
         <label class="chk"><input type="checkbox" id="incOutros" checked> <span id="incOutrosTxt"></span></label>
@@ -279,12 +293,15 @@ let COL = {};
 function readColors(){ COL = {A:css(`--c${A.cor}`), C:css(`--c${C.cor}`), T:css(`--c${T.cor}`), none:css("--none"), surface:css("--surface"), ink:css("--ink"), empty:css("--empty"), muted:css("--muted")}; }
 
 // ---------- estado da simulação ----------
-const S = { g:{a:40,c:40}, inc:true, own:new Map(), sel:null };
+const S = { g:{a:40,c:40}, inc:true, own:new Map(), sel:null, unit:"pct" };
+const isInt = x => Math.abs(x-Math.round(x))<1e-9;
+const fp = x => pf(x, isInt(x)?0:1)+"%";
 function readHash(){
   const h = new URLSearchParams(location.hash.slice(1));
   const g = (h.get("g")||"").split(",").map(Number);
   if (g.length===2 && g.every(x=>x>=0) && g[0]+g[1]<=100) S.g = {a:g[0], c:g[1]};
   if (h.has("o")) S.inc = h.get("o")!=="0";
+  if (h.get("u")==="v") S.unit = "votos";
   (h.get("m")||"").split(";").filter(Boolean).forEach(p=>{
     const [id, v] = p.split(":"); const [a,c] = (v||"").split(",").map(Number);
     if (D.munis.some(m=>m.id===id) && a>=0 && c>=0 && a+c<=100) S.own.set(id,{a,c});
@@ -294,8 +311,9 @@ let hashT;
 function writeHash(){
   clearTimeout(hashT);
   hashT = setTimeout(()=>{
-    const p = [`g=${S.g.a},${S.g.c}`, `o=${S.inc?1:0}`];
-    if (S.own.size) p.push("m="+[...S.own].map(([id,s])=>`${id}:${s.a},${s.c}`).join(";"));
+    const r3 = x => +x.toFixed(3);
+    const p = [`g=${r3(S.g.a)},${r3(S.g.c)}`, `o=${S.inc?1:0}`, `u=${S.unit==="votos"?"v":"p"}`];
+    if (S.own.size) p.push("m="+[...S.own].map(([id,s])=>`${id}:${r3(s.a)},${r3(s.c)}`).join(";"));
     history.replaceState(null,"","#"+p.join("&"));
   }, 200);
 }
@@ -328,7 +346,11 @@ function makeSplit(el, get, set, opts={}){
   el.innerHTML = `<div class="track"><div class="seg sA"></div><div class="seg sN"></div><div class="seg sC"></div>
     <button type="button" class="h h1" role="slider" aria-valuemin="0" aria-valuemax="100"></button>
     <button type="button" class="h h2" role="slider" aria-valuemin="0" aria-valuemax="100"></button></div>
-    <div class="split-legend"><div class="la"></div><div class="ln"></div><div class="lc"></div></div>`;
+    <div class="split-legend">
+      <div class="la"><span>${esc(A.nome)}</span><label class="inp"><input type="text" inputmode="decimal" data-w="a" aria-label="Valor para ${esc(A.nome)}"><i class="u"></i></label><span class="alt"></span></div>
+      <div class="ln"><span>Nenhum dos dois</span><b class="nb"></b><span class="alt"></span></div>
+      <div class="lc"><span>${esc(C.nome)}</span><label class="inp"><input type="text" inputmode="decimal" data-w="c" aria-label="Valor para ${esc(C.nome)}"><i class="u"></i></label><span class="alt"></span></div>
+    </div>`;
   const tr = el.querySelector(".track"), h1 = el.querySelector(".h1"), h2 = el.querySelector(".h2");
   const sA = el.querySelector(".sA"), sN = el.querySelector(".sN"), sC = el.querySelector(".sC");
   sA.style.background = varOf(A); sC.style.background = varOf(C);
@@ -336,15 +358,43 @@ function makeSplit(el, get, set, opts={}){
   function draw(){
     const s = get(), n = 100-s.a-s.c, pool = opts.pool ? opts.pool() : null;
     sA.style.flex = `0 0 ${s.a}%`; sN.style.flex = `0 0 ${n}%`; sC.style.flex = `0 0 ${s.c}%`;
-    sA.textContent = s.a>=8 ? s.a+"%" : ""; sN.textContent = n>=8 ? n+"%" : ""; sC.textContent = s.c>=8 ? s.c+"%" : "";
+    sA.textContent = s.a>=8 ? fp(s.a) : ""; sN.textContent = n>=8 ? fp(n) : ""; sC.textContent = s.c>=8 ? fp(s.c) : "";
     h1.style.left = s.a+"%"; h2.style.left = (100-s.c)+"%";
-    h1.setAttribute("aria-valuenow", s.a); h1.setAttribute("aria-valuetext", `${s.a}% para ${A.nome}`);
-    h2.setAttribute("aria-valuenow", s.c); h2.setAttribute("aria-valuetext", `${s.c}% para ${C.nome}`);
-    const vv = p => pool!=null ? `<span>${nf.format(Math.round(pool*p/100))} votos</span>` : "";
-    el.querySelector(".la").innerHTML = `<span>${esc(A.nome)}</span><b>${s.a}%</b>${vv(s.a)}`;
-    el.querySelector(".ln").innerHTML = `<span>Nenhum dos dois</span><b>${n}%</b>${vv(n)}`;
-    el.querySelector(".lc").innerHTML = `<span>${esc(C.nome)}</span><b>${s.c}%</b>${vv(s.c)}`;
+    h1.setAttribute("aria-valuenow", Math.round(s.a)); h1.setAttribute("aria-valuetext", `${fp(s.a)} para ${A.nome}`);
+    h2.setAttribute("aria-valuenow", Math.round(s.c)); h2.setAttribute("aria-valuetext", `${fp(s.c)} para ${C.nome}`);
+    const votes = x => Math.round((pool||0)*x/100);
+    const byVotes = S.unit==="votos" && pool>0;
+    [["a",s.a],["c",s.c]].forEach(([w,x])=>{
+      const inp = el.querySelector(`input[data-w="${w}"]`), box = inp.closest(".split-legend > div");
+      if (document.activeElement!==inp) inp.value = byVotes ? nf.format(votes(x)) : pf(x, isInt(x)?0:1);
+      box.querySelector(".u").textContent = byVotes ? "votos" : "%";
+      box.querySelector(".alt").textContent = byVotes ? fp(x) : (pool!=null ? `${nf.format(votes(x))} votos` : "");
+    });
+    el.querySelector(".nb").textContent = byVotes ? nf.format(Math.max(0,Math.round(pool)-votes(s.a)-votes(s.c))) : fp(n);
+    el.querySelector(".ln .alt").textContent = byVotes ? fp(n) : (pool!=null ? `${nf.format(Math.max(0,Math.round(pool)-votes(s.a)-votes(s.c)))} votos` : "");
   }
+  // digitar um valor (em % ou em votos)
+  el.querySelectorAll("input[data-w]").forEach(inp=>{
+    const apply = commit => {
+      const raw = inp.value.trim().replace(/\s/g,"");
+      const pool = opts.pool ? opts.pool() : 0, byVotes = S.unit==="votos" && pool>0;
+      // em votos, "." é separador de milhar; em %, aceita vírgula ou ponto como decimal
+      const num = byVotes ? Number(raw.replace(/\./g,"").replace(",",".")) : Number(raw.replace(",","."));
+      if (raw==="" || !isFinite(num)) { if (commit) draw(); return; }
+      let p = byVotes ? 100*num/pool : num;
+      // o valor digitado vale; se passar do total, reduz o outro candidato
+      const s = {...get()}, w = inp.dataset.w, o = w==="a" ? "c" : "a";
+      p = Math.max(0, Math.min(100, p));
+      s[w] = Math.round(p*10000)/10000;
+      s[o] = Math.min(s[o], Math.round((100-s[w])*10000)/10000);
+      set(s);
+      draw();
+    };
+    inp.addEventListener("input", ()=>apply(false));
+    inp.addEventListener("change", ()=>apply(true));
+    inp.addEventListener("blur", ()=>draw());
+    inp.addEventListener("keydown", e=>{ if (e.key==="Enter"){ apply(true); inp.blur(); } });
+  });
   const pctAt = x => { const r = tr.getBoundingClientRect(); return Math.round(Math.max(0,Math.min(100,100*(x-r.left)/r.width))); };
   function move(which, p){
     const s = {...get()};
@@ -384,7 +434,7 @@ const E = D.estado;
 const outrosE = E.v - E.vt[A.k] - E.vt[C.k] - E.vt[T.k];
 $("#lede").textContent = `No 1º turno, ${A.nome} (${A.partido}) e ${C.nome} (${C.partido}) foram os mais votados. ${T.nome} (${T.partido}), terceiro colocado, teve ${nf.format(E.vt[T.k])} votos. Arraste a barra para decidir como esses eleitores se dividem no 2º turno, no estado todo ou em cada município, e veja o resultado.`;
 $("#splitTitle").textContent = `Para onde vão os votos de ${T.nome}`;
-$("#splitSub").textContent = `${nf.format(E.vt[T.k])} votos no 1º turno. Arraste as alças para dividir entre os dois finalistas e quem não votaria em nenhum deles. Também funciona com as setas do teclado.`;
+$("#splitSub").textContent = `${nf.format(E.vt[T.k])} votos no 1º turno. Arraste as alças para dividir entre os dois finalistas e quem não votaria em nenhum deles, ou digite os valores embaixo da barra, em percentual ou em votos. As alças também andam com as setas do teclado.`;
 $("#incOutrosTxt").textContent = `Dividir da mesma forma os votos dos demais candidatos (${nf.format(outrosE)} votos). Desmarcado, esses eleitores não votam em nenhum dos dois.`;
 $("#m1").textContent = `Percentuais sobre os votos válidos simulados, isto é, a soma dos votos de ${A.nome} e de ${C.nome}.`;
 
@@ -399,6 +449,8 @@ const PRE = [
 ];
 $("#presets").innerHTML = PRE.map((p,i)=>`<button type="button" data-i="${i}">${esc(p.l)}</button>`).join("");
 $("#presets").addEventListener("click", e=>{ const b=e.target.closest("button"); if(!b) return; S.g = PRE[+b.dataset.i].f(); gbar.draw(); update(); });
+$("#unitSeg").addEventListener("click", e=>{ const b=e.target.closest("button"); if(!b) return; S.unit=b.dataset.u; syncUnit(); gbar.draw(); if (pbar) pbar.draw(); writeHash(); });
+function syncUnit(){ document.querySelectorAll("#unitSeg button").forEach(b=>b.setAttribute("aria-pressed", b.dataset.u===S.unit)); }
 $("#incOutros").addEventListener("change", e=>{ S.inc = e.target.checked; gbar.draw(); update(); });
 
 // ---------- resultado ----------
@@ -440,7 +492,7 @@ function tipFor(m){
   const r = sim(m);
   return `<div class="tt">${esc(m.n)}</div>`+
     [[A,r.a],[C,r.c]].map(([c,v])=>`<div class="tr"><span><i style="background:${varOf(c)}"></i>${esc(c.nome)}</span><b>${pf(100*v/r.v)}% <span style="color:var(--muted);font-weight:400">${nf.format(Math.round(v))}</span></b></div>`).join("")+
-    `<div class="tm">${nf.format(m.vt[T.k])} votos de ${esc(T.nome)} · divisão ${r.own?"própria":"geral"}: ${r.s.a}% / ${100-r.s.a-r.s.c}% / ${r.s.c}%</div>`;
+    `<div class="tm">${nf.format(m.vt[T.k])} votos de ${esc(T.nome)} · divisão ${r.own?"própria":"geral"}: ${fp(r.s.a)} / ${fp(100-r.s.a-r.s.c)} / ${fp(r.s.c)}</div>`;
 }
 const paths = g0.selectAll("path").data(G.mapa.features).join("path")
   .attr("vector-effect","non-scaling-stroke").style("cursor","pointer")
@@ -463,6 +515,7 @@ function paintMap(){
 // ---------- painel do município ----------
 let pbar = null;
 function select(id){
+  if (S.sel===id && document.getElementById("psplit")) return;
   S.sel = id; const m = munById.get(id);
   $("#q").value = m.n;
   const t1 = m.v;
@@ -504,7 +557,7 @@ function renderLists(){
   $("#flips").innerHTML = (fl.length ? `<div class="it" style="color:var(--ink-2);border-top:0">${fl.length} ${fl.length===1?"município troca":"municípios trocam"} de posição.</div>` : "") + (fl.length ? fl.map(x=>`<div class="it"><button type="button" class="link" data-id="${x.m.id}">${esc(x.m.n)}</button><span>${chip(x.before)} → ${chip(x.after)}</span></div>`).join("")
     : `<div class="it" style="color:var(--muted)">Nenhum município troca de posição nesta simulação.</div>`);
   $("#ownSub").textContent = S.own.size ? "Toque em um nome para editar; use o botão para voltar à divisão geral." : "Nenhum ainda. Todos usam a divisão geral.";
-  $("#owns").innerHTML = [...S.own].map(([id,s])=>{ const m=munById.get(id); return `<div class="it"><button type="button" class="link" data-id="${id}">${esc(m.n)}</button><span style="display:flex;gap:10px;align-items:center"><span>${s.a}% / ${100-s.a-s.c}% / ${s.c}%<br><span style="color:var(--muted);font-size:12px">${(()=>{const e=effect(m); return Math.abs(e)<0.5?"sem efeito no estado":`${signed(Math.abs(e))} para ${esc((e>0?A:C).nome)} no estado`;})()}</span></span><button type="button" class="btn" data-rm="${id}">Usar geral</button></span></div>`; }).join("")+
+  $("#owns").innerHTML = [...S.own].map(([id,s])=>{ const m=munById.get(id); return `<div class="it"><button type="button" class="link" data-id="${id}">${esc(m.n)}</button><span style="display:flex;gap:10px;align-items:center"><span>${fp(s.a)} / ${fp(100-s.a-s.c)} / ${fp(s.c)}<br><span style="color:var(--muted);font-size:12px">${(()=>{const e=effect(m); return Math.abs(e)<0.5?"sem efeito no estado":`${signed(Math.abs(e))} para ${esc((e>0?A:C).nome)} no estado`;})()}</span></span><button type="button" class="btn" data-rm="${id}">Usar geral</button></span></div>`; }).join("")+
     (S.own.size>1?`<div class="it"><span></span><button type="button" class="btn" id="rmAll">Voltar todos à divisão geral</button></div>`:"");
 }
 document.querySelector(".lists").addEventListener("click", e=>{
@@ -563,7 +616,7 @@ const resCard = $("#result");
 function toggleScore(){ const r = resCard.getBoundingClientRect(); $("#score").hidden = r.bottom > 160; }
 addEventListener("scroll", toggleScore, {passive:true}); addEventListener("resize", toggleScore);
 readHash();
-$("#incOutros").checked = S.inc;
+$("#incOutros").checked = S.inc; syncUnit();
 readColors(); sizeMap(); gbar.draw(); renderPanelSim(); update();
 addEventListener("resize", ()=>{ sizeMap(); });
 })();
