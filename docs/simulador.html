@@ -458,7 +458,7 @@ const chip = c => `<span class="chip"><i style="background:${varOf(c)}"></i>${es
 function renderLists(){
   const fl = D.munis.filter(m=>m.v).map(m=>{ const r=sim(m); const before = m.vt[A.k]>=m.vt[C.k]?A:C, after = r.a>=r.c?A:C; return {m,before,after,r}; }).filter(x=>x.before!==x.after).sort((a,b)=>b.m.v-a.m.v);
   $("#flips").innerHTML = (fl.length ? `<div class="it" style="color:var(--ink-2);border-top:0">${fl.length} ${fl.length===1?"município troca":"municípios trocam"} de posição.</div>` : "") + (fl.length ? fl.map(x=>`<div class="it"><button type="button" class="link" data-id="${x.m.id}">${esc(x.m.n)}</button><span>${chip(x.before)} → ${chip(x.after)}</span></div>`).join("")
-    : `<div class="it" style="color:var(--muted)">Nenhum município troca de posição nesta simulação.</div>`;
+    : `<div class="it" style="color:var(--muted)">Nenhum município troca de posição nesta simulação.</div>`);
   $("#ownSub").textContent = S.own.size ? "Toque em um nome para editar; use o botão para voltar à divisão geral." : "Nenhum ainda. Todos usam a divisão geral.";
   $("#owns").innerHTML = [...S.own].map(([id,s])=>{ const m=munById.get(id); return `<div class="it"><button type="button" class="link" data-id="${id}">${esc(m.n)}</button><span style="display:flex;gap:10px;align-items:center"><span>${s.a}% / ${100-s.a-s.c}% / ${s.c}%</span><button type="button" class="btn" data-rm="${id}">Usar geral</button></span></div>`; }).join("")+
     (S.own.size>1?`<div class="it"><span></span><button type="button" class="btn" id="rmAll">Voltar todos à divisão geral</button></div>`:"");
