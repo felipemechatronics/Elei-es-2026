@@ -9,7 +9,7 @@ Resultados do 1º turno (4/10/2026) no Rio Grande do Norte por município, bairr
 | Presidente | [abrir](https://felipemechatronics.github.io/Elei-es-2026/?cargo=presidente) | [relatorio/presidente/RELATORIO.md](relatorio/presidente/RELATORIO.md) |
 | Governador | [abrir](https://felipemechatronics.github.io/Elei-es-2026/?cargo=governador) | [relatorio/governador/RELATORIO.md](relatorio/governador/RELATORIO.md) |
 
-- **Site** (`docs/`): mapa do estado que desce até os bairros e os locais de votação, destaques, gráficos e tabela de todos os municípios, com seletor de cargo.
+- **Site** (`docs/`): mapa do estado que desce até os bairros e os locais de votação, em percentual ou em quantidade de votos, com destaques, gráficos, tabela de todos os municípios e seletor de cargo.
 - **Relatórios** (`relatorio/<cargo>/`): o mesmo conteúdo em texto, tabelas e figuras, legível direto no GitHub.
 - **Dados** (`docs/dados/<cargo>/`): resultados por município, bairro e local de votação, em CSV.
 

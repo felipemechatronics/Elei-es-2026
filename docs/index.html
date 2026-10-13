@@ -87,6 +87,7 @@ h1{font-weight:800;font-stretch:118%;font-size:clamp(34px,4.4vw,54px);line-heigh
 .legend .ramp{display:flex;gap:2px}
 .legend .ramp span{width:22px;height:10px;border-radius:2px}
 .legend .ticks{display:flex;justify-content:space-between;font-variant-numeric:tabular-nums}
+.legend .ticks span{white-space:nowrap}
 .zbtns{position:absolute;top:12px;right:12px;display:flex;flex-direction:column;gap:4px}
 .zbtns button{width:32px;height:32px;border-radius:8px;border:1px solid var(--line-2);background:var(--surface);color:var(--ink);font-size:18px;line-height:1;cursor:pointer}
 .back{position:absolute;top:12px;left:12px;font-size:13px;padding:6px 12px;border-radius:999px;border:1px solid var(--line-2);background:var(--surface);color:var(--ink);cursor:pointer;display:none}
@@ -171,6 +172,7 @@ footer{margin-top:64px;padding:24px 0 48px;border-top:1px solid var(--line);font
 .tip .tr span:first-child{display:inline-flex;align-items:center;gap:6px}
 .tip .tr i{width:8px;height:8px;border-radius:2px;display:inline-block}
 .tip .tm{color:var(--muted);margin-top:3px}
+.tip .tv{color:var(--muted);font-variant-numeric:tabular-nums;display:inline-block;min-width:52px;text-align:right}
 
 @media (max-width:960px){
   .hero{grid-template-columns:1fr;gap:24px}
@@ -209,6 +211,7 @@ footer{margin-top:64px;padding:24px 0 48px;border-top:1px solid var(--line);font
     <div class="mapbox">
       <div class="maptools">
         <div class="seg" id="modeSeg" role="group" aria-label="O que o mapa mostra"></div>
+        <div class="seg" id="measSeg" role="group" aria-label="Medida"><button type="button" data-q="pct" aria-pressed="true">%</button><button type="button" data-q="abs" aria-pressed="false">Votos</button></div>
         <div class="search"><input id="q" list="muniList" placeholder="Buscar município" aria-label="Buscar município"><datalist id="muniList"></datalist></div>
       </div>
       <div class="mapmain no-panel" id="mapmain">
@@ -353,9 +356,14 @@ function rank(u){
 }
 const MB = [5,15,30]; // limites de vantagem (p.p.)
 const MSTEP = [0.38,0.58,0.8,1];
-function marginFill(u){
+let absMB = [100,1000,10000]; // limites de vantagem em votos (recalculados para o recorte do mapa)
+const r2 = x => { if (x<100) return Math.max(1,Math.round(x)); const p = 10**(Math.floor(Math.log10(x))-1); return Math.round(x/p)*p; };
+const fmtK = v => v>=10000 ? nf.format(Math.round(v/1000))+" mil" : v>=1000 ? pf(v/1000,1).replace(/,0$/,"")+" mil" : nf.format(v);
+const voteMargin = u => { const s=[...u.vt].sort((a,b)=>b-a); return s[0]-(s[1]||0); };
+function marginFill(u, meas="pct"){
   const r = rank(u); if (!r) return COL.empty;
-  const i = r.mg<MB[0]?0:r.mg<MB[1]?1:r.mg<MB[2]?2:3;
+  const x = meas==="abs" ? voteMargin(u) : r.mg, t = meas==="abs" ? absMB : MB;
+  const i = x<t[0]?0:x<t[1]?1:x<t[2]?2:3;
   return d3.interpolateRgb(COL.surface, candColor(r.w))(MSTEP[i]);
 }
 
@@ -399,14 +407,15 @@ function tipHtml(title, u, extra=""){
   if (!u.v) return `<div class="tt">${esc(title)}</div><div class="tm">Sem local de votação neste bairro.</div>`;
   const p = parts(u);
   const rows = p.map((v,i)=>({v,i})).filter(r=>r.v>0 || r.i<NTOP);
-  return `<div class="tt">${esc(title)}</div>`+rows.map(r=>`<div class="tr"><span><i style="background:${candColor(r.i)}"></i>${esc(candName(r.i))}</span><b>${pct(r.v,u.v)}</b></div>`).join("")+
+  return `<div class="tt">${esc(title)}</div>`+rows.map(r=>`<div class="tr"><span><i style="background:${candColor(r.i)}"></i>${esc(candName(r.i))}</span><span><b>${pct(r.v,u.v)}</b> <span class="tv">${nf.format(r.v)}</span></span></div>`).join("")+
     `<div class="tm">${nf.format(u.v)} votos válidos · abstenção ${pct(u.ab,u.ap)}</div>${extra}`;
 }
 
 // ---------- mapa ----------
-const state = {mode:"venc", mun:null, tab:"bairros", hl:null};
+const state = {mode:"venc", meas:"pct", mun:null, tab:"bairros", hl:null};
 const MODES = [{id:"venc",label:"Quem venceu"}, ...TOP.map(c=>({id:"c"+c.k,label:c.nome})), {id:"abst",label:"Abstenção"}];
 $("#modeSeg").innerHTML = MODES.map(m=>`<button type="button" data-m="${m.id}" aria-pressed="${m.id===state.mode}">${esc(m.label)}</button>`).join("");
+$("#measSeg").addEventListener("click", e=>{ const b=e.target.closest("button"); if(!b) return; state.meas=b.dataset.q; d3.selectAll("#measSeg button").attr("aria-pressed",function(){return this.dataset.q===state.meas}); paint(); });
 $("#modeSeg").addEventListener("click", e=>{ const b=e.target.closest("button"); if(!b) return; state.mode=b.dataset.m; d3.selectAll("#modeSeg button").attr("aria-pressed",function(){return this.dataset.m===state.mode}); paint(); });
 
 const svg = d3.select("#map");
@@ -420,7 +429,7 @@ svg.call(zoom).on("wheel.zoom", null).on("dblclick.zoom", null);
 function seqScale(vals, color){
   const s = vals.filter(v=>v!=null && isFinite(v)).sort(d3.ascending);
   const th = [0.2,0.4,0.6,0.8].map(q=>d3.quantile(s,q));
-  const nice = th.map(t=>Math.round(t));
+  const nice = th.map(t=> state.meas==="abs" ? r2(t) : Math.round(t));
   const uniq = [...new Set(nice)];
   const lo = d3.interpolateRgb(COL.surface, color)(0.18), hi = d3.color(color).darker(0.9).formatHex();
   const range = d3.range(uniq.length+1).map(i=>d3.interpolateRgb(lo,hi)(i/uniq.length));
@@ -428,29 +437,37 @@ function seqScale(vals, color){
 }
 let curScale = null;
 function valueOf(u){
+  const abs = state.meas==="abs";
   if (!u.v && state.mode!=="abst") return null;
-  if (state.mode==="abst") return u.ap ? 100*u.ab/u.ap : null;
-  const k = +state.mode.slice(1); return 100*u.vt[k]/u.v;
+  if (state.mode==="abst") return u.ap ? (abs ? u.ab : 100*u.ab/u.ap) : null;
+  const k = +state.mode.slice(1); return abs ? u.vt[k] : 100*u.vt[k]/u.v;
 }
 function fillFor(u){
-  if (state.mode==="venc") return marginFill(u);
+  if (state.mode==="venc") return marginFill(u, state.meas);
   const v = valueOf(u); return v==null ? COL.empty : curScale(v);
 }
 function buildScale(){
-  if (state.mode==="venc") { curScale=null; return; }
-  const col = state.mode==="abst" ? COL.abst : candColor(+state.mode.slice(1));
   const pool = state.mun ? [...(bairrosByMuni.get(state.mun)||[]).filter(b=>b.v), ...(locaisByMuni.get(state.mun)||[])] : D.munis;
+  if (state.mode==="venc") {
+    curScale=null;
+    if (state.meas==="abs"){ const ms = pool.filter(u=>u.v).map(voteMargin).sort(d3.ascending); absMB = [...new Set([0.25,0.5,0.75].map(q=>r2(d3.quantile(ms,q))))]; while(absMB.length<3) absMB.push(absMB[absMB.length-1]*2); }
+    return;
+  }
+  const col = state.mode==="abst" ? COL.abst : candColor(+state.mode.slice(1));
   curScale = seqScale(pool.map(valueOf), col);
 }
 function legend(){
   const el = $("#legend");
   if (state.mode==="venc"){
     const rowsC = TOP.map(c=>`<div class="lrow"><div class="ramp">${MSTEP.map(t=>`<span style="background:${d3.interpolateRgb(COL.surface,candColor(c.k))(t)}"></span>`).join("")}</div>${esc(c.nome)}</div>`).join("");
-    el.innerHTML = `<div class="lt">Vantagem do 1º colocado</div>${rowsC}<div class="ticks" style="width:96px"><span>&lt;5</span><span>15</span><span>30+ p.p.</span></div>`;
+    el.innerHTML = state.meas==="abs"
+      ? `<div class="lt">Vantagem do 1º colocado (votos)</div>${rowsC}<div class="ticks" style="width:118px;gap:6px"><span>${fmtK(absMB[0])}</span><span>${fmtK(absMB[1])}</span><span>${fmtK(absMB[2])}+</span></div>`
+      : `<div class="lt">Vantagem do 1º colocado</div>${rowsC}<div class="ticks" style="width:96px"><span>&lt;5</span><span>15</span><span>30+ p.p.</span></div>`;
   } else {
     const d = curScale.domain(), r = curScale.range();
-    const lab = state.mode==="abst" ? "Abstenção (% do eleitorado)" : `${CANDS[+state.mode.slice(1)].nome} (% dos válidos)`;
-    el.innerHTML = `<div class="lt">${esc(lab)}</div><div class="ramp">${r.map(c=>`<span style="background:${c}"></span>`).join("")}</div><div class="ticks" style="width:${r.length*24}px;padding:0 18px">${d.map(x=>`<span>${x}</span>`).join("")}</div>`;
+    const abs = state.meas==="abs";
+    const lab = state.mode==="abst" ? (abs ? "Abstenções (eleitores)" : "Abstenção (% do eleitorado)") : `${CANDS[+state.mode.slice(1)].nome} (${abs ? "votos nominais" : "% dos válidos"})`;
+    el.innerHTML = `<div class="lt">${esc(lab)}</div><div class="ramp">${r.map(c=>`<span style="background:${c}"></span>`).join("")}</div><div class="ticks" style="width:${r.length*24+(abs?40:0)}px;padding:0 ${abs?0:18}px;gap:6px">${d.map(x=>`<span>${abs?fmtK(x):x}</span>`).join("")}</div>`;
   }
   if (state.mun) el.innerHTML += `<div class="lrow" style="margin-top:6px"><svg width="14" height="14"><circle cx="7" cy="7" r="5" fill="none" stroke="${COL.ink}" stroke-width="1.2"/></svg>Local de votação (tamanho = votos)</div>`;
 }
@@ -548,7 +565,7 @@ function highlight(id){ state.hl = state.hl===id ? null : id; paint(); sizeLocai
 
 function miniBars(u){
   const p = parts(u);
-  return p.map((v,i)=>(i<NTOP||v>0)?`<div class="r"><span>${esc(candName(i))}</span><b>${pct(v,u.v)}</b><span class="bar"><i style="width:${u.v?100*v/u.v:0}%;background:${candColor(i)}"></i></span></div>`:"").join("");
+  return p.map((v,i)=>(i<NTOP||v>0)?`<div class="r"><span>${esc(candName(i))}</span><span><b>${pct(v,u.v)}</b> <span style="color:var(--muted);font-variant-numeric:tabular-nums">· ${nf.format(v)} votos</span></span><span class="bar"><i style="width:${u.v?100*v/u.v:0}%;background:${candColor(i)}"></i></span></div>`:"").join("");
 }
 const stackBar = u => `<div class="stack">${parts(u).map((v,i)=>v>0?`<i style="flex:${v};background:${candColor(i)}"></i>`:"").join("")}</div>`;
 function sumUnits(arr){
@@ -562,7 +579,7 @@ function renderPanel(){
   const locs = locaisByMuni.get(m.id)||[];
   let html = `<h3>${esc(m.n)}</h3><div class="sub">${nf.format(m.ap)} eleitores aptos · ${m.nloc} ${m.nloc===1?"local":"locais"} · ${m.se} seções · zona${m.zs.length>1?"s":""} ${m.zs.join(", ")}</div>`;
   html += `<div class="mini">${miniBars(m)}</div>`;
-  html += `<div class="facts">${r?`${esc(CANDS[r.w].nome)} à frente por ${pf(r.mg)} pontos. `:""}Comparecimento de ${pct(m.cp,m.ap)}, abstenção de ${pct(m.ab,m.ap)}. Brancos ${pct(m.b,m.cp)}, nulos ${pct(m.nu,m.cp)}.</div>`;
+  html += `<div class="facts">${r?`${esc(CANDS[r.w].nome)} à frente por ${pf(r.mg)} pontos (${nf.format(voteMargin(m))} votos). `:""}Comparecimento de ${pct(m.cp,m.ap)}, abstenção de ${pct(m.ab,m.ap)}. Brancos ${pct(m.b,m.cp)}, nulos ${pct(m.nu,m.cp)}.</div>`;
   html += `<div class="tabs" role="group"><button type="button" data-t="bairros" aria-pressed="${state.tab==="bairros"}">Bairros</button><button type="button" data-t="locais" aria-pressed="${state.tab==="locais"}">Locais de votação</button></div><div class="list">`;
   if (state.tab==="locais"){
     html += [...locs].sort((a,b)=>b.v-a.v).map(l=>`<button type="button" class="it" data-l="${l.id}" ${l.id===state.hl?'style="background:color-mix(in srgb,var(--ink) 7%,transparent)"':""}>
@@ -574,14 +591,14 @@ function renderPanel(){
     const bs = (bairrosByMuni.get(m.id)||[]).filter(b=>b.v).sort((a,b)=>b.v-a.v);
     const fora = locs.filter(l=>!l.bi);
     html += `<div class="m" style="font-size:12px;color:var(--muted);margin-bottom:4px">Bairros oficiais do IBGE, somando os locais de votação dentro de cada um.</div>`;
-    html += bs.map(b=>{ const rb=rank(b); return `<div class="it" style="cursor:default"><div class="t"><span>${esc(b.n)}</span><span>${nf.format(b.v)}</span></div><div class="m">${esc(CANDS[rb.w].nome)} +${pf(rb.mg)} p.p. · ${b.nloc} ${b.nloc===1?"local":"locais"}</div>${stackBar(b)}</div>`; }).join("");
+    html += bs.map(b=>{ const rb=rank(b); return `<div class="it" style="cursor:default"><div class="t"><span>${esc(b.n)}</span><span>${nf.format(b.v)}</span></div><div class="m">${esc(CANDS[rb.w].nome)} +${pf(rb.mg)} p.p. (${nf.format(voteMargin(b))} votos) · ${b.nloc} ${b.nloc===1?"local":"locais"}</div>${stackBar(b)}</div>`; }).join("");
     if (fora.length){ const u=sumUnits(fora); html += `<div class="it" style="cursor:default"><div class="t"><span>Fora dos bairros mapeados</span><span>${nf.format(u.v)}</span></div><div class="m">${fora.length} ${fora.length===1?"local":"locais"} sem bairro atribuído</div>${stackBar(u)}</div>`; }
     const vazios = (bairrosByMuni.get(m.id)||[]).filter(b=>!b.v).length;
     if (vazios) html += `<div class="m" style="font-size:12px;color:var(--muted);padding-top:6px">${vazios} ${vazios===1?"bairro não tem":"bairros não têm"} local de votação.</div>`;
   } else {
     const g = d3.groups(locs, l=>titleCase(l.bt||"Sem bairro informado")).map(([k,arr])=>({k,u:sumUnits(arr),n:arr.length})).sort((a,b)=>b.u.v-a.u.v);
     html += `<div class="m" style="font-size:12px;color:var(--muted);margin-bottom:4px">Este município não tem bairros delimitados pelo IBGE. A lista agrupa os locais pelo bairro do endereço no TSE.</div>`;
-    html += g.map(({k,u,n})=>{ const rb=rank(u); return `<div class="it" style="cursor:default"><div class="t"><span>${esc(k)}</span><span>${nf.format(u.v)}</span></div><div class="m">${rb?esc(CANDS[rb.w].nome)+" +"+pf(rb.mg)+" p.p. · ":""}${n} ${n===1?"local":"locais"}</div>${stackBar(u)}</div>`; }).join("");
+    html += g.map(({k,u,n})=>{ const rb=rank(u); return `<div class="it" style="cursor:default"><div class="t"><span>${esc(k)}</span><span>${nf.format(u.v)}</span></div><div class="m">${rb?esc(CANDS[rb.w].nome)+" +"+pf(rb.mg)+" p.p. ("+nf.format(voteMargin(u))+" votos) · ":""}${n} ${n===1?"local":"locais"}</div>${stackBar(u)}</div>`; }).join("");
   }
   html += `</div>`;
   $("#panel").innerHTML = html;

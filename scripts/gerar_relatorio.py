@@ -153,6 +153,35 @@ def gerar(D, PASTA):
         ax.set_title(f"{c['nome']}: {br(pct(E, c['k']))}% no estado", loc="left", fontsize=11, fontweight="bold")
     fig.savefig(IMG / "mapa_percentuais.png"); plt.close(fig)
 
+    # 3b. quantidade de votos nominais (círculos proporcionais)
+    def centro(f):
+        g = f["geometry"]
+        polys = [g["coordinates"]] if g["type"] == "Polygon" else g["coordinates"]
+        ring = max((p[0] for p in polys), key=len)
+        A = cx = cy = 0.0
+        for (x0, y0), (x1, y1) in zip(ring, ring[1:] + ring[:1]):
+            c = x0 * y1 - x1 * y0
+            A += c; cx += (x0 + x1) * c; cy += (y0 + y1) * c
+        return (cx / (3 * A), cy / (3 * A)) if A else tuple(ring[0])
+    cen = [centro(f) for f in feats]
+    vmax = max(m["vt"][c["k"]] for m in ms for c in TOP)
+    fig, axs = plt.subplots(1, NT, figsize=(5.2 * NT, 4))
+    axs = [axs] if NT == 1 else axs
+    for ax, c in zip(axs, TOP):
+        desenhar(ax, feats, [VAZIO] * len(feats))
+        vs = [munis[f["properties"]["id"]]["vt"][c["k"]] for f in feats]
+        ordem = sorted(range(len(feats)), key=lambda i: -vs[i])
+        ax.scatter([cen[i][0] for i in ordem], [cen[i][1] for i in ordem], s=[900 * vs[i] / vmax for i in ordem],
+                   color=cor(c["k"]), alpha=0.75, edgecolor="white", linewidth=0.6, zorder=3)
+        ax.set_title(f"{c['nome']}: {n(E['vt'][c['k']])} votos", loc="left", fontsize=11, fontweight="bold")
+    ref = [r for r in (1000, 10000, 100000) if r <= vmax]
+    hs = [plt.scatter([], [], s=900 * r / vmax, color="#9aa5ae", alpha=0.6, edgecolor="white") for r in ref]
+    fig.legend(hs, [n(r) + " votos" for r in ref], loc="lower center", ncol=len(ref), frameon=False,
+               scatterpoints=1, borderpad=1.2, labelspacing=1.5)
+    fig.suptitle("Votos nominais por município (área do círculo proporcional aos votos; mesma escala nos três mapas)",
+                 x=0.01, ha="left", fontsize=11)
+    fig.savefig(IMG / "mapa_votos.png"); plt.close(fig)
+
     # 4. abstenção
     fig, ax = plt.subplots(figsize=(9, 6.2))
     vals = [100 * munis[f["properties"]["id"]]["ab"] / munis[f["properties"]["id"]]["ap"] for f in feats]
@@ -248,6 +277,11 @@ def gerar(D, PASTA):
     L.append("")
     L.append("![Percentual por candidato](img/mapa_percentuais.png)")
     L.append("")
+    L.append("![Votos nominais por município](img/mapa_votos.png)")
+    L.append("")
+    for c in TOP:
+        best = sorted(ms, key=lambda m: -m["vt"][c["k"]])[:5]
+        L.append(f"- Mais votos para **{c['nome']}**: " + ", ".join(f"{m['n']} ({n(m['vt'][c['k']])})" for m in best) + ".")
     for c in TOP:
         best = sorted(ms, key=lambda m: -pct(m, c["k"]))[:5]
         L.append(f"- Maiores percentuais de **{c['nome']}**: " + ", ".join(f"{m['n']} ({br(pct(m, c['k']))}%)" for m in best) + ".")
@@ -272,7 +306,7 @@ def gerar(D, PASTA):
     L.append("|---|---:|---:|" + "---:|" * NT + "---|")
     for m in sorted(D["munis"], key=lambda m: -m["ap"])[:15]:
         r = rank(m)
-        L.append(f"| {m['n']} | {n(m['ap'])} | {br(100 * m['cp'] / m['ap'])}% | " + " | ".join(f"{br(pct(m, c['k']))}%" for c in TOP) +
+        L.append(f"| {m['n']} | {n(m['ap'])} | {br(100 * m['cp'] / m['ap'])}% | " + " | ".join(f"{br(pct(m, c['k']))}% ({n(m['vt'][c['k']])})" for c in TOP) +
                  f" | {C[r['w']]['nome']} +{br(r['mg'])} |")
     L.append("")
 
@@ -295,7 +329,7 @@ def gerar(D, PASTA):
         L.append("| Bairro | Locais | Votos válidos | " + " | ".join(c["nome"] for c in TOP) + " | Abstenção |")
         L.append("|---|---:|---:|" + "---:|" * NT + "---:|")
         for b in bs:
-            L.append(f"| {b['n']} | {b['nloc']} | {n(b['v'])} | " + " | ".join(f"{br(pct(b, c['k']))}%" for c in TOP) +
+            L.append(f"| {b['n']} | {b['nloc']} | {n(b['v'])} | " + " | ".join(f"{br(pct(b, c['k']))}% ({n(b['vt'][c['k']])})" for c in TOP) +
                      f" | {br(100 * b['ab'] / b['ap'])}% |")
         L.append("")
 
