@@ -1,0 +1,83 @@
+{
+  "meta": {
+    "cargo": "Governador",
+    "uf": "RN",
+    "turno": 1,
+    "eleicao": "Eleições Gerais Estaduais 2026",
+    "data": "04/10/2026",
+    "anulados": [
+      29,
+      50
+    ],
+    "locais_sem_base": 0
+  },
+  "cands": [
+    {
+      "k": 0,
+      "nr": 44,
+      "nome": "Allyson Bezerra",
+      "completo": "Allyson Leandro Bezerra Silva",
+      "partido": "UNIÃO"
+    },
+    {
+      "k": 1,
+      "nr": 13,
+      "nome": "Cadu de Lula",
+      "completo": "Carlos Eduardo Xavier",
+      "partido": "PT"
+    },
+    {
+      "k": 2,
+      "nr": 22,
+      "nome": "Álvaro Dias",
+      "completo": "Álvaro Costa Dias",
+      "partido": "PL"
+    },
+    {
+      "k": 3,
+      "nr": 80,
+      "nome": "Arinalda Medeiros",
+      "completo": "Arinalda Vasconcelos de Medeiros",
+      "partido": "UP"
+    },
+    {
+      "k": 4,
+      "nr": 16,
+      "nome": "Dario Melo",
+      "completo": "Dario Barbosa de Melo",
+      "partido": "PSTU"
+    },
+    {
+      "k": 5,
+      "nr": 27,
+      "nome": "Gladyer Godeiro",
+      "completo": "Gladyer Linhares Godeiro",
+      "partido": "DC"
+    },
+    {
+      "k": 6,
+      "nr": 36,
+      "nome": "Karlo Vieira",
+      "completo": "Karlo Rodrigo Lucio Vieira",
+      "partido": "AGIR"
+    }
+  ],
+  "estado": {
+    "ap": 2656207,
+    "cp": 2167714,
+    "ab": 488493,
+    "v": 1986441,
+    "b": 76524,
+    "nu": 104749,
+    "se": 8115,
+    "vt": [
+      733809,
+      718300,
+      530580,
+      1466,
+      1388,
+      464,
+      434
+    ]
+  }
+}

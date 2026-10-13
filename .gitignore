@@ -1,0 +1,5 @@
+# arquivos brutos do TSE (passam de 100 MB, o limite do GitHub)
+dados_tse/*
+!dados_tse/LEIAME.md
+__pycache__/
+.DS_Store
