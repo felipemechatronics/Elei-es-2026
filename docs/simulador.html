@@ -66,6 +66,8 @@ section{padding:36px 0 0}
 .track .seg:first-child{border-radius:10px 0 0 10px}
 .track .seg:last-child{border-radius:0 10px 10px 0}
 .track .sN{background:var(--none);color:var(--ink)}
+.track .sN.keep{background:color-mix(in srgb,var(--c2) 55%,var(--surface));color:var(--ink)}
+.restrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font:400 13px "Archivo",system-ui,sans-serif;color:var(--ink-2);margin-top:14px}
 .h{position:absolute;top:-8px;width:22px;height:60px;margin-left:-11px;border-radius:8px;border:2px solid var(--ink);background:var(--surface);cursor:ew-resize;padding:0;touch-action:none;box-shadow:0 2px 8px rgba(0,0,0,.18)}
 .h::after{content:"";position:absolute;left:50%;top:50%;width:2px;height:20px;margin:-10px 0 0 -1px;background:var(--ink);border-radius:1px;box-shadow:-4px 0 0 var(--ink),4px 0 0 var(--ink);opacity:.5}
 .split-legend{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px;font-size:13px;color:var(--ink-2)}
@@ -123,6 +125,7 @@ section{padding:36px 0 0}
 .tlist{max-height:none}
 .mchk{display:inline-flex;align-items:center;gap:6px;font:400 12.5px "Archivo",system-ui,sans-serif;color:var(--ink-2);background:color-mix(in srgb,var(--surface) 88%,transparent);padding:4px 8px;border-radius:999px}
 .pickbar{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);background:var(--ink);color:var(--bg);font:500 13px "Archivo",system-ui,sans-serif;padding:8px 10px 8px 14px;border-radius:999px;display:flex;gap:10px;align-items:center;box-shadow:0 6px 18px rgba(0,0,0,.2);white-space:nowrap}
+.pickbar[hidden],.score[hidden]{display:none}
 .pickbar button{background:var(--bg);color:var(--ink);border:0;border-radius:999px;padding:4px 10px;font:600 12.5px "Archivo",system-ui,sans-serif;cursor:pointer}
 @media (max-width:960px){ .tgrid{grid-template-columns:1fr} }
 body.picking .score{display:none}
@@ -271,6 +274,7 @@ footer{padding-bottom:140px !important;margin-top:56px;padding:24px 0 48px;borde
         <div class="unitrow"><span>Editar em</span><div class="useg" id="unitSeg" role="group" aria-label="Unidade"><button type="button" data-u="pct" aria-pressed="true">Percentual</button><button type="button" data-u="votos" aria-pressed="false">Votos</button></div></div>
         <div class="split" id="gsplit"></div>
         <div class="chips" id="presets" role="group" aria-label="Divisões prontas"></div>
+        <div class="restrow"><span>O que não for transferido:</span><div class="useg" id="restSeg" role="group" aria-label="O que acontece com os votos não transferidos"><button type="button" data-r="t" aria-pressed="true">Fica com o candidato (1º turno)</button><button type="button" data-r="n" aria-pressed="false">Não vota em nenhum (2º turno)</button></div></div>
         <label class="chk"><input type="checkbox" id="incOutros" checked> <span id="incOutrosTxt"></span></label>
         <div class="adjbox">
           <h3>Votos do 1º turno de cada candidato</h3>
@@ -326,7 +330,7 @@ footer{padding-bottom:140px !important;margin-top:56px;padding:24px 0 48px;borde
     <div class="lists">
       <div>
         <h3>Municípios que trocam de posição</h3>
-        <p class="sub">Comparação entre os dois candidatos: quem tinha mais votos no 1º turno e quem fica à frente na simulação.</p>
+        <p class="sub">Quem liderou o município no 1º turno e quem fica à frente na simulação.</p>
         <div class="list" id="flips"></div>
       </div>
       <div>
@@ -380,7 +384,7 @@ let COL = {};
 function readColors(){ COL = {A:css(`--c${A.cor}`), C:css(`--c${C.cor}`), T:css(`--c${T.cor!=null?T.cor:2}`), none:css("--none"), surface:css("--surface"), ink:css("--ink"), empty:css("--empty"), muted:css("--muted")}; }
 
 // ---------- estado da simulação ----------
-const S = { g:{a:40,c:40}, inc:true, own:new Map(), sel:null, unit:"pct", adj:{a:0,c:0,t:0}, madj:new Map() };
+const S = { g:{a:0,c:0}, rest:"t", inc:true, own:new Map(), sel:null, unit:"pct", adj:{a:0,c:0,t:0}, madj:new Map() };
 S.rules = [];  // transferências: {from:'a'|'c'|'t', to:'a'|'c'|'n', pct, ids:Set}
 const TU = { sel:new Set(), from:"c", to:"a", pct:10, pick:false, view:"sim", hatch:true };
 const custom = id => S.own.has(id) || S.madj.has(id);
@@ -392,6 +396,7 @@ function readHash(){
   const g = (h.get("g")||"").split(",").map(Number);
   if (g.length===2 && g.every(x=>x>=0) && g[0]+g[1]<=100) S.g = {a:g[0], c:g[1]};
   if (h.has("o")) S.inc = h.get("o")!=="0";
+  if (h.get("k")==="n") S.rest = "n";
   if (h.get("u")==="v") S.unit = "votos";
   const aj = (h.get("a")||"").split(",").map(Number);
   if ((aj.length===2||aj.length===3) && aj.every(x=>isFinite(x) && x>=-100)) S.adj = {a:aj[0], c:aj[1], t:aj[2]||0};
@@ -415,7 +420,7 @@ function writeHash(){
   clearTimeout(hashT);
   hashT = setTimeout(()=>{
     const r3 = x => +x.toFixed(3);
-    const p = [`g=${r3(S.g.a)},${r3(S.g.c)}`, `o=${S.inc?1:0}`, `u=${S.unit==="votos"?"v":"p"}`];
+    const p = [`g=${r3(S.g.a)},${r3(S.g.c)}`, `k=${S.rest}`, `o=${S.inc?1:0}`, `u=${S.unit==="votos"?"v":"p"}`];
     if (S.own.size) p.push("m="+[...S.own].map(([id,s])=>`${id}:${r3(s.a)},${r3(s.c)}`).join(";"));
     if (S.adj.a || S.adj.c || S.adj.t) p.push(`a=${r3(S.adj.a)},${r3(S.adj.c)},${r3(S.adj.t||0)}`);
     if (S.rules.length) p.push("r="+S.rules.map(r=>`${r.from}${r.to}${r3(r.pct)}:${[...r.ids].join(".")}`).join(";"));
@@ -448,18 +453,26 @@ function sim(m, gen, o={}){
   }
   const pool = tv + (S.inc ? outros : 0);
   const a = bA + pool*s.a/100, c = bC + pool*s.c/100;
-  return {a, c, v:a+c, toA:pool*s.a/100, toC:pool*s.c/100, toN:pool*(100-s.a-s.c)/100 + (S.inc?0:outros) + mvN, pool, s, j,
+  const kept = pool*(100-s.a-s.c)/100;
+  // S.rest "t": quem não foi transferido continua votando como no 1º turno (Álvaro e demais candidatos)
+  const t = S.rest==="t" ? (pool ? kept*tv/pool : 0) : 0;
+  const ou = S.rest==="t" ? (pool ? kept*(pool-tv)/pool : 0) + (S.inc ? 0 : outros) : 0;
+  const toN = (S.rest==="t" ? 0 : kept + (S.inc?0:outros)) + mvN;
+  return {a, c, t, o:ou, v:a+c+t+ou, toA:pool*s.a/100, toC:pool*s.c/100, toN, pool, s, j,
           bA, bC, dA:bA0-m.vt[A.k], dC:bC0-m.vt[C.k], tv, tvAdj, dT:tvAdj-tv0, mvA, mvC, nRules,
           own:!gen && S.own.has(m.id), ownAdj:!gen && S.madj.has(m.id), custom:!gen && custom(m.id)};
 }
 function total(onlyGeneral, o={}){
-  let a=0,c=0,toA=0,toC=0,toN=0,dA=0,dC=0,tv=0,dT=0,mvA=0,mvC=0; D.munis.forEach(m=>{ const r=sim(m, onlyGeneral, o); a+=r.a; c+=r.c; toA+=r.toA; toC+=r.toC; toN+=r.toN; dA+=r.dA; dC+=r.dC; tv+=r.tvAdj; dT+=r.dT; mvA+=r.mvA; mvC+=r.mvC; });
-  return {a,c,v:a+c,toA,toC,toN,dA,dC,tv,dT,mvA,mvC};
+  let a=0,c=0,t=0,ou=0,toA=0,toC=0,toN=0,dA=0,dC=0,tv=0,dT=0,mvA=0,mvC=0; D.munis.forEach(m=>{ const r=sim(m, onlyGeneral, o); a+=r.a; c+=r.c; t+=r.t; ou+=r.o; toA+=r.toA; toC+=r.toC; toN+=r.toN; dA+=r.dA; dC+=r.dC; tv+=r.tvAdj; dT+=r.dT; mvA+=r.mvA; mvC+=r.mvC; });
+  return {a,c,t,o:ou,v:a+c+t+ou,toA,toC,toN,dA,dC,tv,dT,mvA,mvC};
 }
 // efeito das escolhas próprias de um município sobre a diferença estadual (votos de A menos votos de C)
 function effect(m){ const o = sim(m), g = sim(m, true); return (o.a-o.c)-(g.a-g.c); }
-const lead = t => t.a>=t.c ? A : C;
-const marginTxt = t => Math.abs(t.a-t.c)<0.5 ? "empate" : `${lead(t).nome} à frente por ${nf.format(Math.round(Math.abs(t.a-t.c)))} votos (${pf(100*Math.abs(t.a-t.c)/t.v)} pontos)`;
+const rankU = u => [{c:A,v:u.a},{c:C,v:u.c},{c:T,v:u.t||0}].sort((x,y)=>y.v-x.v);
+const lead = u => rankU(u)[0].c;
+const gapU = u => { const r = rankU(u); return r[0].v - r[1].v; };
+const marginTxt = u => { const r = rankU(u), d = r[0].v-r[1].v; return d<0.5 ? "empate" : `${r[0].c.nome} à frente por ${nf.format(Math.round(d))} votos (${pf(100*d/u.v)} pontos)`; };
+const duelBar = (u, cls="duel") => `<div class="${cls}" aria-hidden="true"><i style="flex:${u.a};background:${varOf(A)}"></i>${u.t>0.5?`<i style="flex:${u.t};background:${varOf(T)}"></i>`:""}${u.o>0.5?`<i style="flex:${u.o};background:var(--outros)"></i>`:""}<i style="flex:${u.c};background:${varOf(C)}"></i></div>`;
 const signed = x => (x>=0?"+":"−")+nf.format(Math.round(Math.abs(x)));
 const signedP = x => (x>=0?"+":"−")+pf(Math.abs(x), isInt(x)?0:1)+"%";
 function effTxt(x){
@@ -474,7 +487,7 @@ function makeSplit(el, get, set, opts={}){
     <button type="button" class="h h2" role="slider" aria-valuemin="0" aria-valuemax="100"></button></div>
     <div class="split-legend">
       <div class="la"><span>${esc(A.nome)}</span><label class="inp"><input type="text" inputmode="decimal" data-w="a" aria-label="Valor para ${esc(A.nome)}"><i class="u"></i></label><span class="alt"></span></div>
-      <div class="ln"><span>Nenhum dos dois</span><b class="nb"></b><span class="alt"></span></div>
+      <div class="ln"><span class="nl">Nenhum dos dois</span><b class="nb"></b><span class="alt"></span></div>
       <div class="lc"><span>${esc(C.nome)}</span><label class="inp"><input type="text" inputmode="decimal" data-w="c" aria-label="Valor para ${esc(C.nome)}"><i class="u"></i></label><span class="alt"></span></div>
     </div>`;
   const tr = el.querySelector(".track"), h1 = el.querySelector(".h1"), h2 = el.querySelector(".h2");
@@ -484,6 +497,8 @@ function makeSplit(el, get, set, opts={}){
   function draw(){
     const s = get(), n = 100-s.a-s.c, pool = opts.pool ? opts.pool() : null;
     sA.style.flex = `0 0 ${s.a}%`; sN.style.flex = `0 0 ${n}%`; sC.style.flex = `0 0 ${s.c}%`;
+    el.querySelector(".nl").textContent = S.rest==="t" ? `Fica com ${T.nome}` : "Nenhum dos dois";
+    sN.classList.toggle("keep", S.rest==="t");
     sA.textContent = s.a>=8 ? fp(s.a) : ""; sN.textContent = n>=8 ? fp(n) : ""; sC.textContent = s.c>=8 ? fp(s.c) : "";
     h1.style.left = s.a+"%"; h2.style.left = (100-s.c)+"%";
     h1.setAttribute("aria-valuenow", Math.round(s.a)); h1.setAttribute("aria-valuetext", `${fp(s.a)} para ${A.nome}`);
@@ -607,22 +622,25 @@ function makeAdj(el, get, set, opts){
 // ---------- textos fixos ----------
 const E = D.estado;
 const outrosE = E.v - E.vt[A.k] - E.vt[C.k] - E.vt[T.k];
-$("#lede").textContent = `No 1º turno, ${A.nome} (${A.partido}) e ${C.nome} (${C.partido}) foram os mais votados. ${T.nome} (${T.partido}), terceiro colocado, teve ${nf.format(E.vt[T.k])} votos. Arraste a barra para decidir como esses eleitores se dividem no 2º turno, no estado todo ou em cada município, e veja o resultado.`;
+$("#lede").textContent = `No 1º turno, ${A.nome} (${A.partido}) e ${C.nome} (${C.partido}) foram os mais votados. ${T.nome} (${T.partido}), terceiro colocado, teve ${nf.format(E.vt[T.k])} votos. O simulador começa pelo resultado real do 1º turno, com ${T.nome} mantendo os votos dele. Arraste a barra para transferir esses votos para ${A.nome} ou ${C.nome}, no estado todo ou em cada município, e veja o resultado.`;
 $("#splitTitle").textContent = `Para onde vão os votos de ${T.nome}`;
-$("#splitSub").textContent = `${nf.format(E.vt[T.k])} votos no 1º turno. Arraste as alças para dividir entre os dois finalistas e quem não votaria em nenhum deles, ou digite os valores embaixo da barra, em percentual ou em votos. As alças também andam com as setas do teclado.`;
+$("#splitSub").textContent = `${nf.format(E.vt[T.k])} votos no 1º turno. Arraste as alças para transferir parte deles para cada finalista; a faixa do meio é o que não foi transferido, ou digite os valores embaixo da barra, em percentual ou em votos. As alças também andam com as setas do teclado.`;
 $("#incOutrosTxt").textContent = `Dividir da mesma forma os votos dos demais candidatos (${nf.format(outrosE)} votos). Desmarcado, esses eleitores não votam em nenhum dos dois.`;
 $("#m1").textContent = `Percentuais sobre os votos válidos simulados, isto é, a soma dos votos de ${A.nome} e de ${C.nome}.`;
 
 // ---------- barra geral ----------
 const gbar = makeSplit($("#gsplit"), ()=>S.g, s=>{ S.g=s; update(); }, {pool:()=>E.vt[T.k]*(1+(S.adj.t||0)/100) + (S.inc?outrosE:0)});
 const PRE = [
+  {l:"Cenário real (1º turno)", f:()=>({a:0,c:0})},
   {l:"Metade para cada", f:()=>({a:50,c:50})},
   {l:"40% / 20% / 40%", f:()=>({a:40,c:40})},
-  {l:"Proporcional ao 1º turno", f:()=>{ const n = 100-S.g.a-S.g.c; const a = Math.round((100-n)*E.vt[A.k]/(E.vt[A.k]+E.vt[C.k])); return {a, c:100-n-a}; }},
+  {l:"Proporcional ao 1º turno", f:()=>{ const n0 = 100-S.g.a-S.g.c, n = n0>=100 ? 0 : n0; const a = Math.round((100-n)*E.vt[A.k]/(E.vt[A.k]+E.vt[C.k])); return {a, c:100-n-a}; }},
   {l:`Todos para ${A.nome}`, f:()=>({a:100,c:0})},
   {l:`Todos para ${C.nome}`, f:()=>({a:0,c:100})},
 ];
 $("#presets").innerHTML = PRE.map((p,i)=>`<button type="button" data-i="${i}">${esc(p.l)}</button>`).join("");
+function syncRest(){ document.querySelectorAll("#restSeg button").forEach(b=>b.setAttribute("aria-pressed", b.dataset.r===S.rest)); }
+$("#restSeg").addEventListener("click", e=>{ const b=e.target.closest("button"); if(!b) return; S.rest=b.dataset.r; syncRest(); gbar.draw(); if (pbar) pbar.draw(); update(); });
 $("#presets").addEventListener("click", e=>{ const b=e.target.closest("button"); if(!b) return; S.g = PRE[+b.dataset.i].f(); gbar.draw(); update(); });
 $("#unitSeg").addEventListener("click", e=>{ const b=e.target.closest("button"); if(!b) return; S.unit=b.dataset.u; syncUnit(); gbar.draw(); gadj.draw(); if (pbar) pbar.draw(); if (padj) padj.draw(); writeHash(); });
 function syncUnit(){ document.querySelectorAll("#unitSeg button").forEach(b=>b.setAttribute("aria-pressed", b.dataset.u===S.unit)); }
@@ -635,22 +653,24 @@ function renderScore(t){
   const el = $("#score"); if (!el) return;
   const tg = total(true), d = (t.a-t.c)-(tg.a-tg.c);
   const tn = S.rules.length ? total(false,{rules:[]}) : t, dr = (t.a-t.c)-(tn.a-tn.c);
-  el.innerHTML = `<div class="lbl">Cenário do 2º turno no estado</div>
-    <div class="top2"><span>${esc(A.nome)} <b>${pf(100*t.a/t.v)}%</b></span><span><b>${pf(100*t.c/t.v)}%</b> ${esc(C.nome)}</span></div>
-    <div class="duel"><i style="flex:${t.a};background:${varOf(A)}"></i><i style="flex:${t.c};background:${varOf(C)}"></i></div>
+  el.innerHTML = `<div class="lbl">${t.t>0.5?"Cenário no estado (votos de "+esc(T.nome)+" ainda não todos transferidos)":"Cenário do 2º turno no estado"}</div>
+    <div class="top2"><span>${esc(A.nome)} <b>${pf(100*t.a/t.v)}%</b></span>${t.t>0.5?`<span>${esc(T.nome)} <b>${pf(100*t.t/t.v)}%</b></span>`:""}<span><b>${pf(100*t.c/t.v)}%</b> ${esc(C.nome)}</span></div>
+    ${duelBar(t)}
     <div class="mg"><span><b>${marginTxt(t)}</b></span>${nCustom()?`<span>Ajustes municipais: ${Math.abs(d)<0.5?"sem efeito":`${signed(Math.abs(d))} para ${esc((d>0?A:C).nome)}`} (${nCustom()} ${nCustom()===1?"município":"municípios"})</span>`:""}${S.rules.length?`<span>Transferências: ${Math.abs(dr)<0.5?"sem efeito":`${signed(Math.abs(dr))} para ${esc((dr>0?A:C).nome)}`}</span>`:""}</div>`;
 }
 function renderResult(){
   const t = total();
   renderScore(t);
   const pa = 100*t.a/t.v, pc = 100*t.c/t.v;
-  const lead = t.a>=t.c ? A : C, diff = Math.abs(t.a-t.c);
   const row = (c,v,p,g,dd,mv) => `<div class="row"><i class="sw" style="background:${varOf(c)}"></i><span><span class="nm">${esc(c.nome)}</span><span class="pt">${esc(c.partido)}</span></span><span class="pc">${pf(p)}%</span>
     <span class="vv">${nf.format(Math.round(v))} votos · ${nf.format(E.vt[c.k])} no 1º turno${Math.abs(dd)>=0.5?` ${signed(dd)} de ajuste`:""} + ${nf.format(Math.round(g))} recebidos${Math.abs(mv)>=0.5?` ${signed(mv)} em transferências`:""}</span></div>`;
-  $("#result").innerHTML = `<h2>Resultado simulado</h2>`+row(A,t.a,pa,t.toA,t.dA,t.mvA)+row(C,t.c,pc,t.toC,t.dC,t.mvC)+
-    `<div class="duel" aria-hidden="true"><i style="flex:${t.a};background:${varOf(A)}"></i><i style="flex:${t.c};background:${varOf(C)}"></i></div>`+
-    `<p class="verdict">${diff<0.5?"Empate":`${esc(lead.nome)} à frente por ${nf.format(Math.round(diff))} votos (${pf(Math.abs(pa-pc))} pontos)`}. ${nCustom()?`${nCustom()} ${nCustom()===1?"município tem":"municípios têm"} ajustes próprios.`:""}</p>`+
-    `<p class="note">${Math.abs(t.dT)>=0.5?`Votos de ${esc(T.nome)} a dividir: ${nf.format(Math.round(t.tv))} (${signed(t.dT)} de ajuste sobre o 1º turno). `:""}${nf.format(Math.round(t.toN))} eleitores de ${esc(T.nome)}${S.inc?" e dos demais candidatos":" e todos os dos demais candidatos"} não votam em nenhum dos dois nesta simulação.</p>`;
+  const rowT = t.t>0.5 ? `<div class="row"><i class="sw" style="background:${varOf(T)}"></i><span><span class="nm">${esc(T.nome)}</span><span class="pt">${esc(T.partido)}</span></span><span class="pc">${pf(100*t.t/t.v)}%</span>
+    <span class="vv">${nf.format(Math.round(t.t))} votos ainda com ele, de ${nf.format(E.vt[T.k])} no 1º turno</span></div>` : "";
+  const rowO = t.o>0.5 ? `<div class="row"><i class="sw" style="background:var(--outros)"></i><span><span class="nm" style="font-weight:500">Demais candidatos</span></span><span class="pc" style="font-size:20px">${pf(100*t.o/t.v)}%</span><span class="vv">${nf.format(Math.round(t.o))} votos</span></div>` : "";
+  $("#result").innerHTML = `<h2>${t.t>0.5?"Resultado do cenário":"Resultado simulado"}</h2>`+row(A,t.a,pa,t.toA,t.dA,t.mvA)+row(C,t.c,pc,t.toC,t.dC,t.mvC)+rowT+rowO+
+    duelBar(t)+
+    `<p class="verdict">${marginTxt(t).replace(/^./, x=>x.toUpperCase())}. ${t.t>0.5 && S.g.a===0 && S.g.c===0 && !S.rules.length && !nCustom() && !S.adj.a && !S.adj.c && !S.adj.t ? "Este é o resultado real do 1º turno; arraste a barra para transferir os votos de "+esc(T.nome)+". " : ""}${nCustom()?`${nCustom()} ${nCustom()===1?"município tem":"municípios têm"} ajustes próprios.`:""}</p>`+
+    `<p class="note">${S.rest==="t" ? `${nf.format(Math.round(t.t))} votos continuam com ${esc(T.nome)}${t.o>0.5?` e ${nf.format(Math.round(t.o))} com os demais candidatos`:""}. ` : ""}${Math.abs(t.dT)>=0.5?`Votos de ${esc(T.nome)} a dividir: ${nf.format(Math.round(t.tv))} (${signed(t.dT)} de ajuste sobre o 1º turno). `:""}${t.toN>=0.5?`${nf.format(Math.round(t.toN))} eleitores não votam em nenhum dos dois nesta simulação.`:""}</p>`;
 }
 
 // ---------- mapa ----------
@@ -667,8 +687,8 @@ const t1win = m => { const o=[A,C,T].map(c=>({c,v:m.vt[c.k]})).sort((x,y)=>y.v-x
 function fill(m){
   if (TU.view==="t1") return fill1(m);
   const r = sim(m); if (!r.v) return COL.empty;
-  const mg = 100*Math.abs(r.a-r.c)/r.v, i = mg<MB[0]?0:mg<MB[1]?1:mg<MB[2]?2:3;
-  return d3.interpolateRgb(COL.surface, r.a>=r.c?COL.A:COL.C)(MST[i]);
+  const mg = 100*gapU(r)/r.v, i = mg<MB[0]?0:mg<MB[1]?1:mg<MB[2]?2:3, w = lead(r);
+  return d3.interpolateRgb(COL.surface, w===A?COL.A:w===C?COL.C:COL.T)(MST[i]);
 }
 const tip = $("#tip");
 function showTip(ev, html){ tip.innerHTML=html; tip.style.opacity=1; const w=tip.offsetWidth,h=tip.offsetHeight; let x=ev.clientX+14,y=ev.clientY+14; if(x+w>innerWidth-8)x=ev.clientX-w-14; if(y+h>innerHeight-8)y=ev.clientY-h-14; tip.style.left=Math.max(8,x)+"px"; tip.style.top=Math.max(8,y)+"px"; }
@@ -677,8 +697,8 @@ function tipFor(m){
   if (TU.view==="t1") return `<div class="tt">${esc(m.n)} · 1º turno</div>`+[A,C,T].map(c=>`<div class="tr"><span><i style="background:${varOf(c)}"></i>${esc(c.nome)}</span><b>${pf(100*m.vt[c.k]/m.v)}% <span style="color:var(--muted);font-weight:400">${nf.format(m.vt[c.k])}</span></b></div>`).join("");
   const r = sim(m);
   return `<div class="tt">${esc(m.n)}</div>`+
-    [[A,r.a],[C,r.c]].map(([c,v])=>`<div class="tr"><span><i style="background:${varOf(c)}"></i>${esc(c.nome)}</span><b>${pf(100*v/r.v)}% <span style="color:var(--muted);font-weight:400">${nf.format(Math.round(v))}</span></b></div>`).join("")+
-    `<div class="tm">${nf.format(Math.round(r.tv))} votos de ${esc(T.nome)}${Math.abs(r.dT)>=0.5?` (1º turno: ${nf.format(m.vt[T.k])})`:""} · divisão ${r.own?"própria":"geral"}: ${fp(r.s.a)} / ${fp(100-r.s.a-r.s.c)} / ${fp(r.s.c)}${(r.j.a||r.j.c||r.j.t)?`<br>Ajuste ${r.ownAdj?"próprio":"geral"}: ${esc(A.nome)} ${signedP(r.j.a)}, ${esc(C.nome)} ${signedP(r.j.c)}, ${esc(T.nome)} ${signedP(r.j.t||0)}`:""}${r.nRules?`<br>${r.nRules} ${r.nRules===1?"transferência aplicada":"transferências aplicadas"}`:""}${TU.sel.has(m.id)?"<br><b>Selecionado para transferência</b>":""}${r.a+r.c>m.ap?"<br>Soma acima do eleitorado apto":""}</div>`;
+    [[A,r.a],[C,r.c],...(r.t>0.5?[[T,r.t]]:[])].map(([c,v])=>`<div class="tr"><span><i style="background:${varOf(c)}"></i>${esc(c.nome)}</span><b>${pf(100*v/r.v)}% <span style="color:var(--muted);font-weight:400">${nf.format(Math.round(v))}</span></b></div>`).join("")+
+    `<div class="tm">${nf.format(Math.round(r.tv))} votos de ${esc(T.nome)}${Math.abs(r.dT)>=0.5?` (1º turno: ${nf.format(m.vt[T.k])})`:""} · divisão ${r.own?"própria":"geral"}: ${fp(r.s.a)} para ${esc(A.nome)}, ${fp(r.s.c)} para ${esc(C.nome)}${(r.j.a||r.j.c||r.j.t)?`<br>Ajuste ${r.ownAdj?"próprio":"geral"}: ${esc(A.nome)} ${signedP(r.j.a)}, ${esc(C.nome)} ${signedP(r.j.c)}, ${esc(T.nome)} ${signedP(r.j.t||0)}`:""}${r.nRules?`<br>${r.nRules} ${r.nRules===1?"transferência aplicada":"transferências aplicadas"}`:""}${TU.sel.has(m.id)?"<br><b>Selecionado para transferência</b>":""}${r.a+r.c>m.ap?"<br>Soma acima do eleitorado apto":""}</div>`;
 }
 const defs = svg.append("defs");
 const hatchPat = defs.append("pattern").attr("id","hatchT").attr("patternUnits","userSpaceOnUse").attr("width",6).attr("height",6).attr("patternTransform","rotate(45)");
@@ -707,7 +727,7 @@ function paintMap(){
   gPick.selectAll("path").data(G.mapa.features.filter(f=>TU.sel.has(f.properties.id)), f=>f.properties.id).join("path")
     .attr("d",path).attr("fill","none").attr("stroke",COL.ink).attr("stroke-width",2.4).attr("stroke-dasharray","4 3").attr("vector-effect","non-scaling-stroke");
   gPick.raise();
-  const cands = TU.view==="t1" ? [A,C,T] : fin;
+  const cands = (TU.view==="t1" || total().t>0.5) ? [A,C,T] : fin;
   const colOf = c => c===A?COL.A:c===C?COL.C:COL.T;
   $("#legend").innerHTML = `<div class="lt">${TU.view==="t1"?"1º colocado no 1º turno":"À frente na simulação"}</div>`+cands.map(c=>`<div class="lrow"><div class="ramp">${MST.map(t=>`<span style="background:${d3.interpolateRgb(COL.surface, colOf(c))(t)}"></span>`).join("")}</div>${esc(c.nome)}</div>`).join("")+
     `<div class="ticks"><span>&lt;5</span><span>15</span><span>30+ p.p.</span></div>`+
@@ -748,13 +768,13 @@ function renderPanelSim(){
   $("#preset2").style.visibility = r.ownAdj ? "visible" : "hidden";
   $("#pwarn").innerHTML = r.a+r.c > m.ap ? `<div class="warn">Com esses ajustes, os dois somam ${nf.format(Math.round(r.a+r.c))} votos, mais que os ${nf.format(m.ap)} eleitores aptos de ${esc(m.n)}.</div>` : "";
   if (padj) padj.draw();
-  $("#psim").innerHTML = [[A,r.a],[C,r.c]].map(([c,v])=>`<div class="r"><span>${esc(c.nome)}</span><span><b>${pf(100*v/r.v)}%</b> <span class="v">${nf.format(Math.round(v))}</span></span><span class="bar"><i style="width:${100*v/r.v}%;background:${varOf(c)}"></i></span></div>`).join("");
+  $("#psim").innerHTML = [[A,r.a],[C,r.c],...(r.t>0.5?[[T,r.t]]:[])].map(([c,v])=>`<div class="r"><span>${esc(c.nome)}</span><span><b>${pf(100*v/r.v)}%</b> <span class="v">${nf.format(Math.round(v))}</span></span><span class="bar"><i style="width:${100*v/r.v}%;background:${varOf(c)}"></i></span></div>`).join("");
   const t = total(), ef = effect(m);
   const g = sim(m, true);
-  const without = {a:t.a - (r.a - g.a), c:t.c - (r.c - g.c)}; without.v = without.a + without.c;
+  const without = {a:t.a - (r.a - g.a), c:t.c - (r.c - g.c), t:t.t - (r.t - g.t), o:t.o - (r.o - g.o)}; without.v = without.a + without.c + without.t + without.o;
   $("#pstate").innerHTML = `<div class="ptitle" style="margin-top:0">Cenário no estado</div>
-    <div class="duel sm"><i style="flex:${t.a};background:${varOf(A)}"></i><i style="flex:${t.c};background:${varOf(C)}"></i></div>
-    <div class="sline"><span><b>${pf(100*t.a/t.v)}%</b>${esc(A.nome)}</span><span><b>${pf(100*t.c/t.v)}%</b>${esc(C.nome)}</span></div>
+    ${duelBar(t,"duel sm")}
+    <div class="sline"><span><b>${pf(100*t.a/t.v)}%</b>${esc(A.nome)}</span>${t.t>0.5?`<span style="text-align:center"><b>${pf(100*t.t/t.v)}%</b>${esc(T.nome)}</span>`:""}<span><b>${pf(100*t.c/t.v)}%</b>${esc(C.nome)}</span></div>
     <p class="snote"><b>${marginTxt(t)}</b>.</p>
     <p class="snote">${r.custom
       ? `${r.own&&r.ownAdj?"A divisão e o ajuste próprios":r.own?"A divisão própria":"O ajuste próprio"} de ${esc(m.n)} ${effTxt(ef)}, em comparação com os valores gerais. Sem ${r.own&&r.ownAdj?"eles":"ele"}: ${marginTxt(without)}.`
@@ -767,7 +787,7 @@ $("#q").addEventListener("change", e=>{ const n=e.target.value.trim().toLowerCas
 // ---------- listas ----------
 const chip = c => `<span class="chip"><i style="background:${varOf(c)}"></i>${esc(c.nome)}</span>`;
 function renderLists(){
-  const fl = D.munis.filter(m=>m.v).map(m=>{ const r=sim(m); const before = m.vt[A.k]>=m.vt[C.k]?A:C, after = r.a>=r.c?A:C; return {m,before,after,r}; }).filter(x=>x.before!==x.after).sort((a,b)=>b.m.v-a.m.v);
+  const fl = D.munis.filter(m=>m.v).map(m=>{ const r=sim(m); const before = t1win(m), after = lead(r); return {m,before,after,r}; }).filter(x=>x.before!==x.after).sort((a,b)=>b.m.v-a.m.v);
   $("#flips").innerHTML = (fl.length ? `<div class="it" style="color:var(--ink-2);border-top:0">${fl.length} ${fl.length===1?"município troca":"municípios trocam"} de posição.</div>` : "") + (fl.length ? fl.map(x=>`<div class="it"><button type="button" class="link" data-id="${x.m.id}">${esc(x.m.n)}</button><span>${chip(x.before)} → ${chip(x.after)}</span></div>`).join("")
     : `<div class="it" style="color:var(--muted)">Nenhum município troca de posição nesta simulação.</div>`);
   const ids = [...new Set([...S.own.keys(), ...S.madj.keys()])];
@@ -789,7 +809,7 @@ const cols = [
   {k:"t", l:`Votos de ${T.nome}`, v:m=>m.vt[T.k], f:m=>nf.format(m.vt[T.k])},
   {k:"a", l:A.nome, v:m=>{const r=sim(m);return r.v?r.a/r.v:0}, f:m=>{const r=sim(m);return r.v?pf(100*r.a/r.v)+"%":"–"}},
   {k:"c", l:C.nome, v:m=>{const r=sim(m);return r.v?r.c/r.v:0}, f:m=>{const r=sim(m);return r.v?pf(100*r.c/r.v)+"%":"–"}},
-  {k:"w", l:"À frente", v:m=>{const r=sim(m);return r.v?(r.a-r.c)/r.v:0}, f:m=>{const r=sim(m); if(!r.v) return "–"; const c=r.a>=r.c?A:C; return `${chip(c)} +${nf.format(Math.round(Math.abs(r.a-r.c)))}`;}},
+  {k:"w", l:"À frente", v:m=>{const r=sim(m);return r.v?(r.a-r.c)/r.v:0}, f:m=>{const r=sim(m); if(!r.v) return "–"; return `${chip(lead(r))} +${nf.format(Math.round(gapU(r)))}`;}},
   {k:"d", l:"Ajustes", v:m=>custom(m.id)?1:0, f:m=>custom(m.id)?"próprios":"gerais"},
 ];
 const ts = {k:"t", dir:-1, q:""};
@@ -846,7 +866,7 @@ function renderTPrev(){
   $("#tApply").disabled = !ok;
   if (!TU.sel.size){ $("#tPrev").innerHTML = "Selecione ao menos um município para ver a prévia."; return; }
   const now = total(), next = total(false, {extra:pending()});
-  const pa = x => pf(100*x.a/x.v)+"%", pc = x => pf(100*x.c/x.v)+"%";
+  const pa = x => pf(100*x.a/x.v)+"%", pc = x => pf(100*x.c/x.v)+"%" + (x.t>0.5?` × ${pf(100*x.t/x.v)}% ${T.nome}`:"");
   $("#tPrev").innerHTML = `Saem <b>${nf.format(Math.round(moved))} votos</b> de ${esc(nameOf(TU.from))} (${fp(TU.pct)} dos ${nf.format(Math.round(st))} que ${TU.from==="t"?"ele tem a dividir":"ele tem"} nos ${TU.sel.size} ${TU.sel.size===1?"município":"municípios"}) para <b>${esc(nameOf(TU.to))}</b>.<br>
     Estado agora: ${esc(A.nome)} ${pa(now)} × ${pc(now)} ${esc(C.nome)} (${marginTxt(now)}).<br>
     <b>Com a transferência: ${esc(A.nome)} ${pa(next)} × ${pc(next)} ${esc(C.nome)} (${marginTxt(next)}).</b>`;
@@ -916,7 +936,7 @@ const resCard = $("#result");
 function toggleScore(){ const r = resCard.getBoundingClientRect(); $("#score").hidden = r.bottom > 160; }
 addEventListener("scroll", toggleScore, {passive:true}); addEventListener("resize", toggleScore);
 readHash();
-$("#incOutros").checked = S.inc; syncUnit();
+$("#incOutros").checked = S.inc; syncUnit(); syncRest();
 readColors(); paintMap(); sizeMap(); gbar.draw(); gadj.draw(); renderTForm(); renderPanelSim(); update();
 addEventListener("resize", ()=>{ sizeMap(); });
 })();
