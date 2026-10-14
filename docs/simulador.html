@@ -82,20 +82,21 @@ section{padding:36px 0 0}
 .inp input:focus{outline:none}
 .inp .u{font-style:normal;font-size:12px;color:var(--muted)}
 .adjbox{margin-top:20px;padding-top:16px;border-top:1px solid var(--line)}
-.adj{display:grid;grid-template-columns:minmax(110px,1fr) auto minmax(150px,1.2fr);gap:6px 12px;align-items:center;padding:8px 0;border-top:1px solid var(--line);font:400 13px "Archivo",system-ui,sans-serif}
+.adj{padding:10px 0;border-top:1px solid var(--line);font:400 13px "Archivo",system-ui,sans-serif}
 .adj:first-child{border-top:0}
+.adj .ah{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:6px}
 .adj .an{display:flex;align-items:center;gap:7px;font-weight:600;color:var(--ink)}
 .adj .an i{width:10px;height:10px;border-radius:3px;display:inline-block;flex:none}
-.adj .actl{display:inline-flex;align-items:center;gap:6px}
-.adj .pm{width:30px;height:30px;border-radius:8px;border:1px solid var(--line-2);background:var(--surface);color:var(--ink);font:600 17px/1 "Archivo",system-ui,sans-serif;cursor:pointer;padding:0}
-.adj .pm:hover{border-color:var(--ink)}
-.adj .inp input{font-size:17px;width:7.5ch;text-align:center}
-.adj .ar{text-align:right;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.adj .ar{color:var(--ink-2);font-variant-numeric:tabular-nums;white-space:nowrap}
 .adj .ar b{color:var(--ink)}
-.adj .ar span{display:block;font-size:12px;color:var(--muted)}
-.panel .adj{grid-template-columns:1fr auto}
-.panel .adj .ar{grid-column:1/3;text-align:left}
-.panel .adj .ar span{display:inline;margin-left:6px}
+.adj .ac{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}
+.adj .grp{display:inline-flex;align-items:center;gap:5px}
+.adj .ou{color:var(--muted);font-size:12px}
+.adj .pm{width:28px;height:28px;border-radius:8px;border:1px solid var(--line-2);background:var(--surface);color:var(--ink);font:600 16px/1 "Archivo",system-ui,sans-serif;cursor:pointer;padding:0;flex:none}
+.adj .pm:hover{border-color:var(--ink)}
+.adj .inp input{font-size:16px;text-align:right}
+.adj .inp input[data-k="p"]{width:5.5ch}
+.adj .inp input[data-k="v"]{width:9ch}
 .warn{font:500 12.5px/1.45 "Archivo",system-ui,sans-serif;color:var(--ink);border-left:3px solid var(--c1);padding:4px 0 4px 8px;margin-top:8px}
 .unitrow{display:flex;align-items:center;gap:8px;font:400 13px "Archivo",system-ui,sans-serif;color:var(--ink-2);margin-top:4px}
 .useg{display:inline-flex;border:1px solid var(--line-2);border-radius:999px;padding:2px;gap:2px}
@@ -202,9 +203,6 @@ footer{padding-bottom:140px !important;margin-top:56px;padding:24px 0 48px;borde
   .panel{border-left:0;border-top:1px solid var(--line);max-height:none}
 }
 @media (max-width:560px){
-  .adj{grid-template-columns:1fr auto}
-  .adj .ar{grid-column:1/3;text-align:left}
-  .adj .ar span{display:inline;margin-left:6px}
   .wrap{padding:0 16px}
   .top nav{gap:12px;font-size:13px}
   .brand{display:none}
@@ -240,7 +238,7 @@ footer{padding-bottom:140px !important;margin-top:56px;padding:24px 0 48px;borde
         <label class="chk"><input type="checkbox" id="incOutros" checked> <span id="incOutrosTxt"></span></label>
         <div class="adjbox">
           <h3>Votos próprios dos finalistas</h3>
-          <p class="sub">Aumente ou diminua os votos que cada um teve no 1º turno, por exemplo por mobilização, abstenção ou eleitores que mudam de ideia. Vale para todos os municípios sem ajuste próprio. Use os botões − e +, as setas do teclado ou digite o valor.</p>
+          <p class="sub">Aumente ou diminua os votos que cada um teve no 1º turno, por exemplo por mobilização, abstenção ou eleitores que mudam de ideia. Vale para todos os municípios sem ajuste próprio. Digite a variação em percentual ou em votos (os dois campos ficam ligados), ou use os botões − e +: de 1 em 1 ponto percentual ou de 1.000 em 1.000 votos (no município, de 100 em 100). Com Shift, o passo é 10 vezes maior.</p>
           <div id="gadj"></div>
           <div class="chips"><button type="button" id="adjReset">Zerar ajustes gerais</button></div>
         </div>
@@ -472,37 +470,46 @@ function makeSplit(el, get, set, opts={}){
 
 // ---------- ajuste dos votos próprios (+/−) ----------
 function makeAdj(el, get, set, opts){
+  const vstep = opts.vstep || 100;
+  const grp = (c, k, unit, lab) => `<span class="grp"><button type="button" class="pm" data-k="${k}" data-d="-1" aria-label="Diminuir ${lab} de ${esc(c.nome)}">−</button><label class="inp"><input type="text" inputmode="decimal" data-k="${k}" aria-label="Variação em ${lab} de ${esc(c.nome)}"><i class="u">${unit}</i></label><button type="button" class="pm" data-k="${k}" data-d="1" aria-label="Aumentar ${lab} de ${esc(c.nome)}">+</button></span>`;
   el.innerHTML = fin.map(c=>{ const w = c===A?"a":"c"; return `<div class="adj" data-w="${w}">
-    <span class="an"><i style="background:${varOf(c)}"></i>${esc(c.nome)}</span>
-    <span class="actl"><button type="button" class="pm" data-d="-1" aria-label="Diminuir votos de ${esc(c.nome)}">−</button><label class="inp"><input type="text" inputmode="decimal" aria-label="Variação dos votos de ${esc(c.nome)}"><i class="u"></i></label><button type="button" class="pm" data-d="1" aria-label="Aumentar votos de ${esc(c.nome)}">+</button></span>
-    <span class="ar"></span></div>`; }).join("");
+    <div class="ah"><span class="an"><i style="background:${varOf(c)}"></i>${esc(c.nome)}</span><span class="ar"></span></div>
+    <div class="ac">${grp(c,"p","%","percentual")}<span class="ou">ou</span>${grp(c,"v","votos","votos")}</div></div>`; }).join("");
+  const fmtSignedVotes = d => (d>=0?"+":"−")+nf.format(Math.round(Math.abs(d)));
+  const fmtSignedPct = x => (x>=0?"+":"−")+pf(Math.abs(x), isInt(x)?0:1);
   function draw(){
-    const j = get(), base = opts.base(), byVotes = S.unit==="votos";
+    const j = get(), base = opts.base();
     el.querySelectorAll(".adj").forEach(row=>{
-      const w = row.dataset.w, b = base[w], d = b*j[w]/100, inp = row.querySelector("input");
-      if (document.activeElement!==inp) inp.value = byVotes ? (d>=0?"+":"−")+nf.format(Math.round(Math.abs(d))) : (j[w]>=0?"+":"−")+pf(Math.abs(j[w]), isInt(j[w])?0:1);
-      row.querySelector(".u").textContent = byVotes ? "votos" : "%";
-      row.querySelector(".ar").innerHTML = `${nf.format(Math.round(b))} → <b>${nf.format(Math.round(b+d))}</b> <span>${byVotes ? signedP(j[w]) : signed(d)+" votos"}</span>`;
+      const w = row.dataset.w, b = base[w], d = b*j[w]/100;
+      const ip = row.querySelector('input[data-k="p"]'), iv = row.querySelector('input[data-k="v"]');
+      if (document.activeElement!==ip) ip.value = fmtSignedPct(j[w]);
+      if (document.activeElement!==iv) iv.value = fmtSignedVotes(d);
+      row.querySelector(".ar").innerHTML = `${nf.format(Math.round(b))} → <b>${nf.format(Math.round(b+d))}</b>`;
     });
   }
   const setW = (w, pct) => { const j = {...get()}; j[w] = Math.max(-100, Math.min(300, Math.round(pct*10000)/10000)); set(j); draw(); };
+  const votesToPct = (w, v) => { const b = opts.base()[w]; return b ? 100*v/b : 0; };
   el.querySelectorAll(".adj").forEach(row=>{
-    const w = row.dataset.w, inp = row.querySelector("input");
+    const w = row.dataset.w;
     row.querySelectorAll(".pm").forEach(btn=>btn.addEventListener("click", e=>{
-      const st = (e.shiftKey ? 10 : 1) * +btn.dataset.d; setW(w, Math.round(get()[w]) + st);
+      const mult = (e.shiftKey ? 10 : 1) * +btn.dataset.d;
+      if (btn.dataset.k==="p") setW(w, Math.round(get()[w]) + mult);
+      else { const b = opts.base()[w], cur = b*get()[w]/100; setW(w, votesToPct(w, Math.round(cur) + mult*vstep)); }
     }));
-    const apply = () => {
-      const raw = inp.value.trim().replace(/\s/g,"").replace("−","-");
-      const b = opts.base()[w], byVotes = S.unit==="votos";
-      const num = byVotes ? Number(raw.replace(/\./g,"").replace(",",".")) : Number(raw.replace(",","."));
-      if (raw==="" || raw==="-" || raw==="+" || !isFinite(num)) return;
-      setW(w, byVotes ? (b ? 100*num/b : 0) : num);
-    };
-    inp.addEventListener("input", apply);
-    inp.addEventListener("blur", draw);
-    inp.addEventListener("keydown", e=>{
-      if (e.key==="Enter"){ apply(); inp.blur(); }
-      if (e.key==="ArrowUp"||e.key==="ArrowDown"){ e.preventDefault(); setW(w, Math.round(get()[w]) + (e.key==="ArrowUp"?1:-1)*(e.shiftKey?10:1)); }
+    row.querySelectorAll("input[data-k]").forEach(inp=>{
+      const k = inp.dataset.k;
+      const apply = () => {
+        const raw = inp.value.trim().replace(/\s/g,"").replace("−","-");
+        const num = k==="v" ? Number(raw.replace(/\./g,"").replace(",",".")) : Number(raw.replace(",","."));
+        if (raw==="" || raw==="-" || raw==="+" || !isFinite(num)) return;
+        setW(w, k==="v" ? votesToPct(w, num) : num);
+      };
+      inp.addEventListener("input", apply);
+      inp.addEventListener("blur", draw);
+      inp.addEventListener("keydown", e=>{
+        if (e.key==="Enter"){ apply(); inp.blur(); }
+        if (e.key==="ArrowUp"||e.key==="ArrowDown"){ e.preventDefault(); row.querySelector(`.pm[data-k="${k}"][data-d="${e.key==="ArrowUp"?1:-1}"]`).dispatchEvent(new MouseEvent("click",{shiftKey:e.shiftKey})); }
+      });
     });
   });
   draw();
@@ -531,7 +538,7 @@ $("#presets").innerHTML = PRE.map((p,i)=>`<button type="button" data-i="${i}">${
 $("#presets").addEventListener("click", e=>{ const b=e.target.closest("button"); if(!b) return; S.g = PRE[+b.dataset.i].f(); gbar.draw(); update(); });
 $("#unitSeg").addEventListener("click", e=>{ const b=e.target.closest("button"); if(!b) return; S.unit=b.dataset.u; syncUnit(); gbar.draw(); gadj.draw(); if (pbar) pbar.draw(); if (padj) padj.draw(); writeHash(); });
 function syncUnit(){ document.querySelectorAll("#unitSeg button").forEach(b=>b.setAttribute("aria-pressed", b.dataset.u===S.unit)); }
-const gadj = makeAdj($("#gadj"), ()=>S.adj, j=>{ S.adj=j; update(); }, {base:()=>({a:E.vt[A.k], c:E.vt[C.k]})});
+const gadj = makeAdj($("#gadj"), ()=>S.adj, j=>{ S.adj=j; update(); }, {base:()=>({a:E.vt[A.k], c:E.vt[C.k]}), vstep:1000});
 $("#adjReset").addEventListener("click", ()=>{ S.adj={a:0,c:0}; gadj.draw(); update(); });
 $("#incOutros").addEventListener("change", e=>{ S.inc = e.target.checked; gbar.draw(); update(); });
 
