@@ -84,6 +84,7 @@ section{padding:36px 0 0}
 .adjbox{margin-top:20px;padding-top:16px;border-top:1px solid var(--line)}
 .adj{padding:10px 0;border-top:1px solid var(--line);font:400 13px "Archivo",system-ui,sans-serif}
 .adj:first-child{border-top:0}
+.adj .hint{font-weight:400;font-size:11.5px;color:var(--muted);margin-left:4px}
 .adj .ah{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:6px}
 .adj .an{display:flex;align-items:center;gap:7px;font-weight:600;color:var(--ink)}
 .adj .an i{width:10px;height:10px;border-radius:3px;display:inline-block;flex:none}
@@ -237,8 +238,8 @@ footer{padding-bottom:140px !important;margin-top:56px;padding:24px 0 48px;borde
         <div class="chips" id="presets" role="group" aria-label="Divisões prontas"></div>
         <label class="chk"><input type="checkbox" id="incOutros" checked> <span id="incOutrosTxt"></span></label>
         <div class="adjbox">
-          <h3>Votos próprios dos finalistas</h3>
-          <p class="sub">Aumente ou diminua os votos que cada um teve no 1º turno, por exemplo por mobilização, abstenção ou eleitores que mudam de ideia. Vale para todos os municípios sem ajuste próprio. Digite a variação em percentual ou em votos (os dois campos ficam ligados), ou use os botões − e +: de 1 em 1 ponto percentual ou de 1.000 em 1.000 votos (no município, de 100 em 100). Com Shift, o passo é 10 vezes maior.</p>
+          <h3>Votos do 1º turno de cada candidato</h3>
+          <p class="sub">Aumente ou diminua os votos que cada um teve no 1º turno, por exemplo por mobilização, abstenção ou eleitores que mudam de ideia. Para os finalistas, o ajuste muda os votos deles diretamente; para Álvaro Dias, muda quantos votos a barra acima divide. Vale para todos os municípios sem ajuste próprio. Digite a variação em percentual ou em votos (os dois campos ficam ligados), ou use os botões − e +: de 1 em 1 ponto percentual ou de 1.000 em 1.000 votos (no município, de 100 em 100). Com Shift, o passo é 10 vezes maior.</p>
           <div id="gadj"></div>
           <div class="chips"><button type="button" id="adjReset">Zerar ajustes gerais</button></div>
         </div>
@@ -287,7 +288,7 @@ footer{padding-bottom:140px !important;margin-top:56px;padding:24px 0 48px;borde
     <h2>Como funciona</h2>
     <p id="m1"></p>
     <p>A simulação parte dos votos de cada município no 1º turno: os votos de cada um dos dois finalistas se repetem, aumentados ou diminuídos pelo ajuste de votos próprios (o geral ou o do município), e os votos do terceiro colocado (e, se marcado, dos demais candidatos) são divididos conforme a barra. A parte "Nenhum dos dois" reúne quem anularia, votaria em branco ou deixaria de votar; ela sai dos votos válidos.</p>
-    <p>O ajuste de votos próprios é um percentual sobre os votos que o candidato teve no 1º turno naquele município. Digitado em votos, ele é convertido para esse percentual. Se a soma dos dois finalistas passar do eleitorado apto do município, o painel avisa.</p>
+    <p>O ajuste é um percentual sobre os votos que o candidato teve no 1º turno naquele município. No caso do terceiro colocado, ele muda o total que é dividido pela barra. Digitado em votos, ele é convertido para esse percentual. Se a soma dos dois finalistas passar do eleitorado apto do município, o painel avisa.</p>
     <p>É um exercício de cenários, não uma pesquisa nem uma projeção.</p>
   </section>
 </main>
@@ -317,7 +318,7 @@ let COL = {};
 function readColors(){ COL = {A:css(`--c${A.cor}`), C:css(`--c${C.cor}`), T:css(`--c${T.cor}`), none:css("--none"), surface:css("--surface"), ink:css("--ink"), empty:css("--empty"), muted:css("--muted")}; }
 
 // ---------- estado da simulação ----------
-const S = { g:{a:40,c:40}, inc:true, own:new Map(), sel:null, unit:"pct", adj:{a:0,c:0}, madj:new Map() };
+const S = { g:{a:40,c:40}, inc:true, own:new Map(), sel:null, unit:"pct", adj:{a:0,c:0,t:0}, madj:new Map() };
 const custom = id => S.own.has(id) || S.madj.has(id);
 const nCustom = () => new Set([...S.own.keys(), ...S.madj.keys()]).size;
 const isInt = x => Math.abs(x-Math.round(x))<1e-9;
@@ -329,10 +330,10 @@ function readHash(){
   if (h.has("o")) S.inc = h.get("o")!=="0";
   if (h.get("u")==="v") S.unit = "votos";
   const aj = (h.get("a")||"").split(",").map(Number);
-  if (aj.length===2 && aj.every(x=>isFinite(x) && x>=-100)) S.adj = {a:aj[0], c:aj[1]};
+  if ((aj.length===2||aj.length===3) && aj.every(x=>isFinite(x) && x>=-100)) S.adj = {a:aj[0], c:aj[1], t:aj[2]||0};
   (h.get("j")||"").split(";").filter(Boolean).forEach(p=>{
-    const [id, v] = p.split(":"); const [a,c] = (v||"").split(",").map(Number);
-    if (D.munis.some(m=>m.id===id) && a>=-100 && c>=-100) S.madj.set(id,{a,c});
+    const [id, v] = p.split(":"); const [a,c,t] = (v||"").split(",").map(Number);
+    if (D.munis.some(m=>m.id===id) && a>=-100 && c>=-100 && !(t<-100)) S.madj.set(id,{a,c,t:t||0});
   });
   (h.get("m")||"").split(";").filter(Boolean).forEach(p=>{
     const [id, v] = p.split(":"); const [a,c] = (v||"").split(",").map(Number);
@@ -346,8 +347,8 @@ function writeHash(){
     const r3 = x => +x.toFixed(3);
     const p = [`g=${r3(S.g.a)},${r3(S.g.c)}`, `o=${S.inc?1:0}`, `u=${S.unit==="votos"?"v":"p"}`];
     if (S.own.size) p.push("m="+[...S.own].map(([id,s])=>`${id}:${r3(s.a)},${r3(s.c)}`).join(";"));
-    if (S.adj.a || S.adj.c) p.push(`a=${r3(S.adj.a)},${r3(S.adj.c)}`);
-    if (S.madj.size) p.push("j="+[...S.madj].map(([id,s])=>`${id}:${r3(s.a)},${r3(s.c)}`).join(";"));
+    if (S.adj.a || S.adj.c || S.adj.t) p.push(`a=${r3(S.adj.a)},${r3(S.adj.c)},${r3(S.adj.t||0)}`);
+    if (S.madj.size) p.push("j="+[...S.madj].map(([id,s])=>`${id}:${r3(s.a)},${r3(s.c)},${r3(s.t||0)}`).join(";"));
     history.replaceState(null,"","#"+p.join("&"));
   }, 200);
 }
@@ -357,17 +358,17 @@ function writeHash(){
 function sim(m, gen){
   const s = gen ? S.g : (S.own.get(m.id) || S.g);
   const j = gen ? S.adj : (S.madj.get(m.id) || S.adj);
-  const tv = m.vt[T.k];
-  const outros = m.v - m.vt[A.k] - m.vt[C.k] - tv;
+  const tv0 = m.vt[T.k], tv = Math.max(0, tv0*(1+(j.t||0)/100));
+  const outros = m.v - m.vt[A.k] - m.vt[C.k] - tv0;
   const pool = tv + (S.inc ? outros : 0);
   const bA = Math.max(0, m.vt[A.k]*(1+j.a/100)), bC = Math.max(0, m.vt[C.k]*(1+j.c/100));
   const a = bA + pool*s.a/100, c = bC + pool*s.c/100;
   return {a, c, v:a+c, toA:pool*s.a/100, toC:pool*s.c/100, toN:pool*(100-s.a-s.c)/100 + (S.inc?0:outros), pool, s, j,
-          bA, bC, dA:bA-m.vt[A.k], dC:bC-m.vt[C.k], own:!gen && S.own.has(m.id), ownAdj:!gen && S.madj.has(m.id), custom:!gen && custom(m.id)};
+          bA, bC, dA:bA-m.vt[A.k], dC:bC-m.vt[C.k], tv, dT:tv-tv0, own:!gen && S.own.has(m.id), ownAdj:!gen && S.madj.has(m.id), custom:!gen && custom(m.id)};
 }
 function total(onlyGeneral){
-  let a=0,c=0,toA=0,toC=0,toN=0,dA=0,dC=0; D.munis.forEach(m=>{ const r=sim(m, onlyGeneral); a+=r.a; c+=r.c; toA+=r.toA; toC+=r.toC; toN+=r.toN; dA+=r.dA; dC+=r.dC; });
-  return {a,c,v:a+c,toA,toC,toN,dA,dC};
+  let a=0,c=0,toA=0,toC=0,toN=0,dA=0,dC=0,tv=0,dT=0; D.munis.forEach(m=>{ const r=sim(m, onlyGeneral); a+=r.a; c+=r.c; toA+=r.toA; toC+=r.toC; toN+=r.toN; dA+=r.dA; dC+=r.dC; tv+=r.tv; dT+=r.dT; });
+  return {a,c,v:a+c,toA,toC,toN,dA,dC,tv,dT};
 }
 // efeito das escolhas próprias de um município sobre a diferença estadual (votos de A menos votos de C)
 function effect(m){ const o = sim(m), g = sim(m, true); return (o.a-o.c)-(g.a-g.c); }
@@ -472,29 +473,30 @@ function makeSplit(el, get, set, opts={}){
 function makeAdj(el, get, set, opts){
   const vstep = opts.vstep || 100;
   const grp = (c, k, unit, lab) => `<span class="grp"><button type="button" class="pm" data-k="${k}" data-d="-1" aria-label="Diminuir ${lab} de ${esc(c.nome)}">−</button><label class="inp"><input type="text" inputmode="decimal" data-k="${k}" aria-label="Variação em ${lab} de ${esc(c.nome)}"><i class="u">${unit}</i></label><button type="button" class="pm" data-k="${k}" data-d="1" aria-label="Aumentar ${lab} de ${esc(c.nome)}">+</button></span>`;
-  el.innerHTML = fin.map(c=>{ const w = c===A?"a":"c"; return `<div class="adj" data-w="${w}">
-    <div class="ah"><span class="an"><i style="background:${varOf(c)}"></i>${esc(c.nome)}</span><span class="ar"></span></div>
+  const keyOf = c => c===A?"a":c===C?"c":"t";
+  el.innerHTML = [A,C,T].map(c=>{ const w = keyOf(c); return `<div class="adj${w==="t"?" adj-t":""}" data-w="${w}">
+    <div class="ah"><span class="an"><i style="background:${varOf(c)}"></i>${esc(c.nome)}${w==="t"?' <span class="hint">votos a dividir pela barra</span>':""}</span><span class="ar"></span></div>
     <div class="ac">${grp(c,"p","%","percentual")}<span class="ou">ou</span>${grp(c,"v","votos","votos")}</div></div>`; }).join("");
   const fmtSignedVotes = d => (d>=0?"+":"−")+nf.format(Math.round(Math.abs(d)));
   const fmtSignedPct = x => (x>=0?"+":"−")+pf(Math.abs(x), isInt(x)?0:1);
   function draw(){
     const j = get(), base = opts.base();
     el.querySelectorAll(".adj").forEach(row=>{
-      const w = row.dataset.w, b = base[w], d = b*j[w]/100;
+      const w = row.dataset.w, b = base[w], jw = j[w]||0, d = b*jw/100;
       const ip = row.querySelector('input[data-k="p"]'), iv = row.querySelector('input[data-k="v"]');
-      if (document.activeElement!==ip) ip.value = fmtSignedPct(j[w]);
+      if (document.activeElement!==ip) ip.value = fmtSignedPct(jw);
       if (document.activeElement!==iv) iv.value = fmtSignedVotes(d);
       row.querySelector(".ar").innerHTML = `${nf.format(Math.round(b))} → <b>${nf.format(Math.round(b+d))}</b>`;
     });
   }
-  const setW = (w, pct) => { const j = {...get()}; j[w] = Math.max(-100, Math.min(300, Math.round(pct*10000)/10000)); set(j); draw(); };
+  const setW = (w, pct) => { const j = {t:0, ...get()}; j[w] = Math.max(-100, Math.min(300, Math.round(pct*10000)/10000)); set(j); draw(); };
   const votesToPct = (w, v) => { const b = opts.base()[w]; return b ? 100*v/b : 0; };
   el.querySelectorAll(".adj").forEach(row=>{
     const w = row.dataset.w;
     row.querySelectorAll(".pm").forEach(btn=>btn.addEventListener("click", e=>{
       const mult = (e.shiftKey ? 10 : 1) * +btn.dataset.d;
-      if (btn.dataset.k==="p") setW(w, Math.round(get()[w]) + mult);
-      else { const b = opts.base()[w], cur = b*get()[w]/100; setW(w, votesToPct(w, Math.round(cur) + mult*vstep)); }
+      if (btn.dataset.k==="p") setW(w, Math.round(get()[w]||0) + mult);
+      else { const b = opts.base()[w], cur = b*(get()[w]||0)/100; setW(w, votesToPct(w, Math.round(cur) + mult*vstep)); }
     }));
     row.querySelectorAll("input[data-k]").forEach(inp=>{
       const k = inp.dataset.k;
@@ -526,7 +528,7 @@ $("#incOutrosTxt").textContent = `Dividir da mesma forma os votos dos demais can
 $("#m1").textContent = `Percentuais sobre os votos válidos simulados, isto é, a soma dos votos de ${A.nome} e de ${C.nome}.`;
 
 // ---------- barra geral ----------
-const gbar = makeSplit($("#gsplit"), ()=>S.g, s=>{ S.g=s; update(); }, {pool:()=>E.vt[T.k] + (S.inc?outrosE:0)});
+const gbar = makeSplit($("#gsplit"), ()=>S.g, s=>{ S.g=s; update(); }, {pool:()=>E.vt[T.k]*(1+(S.adj.t||0)/100) + (S.inc?outrosE:0)});
 const PRE = [
   {l:"Metade para cada", f:()=>({a:50,c:50})},
   {l:"40% / 20% / 40%", f:()=>({a:40,c:40})},
@@ -538,8 +540,8 @@ $("#presets").innerHTML = PRE.map((p,i)=>`<button type="button" data-i="${i}">${
 $("#presets").addEventListener("click", e=>{ const b=e.target.closest("button"); if(!b) return; S.g = PRE[+b.dataset.i].f(); gbar.draw(); update(); });
 $("#unitSeg").addEventListener("click", e=>{ const b=e.target.closest("button"); if(!b) return; S.unit=b.dataset.u; syncUnit(); gbar.draw(); gadj.draw(); if (pbar) pbar.draw(); if (padj) padj.draw(); writeHash(); });
 function syncUnit(){ document.querySelectorAll("#unitSeg button").forEach(b=>b.setAttribute("aria-pressed", b.dataset.u===S.unit)); }
-const gadj = makeAdj($("#gadj"), ()=>S.adj, j=>{ S.adj=j; update(); }, {base:()=>({a:E.vt[A.k], c:E.vt[C.k]}), vstep:1000});
-$("#adjReset").addEventListener("click", ()=>{ S.adj={a:0,c:0}; gadj.draw(); update(); });
+const gadj = makeAdj($("#gadj"), ()=>S.adj, j=>{ S.adj=j; update(); }, {base:()=>({a:E.vt[A.k], c:E.vt[C.k], t:E.vt[T.k]}), vstep:1000});
+$("#adjReset").addEventListener("click", ()=>{ S.adj={a:0,c:0,t:0}; gadj.draw(); update(); });
 $("#incOutros").addEventListener("change", e=>{ S.inc = e.target.checked; gbar.draw(); update(); });
 
 // ---------- resultado ----------
@@ -561,7 +563,7 @@ function renderResult(){
   $("#result").innerHTML = `<h2>Resultado simulado</h2>`+row(A,t.a,pa,t.toA,t.dA)+row(C,t.c,pc,t.toC,t.dC)+
     `<div class="duel" aria-hidden="true"><i style="flex:${t.a};background:${varOf(A)}"></i><i style="flex:${t.c};background:${varOf(C)}"></i></div>`+
     `<p class="verdict">${diff<0.5?"Empate":`${esc(lead.nome)} à frente por ${nf.format(Math.round(diff))} votos (${pf(Math.abs(pa-pc))} pontos)`}. ${nCustom()?`${nCustom()} ${nCustom()===1?"município tem":"municípios têm"} ajustes próprios.`:""}</p>`+
-    `<p class="note">${nf.format(Math.round(t.toN))} eleitores de ${esc(T.nome)}${S.inc?" e dos demais candidatos":" e todos os dos demais candidatos"} não votam em nenhum dos dois nesta simulação.</p>`;
+    `<p class="note">${Math.abs(t.dT)>=0.5?`Votos de ${esc(T.nome)} a dividir: ${nf.format(Math.round(t.tv))} (${signed(t.dT)} de ajuste sobre o 1º turno). `:""}${nf.format(Math.round(t.toN))} eleitores de ${esc(T.nome)}${S.inc?" e dos demais candidatos":" e todos os dos demais candidatos"} não votam em nenhum dos dois nesta simulação.</p>`;
 }
 
 // ---------- mapa ----------
@@ -581,7 +583,7 @@ function tipFor(m){
   const r = sim(m);
   return `<div class="tt">${esc(m.n)}</div>`+
     [[A,r.a],[C,r.c]].map(([c,v])=>`<div class="tr"><span><i style="background:${varOf(c)}"></i>${esc(c.nome)}</span><b>${pf(100*v/r.v)}% <span style="color:var(--muted);font-weight:400">${nf.format(Math.round(v))}</span></b></div>`).join("")+
-    `<div class="tm">${nf.format(m.vt[T.k])} votos de ${esc(T.nome)} · divisão ${r.own?"própria":"geral"}: ${fp(r.s.a)} / ${fp(100-r.s.a-r.s.c)} / ${fp(r.s.c)}${(r.j.a||r.j.c)?`<br>Ajuste ${r.ownAdj?"próprio":"geral"}: ${esc(A.nome)} ${signedP(r.j.a)}, ${esc(C.nome)} ${signedP(r.j.c)}`:""}${r.a+r.c>m.ap?"<br>Soma acima do eleitorado apto":""}</div>`;
+    `<div class="tm">${nf.format(Math.round(r.tv))} votos de ${esc(T.nome)}${Math.abs(r.dT)>=0.5?` (1º turno: ${nf.format(m.vt[T.k])})`:""} · divisão ${r.own?"própria":"geral"}: ${fp(r.s.a)} / ${fp(100-r.s.a-r.s.c)} / ${fp(r.s.c)}${(r.j.a||r.j.c||r.j.t)?`<br>Ajuste ${r.ownAdj?"próprio":"geral"}: ${esc(A.nome)} ${signedP(r.j.a)}, ${esc(C.nome)} ${signedP(r.j.c)}, ${esc(T.nome)} ${signedP(r.j.t||0)}`:""}${r.a+r.c>m.ap?"<br>Soma acima do eleitorado apto":""}</div>`;
 }
 const paths = g0.selectAll("path").data(G.mapa.features).join("path")
   .attr("vector-effect","non-scaling-stroke").style("cursor","pointer")
@@ -613,7 +615,7 @@ function select(id){
     <div class="ptitle">Votos de ${esc(T.nome)} neste município</div>
     <div class="split" id="psplit"></div>
     <div class="status"><span id="pstat"></span><button type="button" class="btn" id="preset">Usar a divisão geral</button></div>
-    <div class="ptitle">Votos próprios de ${esc(A.nome)} e ${esc(C.nome)} aqui</div>
+    <div class="ptitle">Votos do 1º turno aqui (ajuste)</div>
     <div id="padj"></div>
     <div class="status"><span id="pstat2"></span><button type="button" class="btn" id="preset2">Usar o ajuste geral</button></div>
     <div id="pwarn"></div>
@@ -621,7 +623,7 @@ function select(id){
     <div class="ptitle">Resultado simulado em ${esc(m.n)}</div><div class="mini" id="psim"></div>`;
   pbar = makeSplit($("#psplit"), ()=> S.own.get(id) || S.g, s=>{ S.own.set(id, s); update(); }, {pool:()=>sim(m).pool});
   $("#preset").addEventListener("click", ()=>{ S.own.delete(id); pbar.draw(); update(); });
-  padj = makeAdj($("#padj"), ()=> S.madj.get(id) || S.adj, j=>{ S.madj.set(id, j); update(); }, {base:()=>({a:m.vt[A.k], c:m.vt[C.k]})});
+  padj = makeAdj($("#padj"), ()=> S.madj.get(id) || S.adj, j=>{ S.madj.set(id, j); update(); }, {base:()=>({a:m.vt[A.k], c:m.vt[C.k], t:m.vt[T.k]})});
   $("#preset2").addEventListener("click", ()=>{ S.madj.delete(id); padj.draw(); update(); });
   renderPanelSim(); paintMap();
 }
@@ -659,7 +661,7 @@ function renderLists(){
   const ids = [...new Set([...S.own.keys(), ...S.madj.keys()])];
   $("#ownSub").textContent = ids.length ? "Toque em um nome para editar; use o botão para voltar aos valores gerais." : "Nenhum ainda. Todos usam os valores gerais.";
   $("#owns").innerHTML = ids.map(id=>{ const m=munById.get(id), s=S.own.get(id), j=S.madj.get(id), e=effect(m);
-    const parts = [s?`Divisão ${fp(s.a)} / ${fp(100-s.a-s.c)} / ${fp(s.c)}`:"", j?`Votos próprios ${signedP(j.a)} / ${signedP(j.c)}`:""].filter(Boolean).join("<br>");
+    const parts = [s?`Divisão ${fp(s.a)} / ${fp(100-s.a-s.c)} / ${fp(s.c)}`:"", j?`Ajuste ${esc(A.nome)} ${signedP(j.a)}, ${esc(C.nome)} ${signedP(j.c)}${j.t?`, ${esc(T.nome)} ${signedP(j.t)}`:""}`:""].filter(Boolean).join("<br>");
     return `<div class="it"><button type="button" class="link" data-id="${id}">${esc(m.n)}</button><span style="display:flex;gap:10px;align-items:center;text-align:right"><span>${parts}<br><span style="color:var(--muted);font-size:12px">${Math.abs(e)<0.5?"sem efeito no estado":`${signed(Math.abs(e))} para ${esc((e>0?A:C).nome)} no estado`}</span></span><button type="button" class="btn" data-rm="${id}">Usar geral</button></span></div>`; }).join("")+
     (ids.length>1?`<div class="it"><span></span><button type="button" class="btn" id="rmAll">Voltar todos aos valores gerais</button></div>`:"");
 }
@@ -703,7 +705,7 @@ $("#share").addEventListener("click", async ()=>{
 let raf = null;
 function update(){
   if (raf) return;
-  raf = requestAnimationFrame(()=>{ raf=null; renderResult(); paintMap(); renderPanelSim(); renderLists(); renderTable(); writeHash(); });
+  raf = requestAnimationFrame(()=>{ raf=null; gbar.draw(); renderResult(); paintMap(); renderPanelSim(); renderLists(); renderTable(); writeHash(); });
 }
 
 // tema
