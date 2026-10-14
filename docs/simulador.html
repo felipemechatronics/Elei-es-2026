@@ -98,6 +98,40 @@ section{padding:36px 0 0}
 .adj .inp input{font-size:16px;text-align:right}
 .adj .inp input[data-k="p"]{width:5.5ch}
 .adj .inp input[data-k="v"]{width:9ch}
+.tcard{margin-bottom:8px}
+.tgrid{display:grid;grid-template-columns:1fr 1fr;gap:20px 32px}
+.tsel{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.tsel input{flex:1;min-width:180px;font-size:13px;padding:6px 12px;border-radius:999px;border:1px solid var(--line-2);background:var(--bg);color:var(--ink)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.mchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;max-height:150px;overflow:auto}
+.mchips .mc{display:inline-flex;align-items:center;gap:4px;font:500 12.5px "Archivo",system-ui,sans-serif;background:color-mix(in srgb,var(--ink) 7%,transparent);border-radius:999px;padding:3px 4px 3px 10px}
+.mchips .mc button{border:0;background:none;color:var(--ink-2);cursor:pointer;font-size:14px;line-height:1;padding:2px 6px;border-radius:999px}
+.mchips .mc button:hover{background:color-mix(in srgb,var(--ink) 10%,transparent);color:var(--ink)}
+.mchips .none{font:400 13px "Archivo",system-ui,sans-serif;color:var(--muted)}
+.useg.wide{display:flex;flex-wrap:wrap;margin-top:4px}
+.useg.wide button{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.useg.wide button i{width:9px;height:9px;border-radius:2px;display:inline-block}
+.useg button:disabled{opacity:.35;cursor:not-allowed}
+.tamt{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:4px;font:400 13px "Archivo",system-ui,sans-serif}
+.tamt input[type=range]{flex:1;min-width:140px;accent-color:var(--ink)}
+.tamt .inp input{font-size:18px;text-align:right}
+#tPct{width:5ch} #tVotes{width:9ch}
+.tamt .ou{color:var(--muted);font-size:12px}
+.tprev{margin-top:12px;padding:10px 12px;border-radius:10px;background:color-mix(in srgb,var(--ink) 5%,transparent);font:400 13px/1.5 "Archivo",system-ui,sans-serif;color:var(--ink-2)}
+.tprev b{color:var(--ink)}
+.tlist{max-height:none}
+.mchk{display:inline-flex;align-items:center;gap:6px;font:400 12.5px "Archivo",system-ui,sans-serif;color:var(--ink-2);background:color-mix(in srgb,var(--surface) 88%,transparent);padding:4px 8px;border-radius:999px}
+.pickbar{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);background:var(--ink);color:var(--bg);font:500 13px "Archivo",system-ui,sans-serif;padding:8px 10px 8px 14px;border-radius:999px;display:flex;gap:10px;align-items:center;box-shadow:0 6px 18px rgba(0,0,0,.2);white-space:nowrap}
+.pickbar button{background:var(--bg);color:var(--ink);border:0;border-radius:999px;padding:4px 10px;font:600 12.5px "Archivo",system-ui,sans-serif;cursor:pointer}
+@media (max-width:960px){ .tgrid{grid-template-columns:1fr} }
+body.picking .score{display:none}
+@media (max-width:560px){
+  .mapsvg{min-height:560px}
+  .pickbar{position:fixed;bottom:16px;z-index:40}
+  .legend{font-size:11px;padding:6px 8px}
+  .legend .ramp span{width:16px}
+}
 .warn{font:500 12.5px/1.45 "Archivo",system-ui,sans-serif;color:var(--ink);border-left:3px solid var(--c1);padding:4px 0 4px 8px;margin-top:8px}
 .unitrow{display:flex;align-items:center;gap:8px;font:400 13px "Archivo",system-ui,sans-serif;color:var(--ink-2);margin-top:4px}
 .useg{display:inline-flex;border:1px solid var(--line-2);border-radius:999px;padding:2px;gap:2px}
@@ -134,8 +168,9 @@ label.chk{display:flex;gap:8px;align-items:flex-start;font:400 13px/1.4 "Archivo
 .legend .ramp{display:flex;gap:2px}
 .legend .ramp span{width:22px;height:10px;border-radius:2px}
 .legend .ticks{display:flex;justify-content:space-between;width:96px}
-.maptools{position:absolute;top:12px;left:12px;right:12px;display:flex;gap:8px;flex-wrap:wrap}
-.maptools input{font-size:13px;padding:6px 12px;border-radius:999px;border:1px solid var(--line-2);background:var(--bg);color:var(--ink);width:200px}
+.maptools{position:absolute;top:12px;left:12px;right:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;z-index:2}
+.maptools .useg{background:var(--surface)}
+.maptools input#q{font-size:13px;padding:6px 12px;border-radius:999px;border:1px solid var(--line-2);background:var(--bg);color:var(--ink);width:200px}
 .panel{border-left:1px solid var(--line);padding:16px;font-family:"Archivo",system-ui,sans-serif;max-height:640px;overflow:auto}
 .panel h3{font-size:22px;font-weight:800;font-stretch:112%;margin:0}
 .panel .meta{font-size:12.5px;color:var(--muted);margin:2px 0 10px}
@@ -150,7 +185,7 @@ label.chk{display:flex;gap:8px;align-items:flex-start;font:400 13px/1.4 "Archivo
 .mini .r .bar i{display:block;height:100%}
 .mini .r b{font-variant-numeric:tabular-nums}
 .mini .r span.v{color:var(--muted);font-variant-numeric:tabular-nums}
-.ptitle{font-size:12.5px;font-weight:600;color:var(--ink-2);margin:14px 0 2px}
+.ptitle{font-family:"Archivo",system-ui,sans-serif;font-size:12.5px;font-weight:600;color:var(--ink-2);margin:14px 0 2px}
 .empty{color:var(--muted);font-size:14px;padding:30px 4px;line-height:1.5}
 
 /* listas e tabela */
@@ -208,7 +243,7 @@ footer{padding-bottom:140px !important;margin-top:56px;padding:24px 0 48px;borde
   .top nav{gap:12px;font-size:13px}
   .brand{display:none}
   .mapsvg{min-height:360px}
-  .maptools input{width:100%}
+  .maptools input#q{width:100%}
   .res .pc{font-size:28px}
   .split-legend b{font-size:18px}
 }
@@ -249,12 +284,38 @@ footer{padding-bottom:140px !important;margin-top:56px;padding:24px 0 48px;borde
   </section>
 
   <section>
-    <h2>Município a município</h2>
+    <div class="card tcard" id="transf">
+      <h2>Transferir votos entre candidatos</h2>
+      <p class="sub">Escolha os municípios, de quem saem os votos e para onde vão. A prévia mostra o efeito no estado antes de aplicar. As transferências se somam às divisões e aos ajustes acima.</p>
+      <div class="tgrid">
+        <div>
+          <div class="ptitle">1. Municípios <span id="tCount"></span></div>
+          <div class="tsel"><input id="tq2" list="muniList" placeholder="Adicionar município pelo nome" aria-label="Adicionar município à seleção"><button type="button" class="btn" id="tPick" aria-pressed="false">Escolher no mapa</button></div>
+          <div class="chips" id="tQuick" role="group" aria-label="Seleções prontas"></div>
+          <div class="mchips" id="tChips"></div>
+        </div>
+        <div>
+          <div class="ptitle">2. Os votos saem de</div><div class="useg wide" id="tFrom" role="group" aria-label="De quem saem os votos"></div>
+          <div class="ptitle">3. E vão para</div><div class="useg wide" id="tTo" role="group" aria-label="Para onde vão os votos"></div>
+          <div class="ptitle">4. Quanto</div>
+          <div class="tamt"><input type="range" id="tRange" min="0" max="100" step="1" aria-label="Percentual a transferir"><label class="inp"><input type="text" inputmode="decimal" id="tPct" aria-label="Percentual a transferir"><i class="u">%</i></label><span class="ou">ou</span><label class="inp"><input type="text" inputmode="decimal" id="tVotes" aria-label="Votos a transferir"><i class="u">votos</i></label></div>
+          <div class="tprev" id="tPrev" aria-live="polite"></div>
+          <div class="chips"><button type="button" class="btn primary" id="tApply">Aplicar transferência</button></div>
+        </div>
+      </div>
+      <div class="ptitle" style="margin-top:18px">Transferências aplicadas</div>
+      <div class="list tlist" id="tList"></div>
+    </div>
+
+    <h2 style="margin-top:36px">Município a município</h2>
     <p class="sub">Cada município usa a divisão e o ajuste gerais, a menos que você defina valores próprios. Toque em um município no mapa (ou busque pelo nome), arraste a barra dele ou ajuste os votos de cada finalista ali. Municípios com ajustes próprios aparecem com contorno escuro.</p>
     <div class="mapwrap">
       <div class="mapsvg" id="mapsvg">
         <svg id="map" role="img" aria-label="Mapa do resultado simulado por município"></svg>
-        <div class="maptools"><input id="q" list="muniList" placeholder="Buscar município" aria-label="Buscar município"><datalist id="muniList"></datalist></div>
+        <div class="maptools"><input id="q" list="muniList" placeholder="Buscar município" aria-label="Buscar município"><datalist id="muniList"></datalist>
+          <div class="useg" id="viewSeg" role="group" aria-label="O que o mapa mostra"><button type="button" data-v="sim" aria-pressed="true">2º turno simulado</button><button type="button" data-v="t1" aria-pressed="false">1º turno</button></div>
+          <label class="mchk" id="hatchLbl"><input type="checkbox" id="hatch" checked> <span id="hatchTxt"></span></label></div>
+        <div class="pickbar" id="pickbar" hidden></div>
         <div class="legend" id="legend"></div>
       </div>
       <aside class="panel" id="panel"></aside>
@@ -289,6 +350,7 @@ footer{padding-bottom:140px !important;margin-top:56px;padding:24px 0 48px;borde
     <p id="m1"></p>
     <p>A simulação parte dos votos de cada município no 1º turno: os votos de cada um dos dois finalistas se repetem, aumentados ou diminuídos pelo ajuste de votos próprios (o geral ou o do município), e os votos do terceiro colocado (e, se marcado, dos demais candidatos) são divididos conforme a barra. A parte "Nenhum dos dois" reúne quem anularia, votaria em branco ou deixaria de votar; ela sai dos votos válidos.</p>
     <p>O ajuste é um percentual sobre os votos que o candidato teve no 1º turno naquele município. No caso do terceiro colocado, ele muda o total que é dividido pela barra. Digitado em votos, ele é convertido para esse percentual. Se a soma dos dois finalistas passar do eleitorado apto do município, o painel avisa.</p>
+    <p>As transferências entre candidatos tiram um percentual dos votos de um candidato nos municípios escolhidos, depois dos ajustes, e passam para outro candidato ou para "nenhum dos dois". Quando os votos saem de o terceiro colocado, saem do total que a barra divide. Digitada em votos, a quantidade vira o mesmo percentual em todos os municípios escolhidos, proporcional ao tamanho de cada um. Várias transferências são aplicadas na ordem em que foram criadas.</p>
     <p>É um exercício de cenários, não uma pesquisa nem uma projeção.</p>
   </section>
 </main>
@@ -315,10 +377,12 @@ const A = ord[0], C = ord[1], T = ord[2];
 const fin = [A, C];
 const varOf = c => c.cor!=null ? `var(--c${c.cor})` : "var(--outros)";
 let COL = {};
-function readColors(){ COL = {A:css(`--c${A.cor}`), C:css(`--c${C.cor}`), T:css(`--c${T.cor}`), none:css("--none"), surface:css("--surface"), ink:css("--ink"), empty:css("--empty"), muted:css("--muted")}; }
+function readColors(){ COL = {A:css(`--c${A.cor}`), C:css(`--c${C.cor}`), T:css(`--c${T.cor!=null?T.cor:2}`), none:css("--none"), surface:css("--surface"), ink:css("--ink"), empty:css("--empty"), muted:css("--muted")}; }
 
 // ---------- estado da simulação ----------
 const S = { g:{a:40,c:40}, inc:true, own:new Map(), sel:null, unit:"pct", adj:{a:0,c:0,t:0}, madj:new Map() };
+S.rules = [];  // transferências: {from:'a'|'c'|'t', to:'a'|'c'|'n', pct, ids:Set}
+const TU = { sel:new Set(), from:"c", to:"a", pct:10, pick:false, view:"sim", hatch:true };
 const custom = id => S.own.has(id) || S.madj.has(id);
 const nCustom = () => new Set([...S.own.keys(), ...S.madj.keys()]).size;
 const isInt = x => Math.abs(x-Math.round(x))<1e-9;
@@ -335,6 +399,12 @@ function readHash(){
     const [id, v] = p.split(":"); const [a,c,t] = (v||"").split(",").map(Number);
     if (D.munis.some(m=>m.id===id) && a>=-100 && c>=-100 && !(t<-100)) S.madj.set(id,{a,c,t:t||0});
   });
+  (h.get("r")||"").split(";").filter(Boolean).forEach(p=>{
+    const mm = p.match(/^([act])([acn])([\d.]+):(.*)$/); if (!mm || mm[1]===mm[2]) return;
+    const ids = new Set(mm[4].split(".").filter(id=>D.munis.some(m=>m.id===id)));
+    const pct = Math.max(0, Math.min(100, Number(mm[3])));
+    if (ids.size && isFinite(pct)) S.rules.push({from:mm[1], to:mm[2], pct, ids});
+  });
   (h.get("m")||"").split(";").filter(Boolean).forEach(p=>{
     const [id, v] = p.split(":"); const [a,c] = (v||"").split(",").map(Number);
     if (D.munis.some(m=>m.id===id) && a>=0 && c>=0 && a+c<=100) S.own.set(id,{a,c});
@@ -348,6 +418,7 @@ function writeHash(){
     const p = [`g=${r3(S.g.a)},${r3(S.g.c)}`, `o=${S.inc?1:0}`, `u=${S.unit==="votos"?"v":"p"}`];
     if (S.own.size) p.push("m="+[...S.own].map(([id,s])=>`${id}:${r3(s.a)},${r3(s.c)}`).join(";"));
     if (S.adj.a || S.adj.c || S.adj.t) p.push(`a=${r3(S.adj.a)},${r3(S.adj.c)},${r3(S.adj.t||0)}`);
+    if (S.rules.length) p.push("r="+S.rules.map(r=>`${r.from}${r.to}${r3(r.pct)}:${[...r.ids].join(".")}`).join(";"));
     if (S.madj.size) p.push("j="+[...S.madj].map(([id,s])=>`${id}:${r3(s.a)},${r3(s.c)},${r3(s.t||0)}`).join(";"));
     history.replaceState(null,"","#"+p.join("&"));
   }, 200);
@@ -355,20 +426,35 @@ function writeHash(){
 
 // ---------- cálculo ----------
 // gen = true: usa só a divisão e o ajuste gerais (ignora o que foi definido no município)
-function sim(m, gen){
+// gen = true: usa só a divisão e o ajuste gerais (ignora o que foi definido no município)
+// o.rules: lista de transferências a aplicar (padrão: S.rules); o.extra: uma transferência a mais, em prévia
+function sim(m, gen, o={}){
   const s = gen ? S.g : (S.own.get(m.id) || S.g);
   const j = gen ? S.adj : (S.madj.get(m.id) || S.adj);
-  const tv0 = m.vt[T.k], tv = Math.max(0, tv0*(1+(j.t||0)/100));
+  const tv0 = m.vt[T.k];
+  let tv = Math.max(0, tv0*(1+(j.t||0)/100));
   const outros = m.v - m.vt[A.k] - m.vt[C.k] - tv0;
+  let bA = Math.max(0, m.vt[A.k]*(1+j.a/100)), bC = Math.max(0, m.vt[C.k]*(1+j.c/100));
+  const bA0 = bA, bC0 = bC, tvAdj = tv;
+  // transferências entre candidatos, na ordem em que foram criadas
+  let mvN = 0, mvA = 0, mvC = 0, nRules = 0;
+  const rules = [...(o.rules || S.rules), ...(o.extra ? [o.extra] : [])];
+  for (const r of rules){
+    if (!r.ids.has(m.id)) continue; nRules++;
+    const src = r.from==="a" ? bA : r.from==="c" ? bC : tv, x = src*r.pct/100;
+    if (r.from==="a") bA -= x; else if (r.from==="c") bC -= x; else tv -= x;
+    if (r.to==="a") { bA += x; mvA += x; } else if (r.to==="c") { bC += x; mvC += x; } else mvN += x;
+    if (r.from==="a") mvA -= x; if (r.from==="c") mvC -= x;
+  }
   const pool = tv + (S.inc ? outros : 0);
-  const bA = Math.max(0, m.vt[A.k]*(1+j.a/100)), bC = Math.max(0, m.vt[C.k]*(1+j.c/100));
   const a = bA + pool*s.a/100, c = bC + pool*s.c/100;
-  return {a, c, v:a+c, toA:pool*s.a/100, toC:pool*s.c/100, toN:pool*(100-s.a-s.c)/100 + (S.inc?0:outros), pool, s, j,
-          bA, bC, dA:bA-m.vt[A.k], dC:bC-m.vt[C.k], tv, dT:tv-tv0, own:!gen && S.own.has(m.id), ownAdj:!gen && S.madj.has(m.id), custom:!gen && custom(m.id)};
+  return {a, c, v:a+c, toA:pool*s.a/100, toC:pool*s.c/100, toN:pool*(100-s.a-s.c)/100 + (S.inc?0:outros) + mvN, pool, s, j,
+          bA, bC, dA:bA0-m.vt[A.k], dC:bC0-m.vt[C.k], tv, tvAdj, dT:tvAdj-tv0, mvA, mvC, nRules,
+          own:!gen && S.own.has(m.id), ownAdj:!gen && S.madj.has(m.id), custom:!gen && custom(m.id)};
 }
-function total(onlyGeneral){
-  let a=0,c=0,toA=0,toC=0,toN=0,dA=0,dC=0,tv=0,dT=0; D.munis.forEach(m=>{ const r=sim(m, onlyGeneral); a+=r.a; c+=r.c; toA+=r.toA; toC+=r.toC; toN+=r.toN; dA+=r.dA; dC+=r.dC; tv+=r.tv; dT+=r.dT; });
-  return {a,c,v:a+c,toA,toC,toN,dA,dC,tv,dT};
+function total(onlyGeneral, o={}){
+  let a=0,c=0,toA=0,toC=0,toN=0,dA=0,dC=0,tv=0,dT=0,mvA=0,mvC=0; D.munis.forEach(m=>{ const r=sim(m, onlyGeneral, o); a+=r.a; c+=r.c; toA+=r.toA; toC+=r.toC; toN+=r.toN; dA+=r.dA; dC+=r.dC; tv+=r.tvAdj; dT+=r.dT; mvA+=r.mvA; mvC+=r.mvC; });
+  return {a,c,v:a+c,toA,toC,toN,dA,dC,tv,dT,mvA,mvC};
 }
 // efeito das escolhas próprias de um município sobre a diferença estadual (votos de A menos votos de C)
 function effect(m){ const o = sim(m), g = sim(m, true); return (o.a-o.c)-(g.a-g.c); }
@@ -548,19 +634,20 @@ $("#incOutros").addEventListener("change", e=>{ S.inc = e.target.checked; gbar.d
 function renderScore(t){
   const el = $("#score"); if (!el) return;
   const tg = total(true), d = (t.a-t.c)-(tg.a-tg.c);
+  const tn = S.rules.length ? total(false,{rules:[]}) : t, dr = (t.a-t.c)-(tn.a-tn.c);
   el.innerHTML = `<div class="lbl">Cenário do 2º turno no estado</div>
     <div class="top2"><span>${esc(A.nome)} <b>${pf(100*t.a/t.v)}%</b></span><span><b>${pf(100*t.c/t.v)}%</b> ${esc(C.nome)}</span></div>
     <div class="duel"><i style="flex:${t.a};background:${varOf(A)}"></i><i style="flex:${t.c};background:${varOf(C)}"></i></div>
-    <div class="mg"><span><b>${marginTxt(t)}</b></span>${nCustom()?`<span>Ajustes municipais: ${Math.abs(d)<0.5?"sem efeito":`${signed(Math.abs(d))} para ${esc((d>0?A:C).nome)}`} (${nCustom()} ${nCustom()===1?"município":"municípios"})</span>`:""}</div>`;
+    <div class="mg"><span><b>${marginTxt(t)}</b></span>${nCustom()?`<span>Ajustes municipais: ${Math.abs(d)<0.5?"sem efeito":`${signed(Math.abs(d))} para ${esc((d>0?A:C).nome)}`} (${nCustom()} ${nCustom()===1?"município":"municípios"})</span>`:""}${S.rules.length?`<span>Transferências: ${Math.abs(dr)<0.5?"sem efeito":`${signed(Math.abs(dr))} para ${esc((dr>0?A:C).nome)}`}</span>`:""}</div>`;
 }
 function renderResult(){
   const t = total();
   renderScore(t);
   const pa = 100*t.a/t.v, pc = 100*t.c/t.v;
   const lead = t.a>=t.c ? A : C, diff = Math.abs(t.a-t.c);
-  const row = (c,v,p,g,dd) => `<div class="row"><i class="sw" style="background:${varOf(c)}"></i><span><span class="nm">${esc(c.nome)}</span><span class="pt">${esc(c.partido)}</span></span><span class="pc">${pf(p)}%</span>
-    <span class="vv">${nf.format(Math.round(v))} votos · ${nf.format(E.vt[c.k])} no 1º turno${Math.abs(dd)>=0.5?` ${signed(dd)} de ajuste`:""} + ${nf.format(Math.round(g))} recebidos</span></div>`;
-  $("#result").innerHTML = `<h2>Resultado simulado</h2>`+row(A,t.a,pa,t.toA,t.dA)+row(C,t.c,pc,t.toC,t.dC)+
+  const row = (c,v,p,g,dd,mv) => `<div class="row"><i class="sw" style="background:${varOf(c)}"></i><span><span class="nm">${esc(c.nome)}</span><span class="pt">${esc(c.partido)}</span></span><span class="pc">${pf(p)}%</span>
+    <span class="vv">${nf.format(Math.round(v))} votos · ${nf.format(E.vt[c.k])} no 1º turno${Math.abs(dd)>=0.5?` ${signed(dd)} de ajuste`:""} + ${nf.format(Math.round(g))} recebidos${Math.abs(mv)>=0.5?` ${signed(mv)} em transferências`:""}</span></div>`;
+  $("#result").innerHTML = `<h2>Resultado simulado</h2>`+row(A,t.a,pa,t.toA,t.dA,t.mvA)+row(C,t.c,pc,t.toC,t.dC,t.mvC)+
     `<div class="duel" aria-hidden="true"><i style="flex:${t.a};background:${varOf(A)}"></i><i style="flex:${t.c};background:${varOf(C)}"></i></div>`+
     `<p class="verdict">${diff<0.5?"Empate":`${esc(lead.nome)} à frente por ${nf.format(Math.round(diff))} votos (${pf(Math.abs(pa-pc))} pontos)`}. ${nCustom()?`${nCustom()} ${nCustom()===1?"município tem":"municípios têm"} ajustes próprios.`:""}</p>`+
     `<p class="note">${Math.abs(t.dT)>=0.5?`Votos de ${esc(T.nome)} a dividir: ${nf.format(Math.round(t.tv))} (${signed(t.dT)} de ajuste sobre o 1º turno). `:""}${nf.format(Math.round(t.toN))} eleitores de ${esc(T.nome)}${S.inc?" e dos demais candidatos":" e todos os dos demais candidatos"} não votam em nenhum dos dois nesta simulação.</p>`;
@@ -571,7 +658,14 @@ const munById = new Map(D.munis.map(m=>[m.id,m]));
 const svg = d3.select("#map"), g0 = svg.append("g");
 const proj = d3.geoMercator(), path = d3.geoPath(proj);
 const MB=[5,15,30], MST=[0.38,0.58,0.8,1];
+function fill1(m){
+  const o = [A,C,T].map(c=>({c, v:m.vt[c.k]})).sort((x,y)=>y.v-x.v); if (!m.v) return COL.empty;
+  const mg = 100*(o[0].v-o[1].v)/m.v, i = mg<MB[0]?0:mg<MB[1]?1:mg<MB[2]?2:3;
+  return d3.interpolateRgb(COL.surface, o[0].c===A?COL.A:o[0].c===C?COL.C:COL.T)(MST[i]);
+}
+const t1win = m => { const o=[A,C,T].map(c=>({c,v:m.vt[c.k]})).sort((x,y)=>y.v-x.v); return o[0].c; };
 function fill(m){
+  if (TU.view==="t1") return fill1(m);
   const r = sim(m); if (!r.v) return COL.empty;
   const mg = 100*Math.abs(r.a-r.c)/r.v, i = mg<MB[0]?0:mg<MB[1]?1:mg<MB[2]?2:3;
   return d3.interpolateRgb(COL.surface, r.a>=r.c?COL.A:COL.C)(MST[i]);
@@ -580,27 +674,45 @@ const tip = $("#tip");
 function showTip(ev, html){ tip.innerHTML=html; tip.style.opacity=1; const w=tip.offsetWidth,h=tip.offsetHeight; let x=ev.clientX+14,y=ev.clientY+14; if(x+w>innerWidth-8)x=ev.clientX-w-14; if(y+h>innerHeight-8)y=ev.clientY-h-14; tip.style.left=Math.max(8,x)+"px"; tip.style.top=Math.max(8,y)+"px"; }
 const hideTip = () => tip.style.opacity = 0;
 function tipFor(m){
+  if (TU.view==="t1") return `<div class="tt">${esc(m.n)} · 1º turno</div>`+[A,C,T].map(c=>`<div class="tr"><span><i style="background:${varOf(c)}"></i>${esc(c.nome)}</span><b>${pf(100*m.vt[c.k]/m.v)}% <span style="color:var(--muted);font-weight:400">${nf.format(m.vt[c.k])}</span></b></div>`).join("");
   const r = sim(m);
   return `<div class="tt">${esc(m.n)}</div>`+
     [[A,r.a],[C,r.c]].map(([c,v])=>`<div class="tr"><span><i style="background:${varOf(c)}"></i>${esc(c.nome)}</span><b>${pf(100*v/r.v)}% <span style="color:var(--muted);font-weight:400">${nf.format(Math.round(v))}</span></b></div>`).join("")+
-    `<div class="tm">${nf.format(Math.round(r.tv))} votos de ${esc(T.nome)}${Math.abs(r.dT)>=0.5?` (1º turno: ${nf.format(m.vt[T.k])})`:""} · divisão ${r.own?"própria":"geral"}: ${fp(r.s.a)} / ${fp(100-r.s.a-r.s.c)} / ${fp(r.s.c)}${(r.j.a||r.j.c||r.j.t)?`<br>Ajuste ${r.ownAdj?"próprio":"geral"}: ${esc(A.nome)} ${signedP(r.j.a)}, ${esc(C.nome)} ${signedP(r.j.c)}, ${esc(T.nome)} ${signedP(r.j.t||0)}`:""}${r.a+r.c>m.ap?"<br>Soma acima do eleitorado apto":""}</div>`;
+    `<div class="tm">${nf.format(Math.round(r.tv))} votos de ${esc(T.nome)}${Math.abs(r.dT)>=0.5?` (1º turno: ${nf.format(m.vt[T.k])})`:""} · divisão ${r.own?"própria":"geral"}: ${fp(r.s.a)} / ${fp(100-r.s.a-r.s.c)} / ${fp(r.s.c)}${(r.j.a||r.j.c||r.j.t)?`<br>Ajuste ${r.ownAdj?"próprio":"geral"}: ${esc(A.nome)} ${signedP(r.j.a)}, ${esc(C.nome)} ${signedP(r.j.c)}, ${esc(T.nome)} ${signedP(r.j.t||0)}`:""}${r.nRules?`<br>${r.nRules} ${r.nRules===1?"transferência aplicada":"transferências aplicadas"}`:""}${TU.sel.has(m.id)?"<br><b>Selecionado para transferência</b>":""}${r.a+r.c>m.ap?"<br>Soma acima do eleitorado apto":""}</div>`;
 }
-const paths = g0.selectAll("path").data(G.mapa.features).join("path")
+const defs = svg.append("defs");
+const hatchPat = defs.append("pattern").attr("id","hatchT").attr("patternUnits","userSpaceOnUse").attr("width",6).attr("height",6).attr("patternTransform","rotate(45)");
+hatchPat.append("rect").attr("width",2.4).attr("height",6);
+const paths = g0.selectAll("path.m").data(G.mapa.features).join("path").attr("class","m")
   .attr("vector-effect","non-scaling-stroke").style("cursor","pointer")
   .on("mousemove",(ev,f)=>showTip(ev, tipFor(munById.get(f.properties.id))))
   .on("mouseleave",hideTip)
-  .on("click",(ev,f)=>{ hideTip(); select(f.properties.id); });
+  .on("click",(ev,f)=>{ hideTip(); if (TU.pick) { togglePick(f.properties.id); } else select(f.properties.id); });
+const gHatch = g0.append("g").attr("pointer-events","none");
+const hpaths = gHatch.selectAll("path").data(G.mapa.features.filter(f=>t1win(munById.get(f.properties.id))===T)).join("path").attr("fill","url(#hatchT)");
+const gPick = g0.append("g").attr("pointer-events","none");
 function sizeMap(){
   const b = $("#mapsvg").getBoundingClientRect(); const W=Math.max(280,b.width), H=Math.max(320,b.height);
-  svg.attr("viewBox",`0 0 ${W} ${H}`); proj.fitExtent([[14,56],[W-14,H-14]], G.mapa); paths.attr("d",path);
+  svg.attr("viewBox",`0 0 ${W} ${H}`); const topPad = (document.querySelector(".maptools")?.getBoundingClientRect().height || 70) + 22;
+  const botPad = innerWidth < 560 ? ($("#legend").offsetHeight || 120) + 18 : 14;
+  proj.fitExtent([[14,topPad],[W-14,H-botPad]], G.mapa); paths.attr("d",path); hpaths.attr("d",path); gPick.selectAll("path").attr("d",path);
 }
 function paintMap(){
   paths.attr("fill", f=>fill(munById.get(f.properties.id)))
     .attr("stroke", f=> (custom(f.properties.id) || S.sel===f.properties.id) ? COL.ink : COL.surface)
     .attr("stroke-width", f=> S.sel===f.properties.id ? 2.2 : custom(f.properties.id) ? 1.4 : 0.6);
   paths.filter(f=>custom(f.properties.id)).raise(); paths.filter(f=>S.sel===f.properties.id).raise();
-  $("#legend").innerHTML = `<div class="lt">À frente na simulação</div>`+fin.map(c=>`<div class="lrow"><div class="ramp">${MST.map(t=>`<span style="background:${d3.interpolateRgb(COL.surface, c===A?COL.A:COL.C)(t)}"></span>`).join("")}</div>${esc(c.nome)}</div>`).join("")+
-    `<div class="ticks"><span>&lt;5</span><span>15</span><span>30+ p.p.</span></div>`;
+  hatchPat.select("rect").attr("fill", COL.T).attr("fill-opacity", 0.85);
+  gHatch.attr("display", TU.view==="sim" && TU.hatch ? null : "none"); gHatch.raise();
+  gPick.selectAll("path").data(G.mapa.features.filter(f=>TU.sel.has(f.properties.id)), f=>f.properties.id).join("path")
+    .attr("d",path).attr("fill","none").attr("stroke",COL.ink).attr("stroke-width",2.4).attr("stroke-dasharray","4 3").attr("vector-effect","non-scaling-stroke");
+  gPick.raise();
+  const cands = TU.view==="t1" ? [A,C,T] : fin;
+  const colOf = c => c===A?COL.A:c===C?COL.C:COL.T;
+  $("#legend").innerHTML = `<div class="lt">${TU.view==="t1"?"1º colocado no 1º turno":"À frente na simulação"}</div>`+cands.map(c=>`<div class="lrow"><div class="ramp">${MST.map(t=>`<span style="background:${d3.interpolateRgb(COL.surface, colOf(c))(t)}"></span>`).join("")}</div>${esc(c.nome)}</div>`).join("")+
+    `<div class="ticks"><span>&lt;5</span><span>15</span><span>30+ p.p.</span></div>`+
+    (TU.view==="sim" && TU.hatch ? `<div class="lrow" style="margin-top:5px"><svg width="22" height="10" aria-hidden="true"><rect width="22" height="10" fill="${COL.surface}"/><rect width="22" height="10" fill="url(#hatchT)"/></svg>${esc(T.nome)} venceu no 1º turno</div>` : "")+
+    (TU.sel.size ? `<div class="lrow" style="margin-top:5px"><svg width="22" height="10" aria-hidden="true"><rect x="1" y="1" width="20" height="8" fill="none" stroke="${COL.ink}" stroke-width="1.6" stroke-dasharray="3 2"/></svg>Selecionado para transferência</div>` : "");
 }
 
 // ---------- painel do município ----------
@@ -701,11 +813,94 @@ $("#share").addEventListener("click", async ()=>{
   const t = $("#toast"); t.textContent = ok ? "Link copiado" : "Copie o endereço da barra do navegador"; t.style.opacity = 1; setTimeout(()=>t.style.opacity=0, 1800);
 });
 
+// ---------- transferência de votos ----------
+const KEY = {a:A, c:C, t:T};
+const nameOf = k => k==="n" ? "Nenhum dos dois" : KEY[k].nome;
+const muniByName = n => { const q = n.trim().toLowerCase(); return D.munis.find(m=>m.n.toLowerCase()===q); };
+$("#hatchTxt").textContent = `Hachura: onde ${T.nome} venceu no 1º turno`;
+$("#hatch").addEventListener("change", e=>{ TU.hatch = e.target.checked; paintMap(); });
+$("#viewSeg").addEventListener("click", e=>{ const b=e.target.closest("button"); if(!b) return; TU.view=b.dataset.v; document.querySelectorAll("#viewSeg button").forEach(x=>x.setAttribute("aria-pressed", x.dataset.v===TU.view)); $("#hatchLbl").style.display = TU.view==="sim" ? "" : "none"; paintMap(); });
+function srcOf(r, k){ return k==="a" ? r.bA : k==="c" ? r.bC : r.tv; }
+const pending = () => ({from:TU.from, to:TU.to, pct:TU.pct, ids:TU.sel});
+function srcTotal(){ let x=0; TU.sel.forEach(id=>{ x += srcOf(sim(munById.get(id)), TU.from); }); return x; }
+function renderTForm(){
+  $("#tFrom").innerHTML = ["a","c","t"].map(k=>`<button type="button" data-k="${k}" aria-pressed="${TU.from===k}"><i style="background:${varOf(KEY[k])}"></i>${esc(KEY[k].nome)}</button>`).join("");
+  $("#tTo").innerHTML = ["a","c","n"].map(k=>`<button type="button" data-k="${k}" aria-pressed="${TU.to===k}" ${k===TU.from?"disabled":""}>${k==="n"?"":`<i style="background:${varOf(KEY[k])}"></i>`}${esc(nameOf(k))}</button>`).join("");
+  $("#tQuick").innerHTML = [["all","Todos"],["wA",`Onde ${A.nome} venceu`],["wC",`Onde ${C.nome} venceu`],["wT",`Onde ${T.nome} venceu`],["big","10 maiores"],["clr","Limpar seleção"]].map(([k,l])=>`<button type="button" data-q="${k}">${esc(l)}</button>`).join("");
+}
+function renderTSel(){
+  const ids = [...TU.sel].map(id=>munById.get(id)).sort((a,b)=>b.ap-a.ap);
+  $("#tCount").textContent = TU.sel.size ? `(${TU.sel.size})` : "";
+  $("#tChips").innerHTML = ids.length ? ids.map(m=>`<span class="mc">${esc(m.n)}<button type="button" data-rm="${m.id}" aria-label="Tirar ${esc(m.n)} da seleção">×</button></span>`).join("") : `<span class="none">Nenhum município selecionado.</span>`;
+  const pb = $("#pickbar"); pb.hidden = !TU.pick; document.body.classList.toggle("picking", TU.pick);
+  pb.innerHTML = `Toque nos municípios para selecionar (${TU.sel.size}) <button type="button" id="pickDone">Concluir</button>`;
+  $("#tPick").setAttribute("aria-pressed", TU.pick); $("#tPick").textContent = TU.pick ? "Escolhendo no mapa…" : "Escolher no mapa";
+}
+function renderTPrev(){
+  const tr = $("#tRange"), ip = $("#tPct"), iv = $("#tVotes");
+  const st = srcTotal(), moved = st*TU.pct/100;
+  tr.value = TU.pct;
+  if (document.activeElement!==ip) ip.value = pf(TU.pct, isInt(TU.pct)?0:1);
+  if (document.activeElement!==iv) iv.value = nf.format(Math.round(moved));
+  const ok = TU.sel.size>0 && TU.pct>0 && TU.from!==TU.to;
+  $("#tApply").disabled = !ok;
+  if (!TU.sel.size){ $("#tPrev").innerHTML = "Selecione ao menos um município para ver a prévia."; return; }
+  const now = total(), next = total(false, {extra:pending()});
+  const pa = x => pf(100*x.a/x.v)+"%", pc = x => pf(100*x.c/x.v)+"%";
+  $("#tPrev").innerHTML = `Saem <b>${nf.format(Math.round(moved))} votos</b> de ${esc(nameOf(TU.from))} (${fp(TU.pct)} dos ${nf.format(Math.round(st))} que ${TU.from==="t"?"ele tem a dividir":"ele tem"} nos ${TU.sel.size} ${TU.sel.size===1?"município":"municípios"}) para <b>${esc(nameOf(TU.to))}</b>.<br>
+    Estado agora: ${esc(A.nome)} ${pa(now)} × ${pc(now)} ${esc(C.nome)} (${marginTxt(now)}).<br>
+    <b>Com a transferência: ${esc(A.nome)} ${pa(next)} × ${pc(next)} ${esc(C.nome)} (${marginTxt(next)}).</b>`;
+}
+function renderTList(){
+  if (!S.rules.length){ $("#tList").innerHTML = `<div class="it" style="color:var(--muted)">Nenhuma ainda.</div>`; return; }
+  const all = total();
+  $("#tList").innerHTML = S.rules.map((r,i)=>{
+    const without = total(false, {rules:S.rules.filter((_,k)=>k!==i)});
+    const e = (all.a-all.c)-(without.a-without.c);
+    let moved = 0; r.ids.forEach(id=>{ const m=munById.get(id); const a = sim(m,false,{rules:S.rules.slice(0,i)}); moved += srcOf(a, r.from)*r.pct/100; });
+    const names = [...r.ids].map(id=>munById.get(id)).sort((a,b)=>b.ap-a.ap).map(m=>m.n);
+    return `<div class="it"><span><b>${esc(nameOf(r.from))} → ${esc(nameOf(r.to))}</b>: ${fp(r.pct)} (${nf.format(Math.round(moved))} votos)<br><span style="color:var(--muted);font-size:12px">${r.ids.size===D.munis.length?"Todos os municípios":esc(names.slice(0,6).join(", "))+(names.length>6?` e mais ${names.length-6}`:"")} · ${Math.abs(e)<0.5?"sem efeito na diferença":`${signed(Math.abs(e))} para ${esc((e>0?A:C).nome)} no estado`}</span></span>
+      <span style="display:flex;gap:6px"><button type="button" class="btn" data-edit="${i}">Editar</button><button type="button" class="btn" data-del="${i}">Remover</button></span></div>`;
+  }).join("") + (S.rules.length>1?`<div class="it"><span></span><button type="button" class="btn" id="tClear">Remover todas</button></div>`:"");
+}
+function renderTransfer(){ renderTSel(); renderTPrev(); renderTList(); }
+function togglePick(id){ TU.sel.has(id) ? TU.sel.delete(id) : TU.sel.add(id); renderTSel(); renderTPrev(); paintMap(); }
+$("#tFrom").addEventListener("click", e=>{ const b=e.target.closest("button"); if(!b) return; TU.from=b.dataset.k; if (TU.to===TU.from) TU.to = TU.from==="a"?"c":"a"; renderTForm(); renderTPrev(); });
+$("#tTo").addEventListener("click", e=>{ const b=e.target.closest("button"); if(!b||b.disabled) return; TU.to=b.dataset.k; renderTForm(); renderTPrev(); });
+$("#tQuick").addEventListener("click", e=>{
+  const b=e.target.closest("button"); if(!b) return; const q=b.dataset.q;
+  if (q==="clr") TU.sel.clear();
+  else if (q==="all") D.munis.forEach(m=>TU.sel.add(m.id));
+  else if (q==="big") [...D.munis].sort((a,b)=>b.ap-a.ap).slice(0,10).forEach(m=>TU.sel.add(m.id));
+  else { const c = q==="wA"?A:q==="wC"?C:T; D.munis.filter(m=>m.v && t1win(m)===c).forEach(m=>TU.sel.add(m.id)); }
+  renderTSel(); renderTPrev(); paintMap();
+});
+$("#tChips").addEventListener("click", e=>{ const b=e.target.closest("[data-rm]"); if(!b) return; TU.sel.delete(b.dataset.rm); renderTSel(); renderTPrev(); paintMap(); });
+$("#tq2").addEventListener("change", e=>{ const m = muniByName(e.target.value); if (m){ TU.sel.add(m.id); e.target.value=""; renderTSel(); renderTPrev(); paintMap(); } });
+$("#tPick").addEventListener("click", ()=>{ TU.pick = !TU.pick; renderTSel(); if (TU.pick) document.getElementById("mapsvg").scrollIntoView({block:"center"}); });
+document.getElementById("mapsvg").addEventListener("click", e=>{ if (e.target.id==="pickDone"){ TU.pick=false; renderTSel(); document.getElementById("transf").scrollIntoView({block:"start"}); } });
+$("#tRange").addEventListener("input", e=>{ TU.pct = +e.target.value; renderTPrev(); });
+$("#tPct").addEventListener("input", e=>{ const v = Number(e.target.value.trim().replace(",",".")); if (isFinite(v) && e.target.value.trim()!==""){ TU.pct = Math.max(0, Math.min(100, Math.round(v*10000)/10000)); renderTPrev(); } });
+$("#tVotes").addEventListener("input", e=>{ const raw=e.target.value.trim().replace(/\s/g,""); const v = Number(raw.replace(/\./g,"").replace(",",".")); const st = srcTotal(); if (raw!=="" && isFinite(v) && st>0){ TU.pct = Math.max(0, Math.min(100, Math.round(10000*100*v/st)/10000)); renderTPrev(); } });
+["#tPct","#tVotes"].forEach(sel=>{ $(sel).addEventListener("blur", renderTPrev); $(sel).addEventListener("keydown", e=>{ if (e.key==="Enter") e.target.blur(); }); });
+$("#tApply").addEventListener("click", ()=>{
+  if (!TU.sel.size || !TU.pct || TU.from===TU.to) return;
+  S.rules.push({from:TU.from, to:TU.to, pct:TU.pct, ids:new Set(TU.sel)});
+  const t = $("#toast"); t.textContent = "Transferência aplicada"; t.style.opacity = 1; setTimeout(()=>t.style.opacity=0, 1500);
+  update();
+});
+$("#tList").addEventListener("click", e=>{
+  const d = e.target.closest("[data-del]"); if (d){ S.rules.splice(+d.dataset.del,1); update(); return; }
+  const ed = e.target.closest("[data-edit]");
+  if (ed){ const r = S.rules.splice(+ed.dataset.edit,1)[0]; TU.from=r.from; TU.to=r.to; TU.pct=r.pct; TU.sel=new Set(r.ids); renderTForm(); update(); paintMap(); document.getElementById("transf").scrollIntoView({block:"start"}); return; }
+  if (e.target.id==="tClear"){ S.rules = []; update(); }
+});
+
 // ---------- atualização ----------
 let raf = null;
 function update(){
   if (raf) return;
-  raf = requestAnimationFrame(()=>{ raf=null; gbar.draw(); renderResult(); paintMap(); renderPanelSim(); renderLists(); renderTable(); writeHash(); });
+  raf = requestAnimationFrame(()=>{ raf=null; gbar.draw(); renderResult(); renderTransfer(); paintMap(); renderPanelSim(); renderLists(); renderTable(); writeHash(); });
 }
 
 // tema
@@ -722,7 +917,7 @@ function toggleScore(){ const r = resCard.getBoundingClientRect(); $("#score").h
 addEventListener("scroll", toggleScore, {passive:true}); addEventListener("resize", toggleScore);
 readHash();
 $("#incOutros").checked = S.inc; syncUnit();
-readColors(); sizeMap(); gbar.draw(); gadj.draw(); renderPanelSim(); update();
+readColors(); paintMap(); sizeMap(); gbar.draw(); gadj.draw(); renderTForm(); renderPanelSim(); update();
 addEventListener("resize", ()=>{ sizeMap(); });
 })();
 </script>
