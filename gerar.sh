@@ -5,3 +5,4 @@ cd "$(dirname "$0")"
 python scripts/gerar_dados.py dados_tse/Urnas_Presidente.xlsx --cargo Presidente
 python scripts/gerar_dados.py dados_tse/votacao_secao_2026_RN.csv --cargo Governador --anulados 50,29
 python scripts/gerar_relatorio.py
+python scripts/gerar_deputados.py dados_tse/votacao_secao_2026_RN.csv
