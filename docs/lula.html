@@ -1,0 +1,710 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lula e o voto para governador</title>
+<meta name="description" content="Relação estimada entre o voto em Lula para presidente e o voto para governador no Rio Grande do Norte, 1º turno de 2026: margem, destino dos votos e simulação de migração.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme: light;
+  --bg:#f5f7f8; --surface:#ffffff; --ink:#15212c; --ink-2:#4a5966; --muted:#7a8792;
+  --line:#dce2e6; --line-2:#c3ccd3;
+  --c0:#2a78d6; --c1:#eb6834; --c2:#1baf7a; --outros:#c3c9ce; --none:#b3bcc4;
+  --empty:#eceff1; --focus:#2a78d6;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --bg:#0e151b; --surface:#121a21; --ink:#e9eef1; --ink-2:#b4c0c9; --muted:#7f8c96;
+    --line:#24313b; --line-2:#33424e;
+    --c0:#3987e5; --c1:#d95926; --c2:#199e70; --outros:#444d55; --none:#55616b;
+    --empty:#1a242c;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --bg:#0e151b; --surface:#121a21; --ink:#e9eef1; --ink-2:#b4c0c9; --muted:#7f8c96;
+  --line:#24313b; --line-2:#33424e;
+  --c0:#3987e5; --c1:#d95926; --c2:#199e70; --outros:#444d55; --none:#55616b;
+  --empty:#1a242c;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 17px/1.6 "Literata",Georgia,serif;-webkit-font-smoothing:antialiased}
+h1,h2,h3,button,input,select,table,.tip,nav,.ui{font-family:"Archivo",system-ui,sans-serif}
+a{color:inherit;text-underline-offset:3px}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.wrap{max-width:1240px;margin:0 auto;padding:0 24px}
+.top{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;gap:24px;height:52px}
+.brand{font:700 15px/1 "Archivo",system-ui,sans-serif;font-stretch:112%;text-decoration:none}
+.top nav{display:flex;gap:18px;font-size:14px;color:var(--ink-2);overflow-x:auto;scrollbar-width:none}
+.top nav a{text-decoration:none;white-space:nowrap}
+.top nav a[aria-current]{color:var(--ink);font-weight:600}
+.theme{margin-left:auto;background:none;border:1px solid var(--line-2);color:var(--ink-2);border-radius:999px;font-size:13px;padding:5px 12px;cursor:pointer;white-space:nowrap}
+header.intro{padding:36px 0 8px;max-width:780px}
+.kicker{font:500 14px/1.3 "Archivo",system-ui,sans-serif;color:var(--ink-2);margin:0 0 12px}
+h1{font-weight:800;font-stretch:118%;font-size:clamp(32px,4.2vw,50px);line-height:1;letter-spacing:-.025em;margin:0 0 16px}
+.lede{font-size:18px;color:var(--ink-2);margin:0}
+h2{font-weight:800;font-stretch:115%;font-size:clamp(22px,2.6vw,30px);line-height:1.1;letter-spacing:-.02em;margin:0 0 10px}
+h3{font:700 17px/1.25 "Archivo",system-ui,sans-serif;margin:0 0 6px}
+.sub{font:400 14px/1.5 "Archivo",system-ui,sans-serif;color:var(--ink-2);margin:0 0 14px;max-width:780px}
+section{padding:40px 0 0}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.grid2>*,.sim>*{min-width:0}
+.note{font:400 12.5px/1.5 "Archivo",system-ui,sans-serif;color:var(--muted);margin-top:10px}
+
+/* números-chave */
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:24px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 18px;font-family:"Archivo",system-ui,sans-serif}
+.kpi .l{font-size:13px;color:var(--ink-2);display:flex;align-items:center;gap:7px}
+.kpi .l i{width:10px;height:10px;border-radius:3px;display:inline-block}
+.kpi .v{font:800 32px/1.1 "Archivo",system-ui,sans-serif;font-stretch:110%;font-variant-numeric:tabular-nums;margin:6px 0 2px}
+.kpi .s{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.kpi.hl{border-color:var(--ink)}
+
+/* fluxo */
+.flow{position:relative}
+.flow svg{display:block;width:100%;height:auto;overflow:visible}
+.flow text{font:500 13px "Archivo",system-ui,sans-serif;fill:var(--ink)}
+.flow text.n{font-weight:400;fill:var(--ink-2);font-variant-numeric:tabular-nums}
+.flow path.rib{mix-blend-mode:normal;cursor:pointer}
+.flow path.rib:hover{opacity:1 !important}
+.dest .row{display:grid;grid-template-columns:150px 1fr;gap:6px 14px;align-items:center;padding:9px 0;border-top:1px solid var(--line);font:400 13px "Archivo",system-ui,sans-serif}
+.dest .row:first-child{border-top:0}
+.dest .nm{font-weight:600}
+.dest .nm span{display:block;font-weight:400;color:var(--muted);font-size:12px;font-variant-numeric:tabular-nums}
+.sbar{display:flex;height:22px;border-radius:6px;overflow:hidden;gap:1px}
+.sbar i{display:flex;align-items:center;justify-content:center;font:600 11.5px "Archivo",system-ui,sans-serif;color:#fff;font-style:normal;overflow:hidden;white-space:nowrap;min-width:0}
+.sbar i.lt{color:var(--ink)}
+.keys{display:flex;flex-wrap:wrap;gap:6px 16px;font:400 13px "Archivo",system-ui,sans-serif;color:var(--ink-2);margin:4px 0 10px}
+.keys span{display:inline-flex;align-items:center;gap:6px}
+.keys i{width:10px;height:10px;border-radius:3px;display:inline-block}
+table.mx{width:100%;border-collapse:collapse;font:400 13px "Archivo",system-ui,sans-serif;margin-top:14px}
+table.mx th,table.mx td{padding:7px 8px;text-align:right;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;white-space:nowrap}
+table.mx th:first-child,table.mx td:first-child{text-align:left}
+table.mx th{font-weight:600;color:var(--ink-2);position:static;cursor:default;background:none}
+table.mx td small{color:var(--muted);font-size:11.5px;display:block}
+.mxscroll{overflow-x:auto}
+
+/* margem */
+.gap{font:400 15px/1.55 "Archivo",system-ui,sans-serif}
+.gapbar{display:flex;height:34px;border-radius:8px;overflow:hidden;gap:2px;margin:14px 0 8px}
+.gapbar i{display:flex;align-items:center;justify-content:center;font:700 12.5px "Archivo",system-ui,sans-serif;color:#fff;font-style:normal;white-space:nowrap;overflow:hidden;min-width:0}
+.gapbar i.lt{color:var(--ink)}
+.gaplist{margin:10px 0 0;padding:0;list-style:none}
+.gaplist li{display:grid;grid-template-columns:12px 1fr auto;gap:10px;align-items:baseline;border-top:1px solid var(--line);padding:8px 0;font-size:14px}
+.gaplist li i{width:10px;height:10px;border-radius:3px;align-self:center}
+.gaplist b{font-variant-numeric:tabular-nums}
+
+/* simulação */
+.sim{display:grid;grid-template-columns:1.25fr 1fr;gap:24px;align-items:start}
+.grp{border-top:1px solid var(--line);padding:12px 0;font:400 13px "Archivo",system-ui,sans-serif}
+.grp:first-of-type{border-top:0;padding-top:0}
+.grp .gh{display:flex;justify-content:space-between;gap:10px;align-items:baseline;margin-bottom:6px}
+.grp .gh b{font-size:14px}
+.grp .gh span{color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.sl{display:grid;grid-template-columns:118px 1fr 92px;gap:10px;align-items:center;margin:4px 0}
+.sl label{display:flex;align-items:center;gap:6px;color:var(--ink-2)}
+.sl label i{width:9px;height:9px;border-radius:2px;display:inline-block;flex:none}
+.sl input[type=range]{width:100%;accent-color:var(--ink)}
+.sl output{text-align:right;font-variant-numeric:tabular-nums;color:var(--ink)}
+.sl output small{display:block;color:var(--muted);font-size:11px}
+.presets{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 14px}
+.btn{font:500 12.5px "Archivo",system-ui,sans-serif;border:1px solid var(--line-2);border-radius:999px;background:none;color:var(--ink-2);padding:5px 11px;cursor:pointer}
+.btn:hover{border-color:var(--ink);color:var(--ink)}
+.res .row{display:grid;grid-template-columns:12px 1fr auto;gap:4px 10px;align-items:baseline;padding:10px 0;border-top:1px solid var(--line)}
+.res .row:first-of-type{border-top:0}
+.res .sw{width:12px;height:12px;border-radius:3px;align-self:center}
+.res .nm{font:600 17px/1.2 "Archivo",system-ui,sans-serif}
+.res .pc{font:800 34px/1 "Archivo",system-ui,sans-serif;font-stretch:110%;font-variant-numeric:tabular-nums}
+.res .vv{grid-column:2/4;font:400 13px/1.3 "Archivo",system-ui,sans-serif;color:var(--ink-2)}
+.duel{display:flex;height:14px;border-radius:7px;overflow:hidden;gap:2px;margin:14px 0 6px;position:relative}
+.duel i{display:block;height:100%}
+.duel::after{content:"";position:absolute;left:50%;top:-4px;bottom:-4px;width:2px;background:var(--ink);opacity:.55}
+.verdict{font:500 15px/1.45 "Archivo",system-ui,sans-serif;margin:10px 0 0}
+.tie{margin-top:12px;padding:10px 12px;border-radius:10px;background:color-mix(in srgb,var(--ink) 5%,transparent);font:400 13px/1.5 "Archivo",system-ui,sans-serif;color:var(--ink-2)}
+.tie b{color:var(--ink)}
+.sticky{position:sticky;top:68px}
+
+/* mapa */
+.mapwrap{display:grid;grid-template-columns:1fr 340px;background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.mapsvg{position:relative;min-height:480px}
+.mapsvg > svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.maptools{position:absolute;top:12px;left:12px;right:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;z-index:2}
+.maptools input#q{font-size:13px;padding:6px 12px;border-radius:999px;border:1px solid var(--line-2);background:var(--bg);color:var(--ink);width:190px}
+.useg{display:inline-flex;border:1px solid var(--line-2);border-radius:999px;padding:2px;gap:2px;background:var(--surface);flex-wrap:wrap}
+.useg button{border:0;background:none;color:var(--ink-2);font-size:12.5px;font-weight:500;padding:4px 10px;border-radius:999px;cursor:pointer}
+.useg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.legend{position:absolute;left:14px;bottom:12px;font:400 12px/1.3 "Archivo",system-ui,sans-serif;color:var(--ink-2);background:color-mix(in srgb,var(--surface) 90%,transparent);padding:8px 10px;border-radius:8px;pointer-events:none}
+.legend .lt{font-weight:600;color:var(--ink);margin-bottom:5px}
+.legend .lrow{display:flex;align-items:center;gap:6px;margin:2px 0}
+.legend .ramp{display:flex;gap:2px}
+.legend .ramp span{width:22px;height:10px;border-radius:2px}
+.legend .ticks{display:flex;justify-content:space-between;font-variant-numeric:tabular-nums}
+.panel{border-left:1px solid var(--line);padding:16px;font-family:"Archivo",system-ui,sans-serif;max-height:640px;overflow:auto}
+.panel h3{font-size:22px;font-weight:800;font-stretch:112%;margin:0}
+.panel .meta{font-size:12.5px;color:var(--muted);margin:2px 0 10px}
+.ptitle{font-size:12.5px;font-weight:600;color:var(--ink-2);margin:16px 0 6px}
+.mini .r{display:grid;grid-template-columns:1fr auto;font-size:13px;gap:2px 8px;margin:6px 0}
+.mini .r .bar{grid-column:1/3;height:5px;background:var(--empty);border-radius:3px;overflow:hidden}
+.mini .r .bar i{display:block;height:100%}
+.mini .r b{font-variant-numeric:tabular-nums}
+.mini .r span.v{color:var(--muted);font-variant-numeric:tabular-nums}
+.empty{color:var(--muted);font-size:14px;padding:30px 4px;line-height:1.5}
+
+/* dispersão */
+.scat{position:relative}
+.scat canvas{display:block;width:100%;height:420px}
+.scat svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+.scat svg text{font:400 12px "Archivo",system-ui,sans-serif;fill:var(--ink-2)}
+.scattools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:10px;font:400 13px "Archivo",system-ui,sans-serif;color:var(--ink-2)}
+.scattools select{font:400 13px "Archivo",system-ui,sans-serif;padding:5px 10px;border-radius:999px;border:1px solid var(--line-2);background:var(--bg);color:var(--ink)}
+
+/* tabela */
+.tablebox{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.tabletools{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:12px 14px;border-bottom:1px solid var(--line);font:400 13px "Archivo",system-ui,sans-serif;color:var(--ink-2)}
+.tabletools input{font-size:13px;padding:6px 12px;border-radius:999px;border:1px solid var(--line-2);background:var(--bg);color:var(--ink);width:220px}
+.tscroll{max-height:540px;overflow:auto}
+table.big{border-collapse:collapse;width:100%;font-size:13.5px}
+table.big th,table.big td{padding:8px 12px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+table.big th:first-child,table.big td:first-child{text-align:left}
+table.big th{position:sticky;top:0;background:var(--surface);font-weight:600;color:var(--ink-2);cursor:pointer;z-index:1}
+table.big th[aria-sort="ascending"]::after{content:" ▲";font-size:9px}
+table.big th[aria-sort="descending"]::after{content:" ▼";font-size:9px}
+table.big tbody tr{cursor:pointer}
+table.big tbody tr:hover{background:color-mix(in srgb,var(--ink) 4%,transparent)}
+.chip{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.chip i{width:9px;height:9px;border-radius:2px;display:inline-block}
+.method{max-width:780px}
+.method p{font-size:15.5px;color:var(--ink-2);margin:0 0 .8em}
+footer{margin-top:56px;padding:24px 0 48px;border-top:1px solid var(--line);font:400 13px/1.6 "Archivo",system-ui,sans-serif;color:var(--muted)}
+.tip{position:fixed;z-index:50;pointer-events:none;background:var(--surface);color:var(--ink);border:1px solid var(--line-2);border-radius:10px;padding:9px 11px;font-size:12.5px;line-height:1.4;box-shadow:0 6px 22px rgba(0,0,0,.14);max-width:290px;opacity:0}
+.tip .tt{font-weight:700;font-size:13.5px;margin-bottom:3px}
+.tip .tr{display:flex;justify-content:space-between;gap:14px}
+.tip .tr i{width:8px;height:8px;border-radius:2px;display:inline-block;margin-right:6px}
+.tip .tm{color:var(--muted);margin-top:3px}
+
+@media (max-width:960px){
+  .grid2,.sim{grid-template-columns:1fr}
+  .kpis{grid-template-columns:1fr 1fr}
+  .mapwrap{grid-template-columns:1fr}
+  .panel{border-left:0;border-top:1px solid var(--line);max-height:none}
+  .sticky{position:static}
+}
+@media (max-width:560px){
+  .wrap{padding:0 16px}
+  .top nav{gap:12px;font-size:13px}
+  .brand{display:none}
+  .kpi .v{font-size:24px}
+  .dest .row{grid-template-columns:1fr}
+  .sl{grid-template-columns:96px 1fr 80px;gap:8px}
+  .mapsvg{min-height:520px}
+  .maptools input#q{width:100%}
+  .legend{font-size:11px;padding:6px 8px}
+  .legend .ramp span{width:16px}
+  .scat canvas{height:340px}
+  .res .pc{font-size:28px}
+}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="brand" href="index.html">RN 2026</a>
+  <nav aria-label="Páginas"><a href="index.html">Resultados</a><a href="deputados.html">Deputados</a><a href="simulador.html">Simulador 2º turno</a><a href="lula.html" aria-current="page">Lula × Governo</a><a href="gestao.html">Gestão</a></nav>
+  <button class="theme" id="themeBtn" type="button">Tema escuro</button>
+</div></header>
+
+<main class="wrap">
+<header class="intro">
+  <p class="kicker">Presidente × Governador · Rio Grande do Norte · 1º turno, 4 de outubro de 2026</p>
+  <h1>O voto em Lula e a eleição para governador</h1>
+  <p class="lede">Quanto da votação de Lula no estado foi para cada candidato a governador, qual é a distância entre os votos de Lula e os de Cadu de Lula, e como essa margem pode se mover no 2º turno.</p>
+</header>
+
+<div class="kpis" id="kpis"></div>
+<p class="note">O voto é secreto: não há registro de em quem cada eleitor de Lula votou para governador. Os números com "estimado" vêm da comparação das 8.115 seções eleitorais, onde os mesmos eleitores votaram para os dois cargos na mesma urna. Veja <a href="#metodo">como foi feito</a>.</p>
+
+<section id="fluxo">
+  <h2>Para onde foram os votos de cada candidato a presidente</h2>
+  <p class="sub">Largura de cada faixa: número estimado de eleitores que votaram em um candidato a presidente (à esquerda) e em um candidato a governador (à direita). Passe o mouse ou toque em uma faixa para ver os números.</p>
+  <div class="grid2">
+    <div class="card flow" id="flow"></div>
+    <div class="card">
+      <div class="keys" id="keysG"></div>
+      <div class="dest" id="dest"></div>
+      <div class="mxscroll"><table class="mx" id="mx"></table></div>
+      <p class="note">Entre colchetes, intervalo de 90% obtido por reamostragem das seções. Ele mede a incerteza estatística, não os limites do método (veja abaixo).</p>
+    </div>
+  </div>
+</section>
+
+<section id="margem">
+  <h2>A margem entre Lula e Cadu</h2>
+  <p class="sub">Diferença entre os votos de Lula para presidente e os de Cadu de Lula para governador, e a estimativa de onde estão esses eleitores.</p>
+  <div class="grid2">
+    <div class="card gap" id="gap"></div>
+    <div class="card gap" id="comp"></div>
+  </div>
+</section>
+
+<section id="simulacao">
+  <h2>Simulação de migração para o 2º turno</h2>
+  <p class="sub">No 2º turno ficam Allyson Bezerra e Cadu de Lula. Escolha quanto de cada grupo de eleitores (estimado) muda de voto ou passa a votar em um dos dois. Tudo começa em zero, isto é, no resultado do 1º turno sem os votos de Álvaro Dias. As mesmas proporções são aplicadas às estimativas de cada município.</p>
+  <div class="sim">
+    <div class="card">
+      <div class="presets" id="presets"></div>
+      <div id="groups"></div>
+    </div>
+    <div class="card res sticky" id="result"></div>
+  </div>
+</section>
+
+<section id="mapa">
+  <h2>Mapa por município</h2>
+  <p class="sub">Escolha o que ver. Toque em um município para ver a sua estimativa.</p>
+  <div class="mapwrap">
+    <div class="mapsvg" id="mapsvg">
+      <div class="maptools">
+        <div class="useg" id="mview" role="group" aria-label="O que o mapa mostra">
+          <button type="button" data-v="gap" aria-pressed="true">Lula − Cadu</button>
+          <button type="button" data-v="la">Lula → Allyson</button>
+          <button type="button" data-v="lc">Lula → Cadu</button>
+          <button type="button" data-v="sim">2º turno simulado</button>
+        </div>
+        <div class="useg" id="munit" role="group" aria-label="Unidade">
+          <button type="button" data-u="pct" aria-pressed="true">%</button>
+          <button type="button" data-u="v">Votos</button>
+        </div>
+        <input id="q" list="mlist" placeholder="Buscar município" autocomplete="off" aria-label="Buscar município">
+        <datalist id="mlist"></datalist>
+      </div>
+      <div class="legend" id="legend"></div>
+    </div>
+    <aside class="panel" id="panel"><p class="empty">Toque em um município no mapa ou busque pelo nome para ver os votos de Lula e de Cadu, a diferença entre eles e a estimativa de como os eleitores de Lula votaram para governador.</p></aside>
+  </div>
+</section>
+
+<section id="secoes">
+  <h2>Seção por seção</h2>
+  <p class="sub">Cada ponto é uma seção eleitoral: no eixo horizontal, a parcela de votos em Lula; no vertical, a do candidato a governador escolhido. A linha é a média das seções em cada faixa de 5 pontos. Quanto mais a nuvem sobe junto com Lula, mais o voto desse candidato acompanha o de Lula.</p>
+  <div class="card">
+    <div class="scattools">
+      <label>Candidato a governador <select id="scy"><option value="1">Cadu de Lula</option><option value="2">Allyson Bezerra</option><option value="3">Álvaro Dias</option></select></label>
+      <label>Destacar <select id="scm"><option value="">nenhum município</option></select></label>
+      <span id="scr"></span>
+    </div>
+    <div class="scat" id="scat"><canvas id="scv" role="img" aria-label="Gráfico de dispersão das seções eleitorais"></canvas><svg id="scs"></svg></div>
+  </div>
+</section>
+
+<section id="tabela">
+  <h2>Todos os municípios</h2>
+  <div class="tablebox">
+    <div class="tabletools"><input id="tq" placeholder="Filtrar município" aria-label="Filtrar município"><span id="tcount"></span><a href="dados/lula/transferencia_estimada_municipios.csv" download>Baixar estimativas (CSV)</a></div>
+    <div class="tscroll"><table class="big" id="tbl"><thead></thead><tbody></tbody></table></div>
+  </div>
+  <p class="note">A coluna do 2º turno usa a simulação acima.</p>
+</section>
+
+<section id="metodo" class="method">
+  <h2>Como foi feito</h2>
+  <p>Os resultados de Presidente vêm dos boletins de urna e os de Governador do arquivo de votação por seção do TSE. As duas fontes foram casadas pela zona e pelo número da seção: as 8.115 seções do estado têm os dois cargos. Os votos de candidatos a governador com registro indeferido entram como nulos, como na totalização oficial.</p>
+  <p>Como o voto é secreto, a relação entre os dois votos é estimada por inferência ecológica. Em cada seção se conhece a parcela de Lula, de Flávio Bolsonaro, dos demais candidatos e de brancos e nulos para presidente, e a parcela de cada opção para governador. Procura-se a tabela de transferência (que fração dos eleitores de cada candidato a presidente votou em cada candidato a governador) que melhor reproduz os resultados de todas as seções ao mesmo tempo, com cada fração entre 0 e 100% e cada linha somando 100%. As seções têm peso proporcional ao comparecimento.</p>
+  <p>A tabela é estimada para cada município com as seções do próprio município, puxada em direção à tabela estadual quando há poucas seções. Depois, os números de cada município são ajustados para somar exatamente os votos reais de cada candidato a governador e as proporções reais de cada candidato a presidente. O total do estado é a soma dos municípios. O intervalo de 90% vem de 200 reamostragens das seções dentro de cada município.</p>
+  <p id="r2txt"></p>
+  <p><b>Limites.</b> A estimativa supõe que, dentro de um município, eleitores de Lula de seções diferentes votam para governador de forma parecida. Se, por exemplo, os eleitores de Lula de bairros mais pobres votam diferente dos de bairros mais ricos, a estimativa pode ficar enviesada, e o intervalo de confiança não captura isso. Use os números como ordem de grandeza e compare com pesquisas de opinião, que perguntam diretamente. A simulação de 2º turno não é previsão: ela mostra o que acontece com a margem sob as hipóteses que você escolher.</p>
+  <p>Arquivos: <a href="dados/lula/transferencia_estimada_estado.csv" download>tabela estadual com intervalos (CSV)</a> e <a href="dados/lula/transferencia_estimada_municipios.csv" download>estimativas por município (CSV)</a>. Script: <code>scripts/gerar_lula.py</code>.</p>
+</section>
+</main>
+
+<footer><div class="wrap">Dados: TSE, Portal de Dados Abertos (boletins de urna e votação por seção, 1º turno de 2026). Malha municipal: IBGE. Base geográfica a partir do projeto <a href="https://sousapfe.github.io/eleicoesRN/">Como o RN votou para governador</a>, de Peterson Sousa.</div></footer>
+<div class="tip" id="tip" role="tooltip"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script src="geo.js"></script>
+<script src="lula.js"></script>
+<script>
+(() => {
+const L = window.LULA, G = window.GEO;
+const nf = new Intl.NumberFormat("pt-BR");
+const pf = (x,d=1) => (isFinite(x)?x:0).toLocaleString("pt-BR",{minimumFractionDigits:d,maximumFractionDigits:d});
+const $ = s => document.querySelector(s);
+const esc = s => String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const sum = a => a.reduce((s,x)=>s+x,0);
+const sgn = x => (x>0?"+":x<0?"−":"")+nf.format(Math.abs(Math.round(x)));
+
+// categorias (mesma ordem de lula.js)
+const PR = [{k:"lula",nome:"Lula"},{k:"flavio",nome:"Flávio Bolsonaro"},{k:"outros",nome:"Outros candidatos"},{k:"bn",nome:"Branco ou nulo"}];
+const GV = [{k:"allyson",nome:"Allyson Bezerra",cv:"--c0"},{k:"cadu",nome:"Cadu de Lula",cv:"--c1"},{k:"alvaro",nome:"Álvaro Dias",cv:"--c2"},{k:"outros",nome:"Outros",cv:"--outros"},{k:"bn",nome:"Branco ou nulo",cv:"--none"}];
+const LU=0, FL=1, PO=2, PB=3, AL=0, CA=1, AV=2, GO=3, GB=4;
+let COL = {};
+function readColors(){ COL = {g:GV.map(g=>css(g.cv)), surface:css("--surface"), ink:css("--ink"), ink2:css("--ink-2"), muted:css("--muted"), line:css("--line"), empty:css("--empty")}; }
+const light = j => j>=GO; // texto escuro sobre cinza
+
+// municípios
+const M = L.munis.map(m=>{
+  const vp = m.p[LU]+m.p[FL]+m.p[PO], vg = m.g[AL]+m.g[CA]+m.g[AV]+m.g[GO];
+  return {...m, vp, vg, pL:100*m.p[LU]/vp, pC:100*m.g[CA]/vg, gapV:m.p[LU]-m.g[CA], gapP:100*m.p[LU]/vp-100*m.g[CA]/vg,
+    rowL: sum(m.N[LU])};
+});
+const byId = new Map(M.map(m=>[m.id,m]));
+const EST = { p:[0,1,2,3].map(i=>sum(M.map(m=>m.p[i]))), g:[0,1,2,3,4].map(j=>sum(M.map(m=>m.g[j]))),
+  N:[0,1,2,3].map(i=>[0,1,2,3,4].map(j=>sum(M.map(m=>m.N[i][j])))) };
+EST.vp = EST.p[LU]+EST.p[FL]+EST.p[PO]; EST.vg = EST.g[AL]+EST.g[CA]+EST.g[AV]+EST.g[GO];
+const rowShare = (N,i,j) => { const t=sum(N[i]); return t? N[i][j]/t : 0; };
+// eleitores de Lula na escala real (a matriz é escalada para o total de governador)
+const realL = (N, p, i, j) => rowShare(N,i,j)*p[i];
+
+// ---------- números-chave ----------
+function renderKpis(){
+  const lula = EST.p[LU], cadu = EST.g[CA], al = EST.g[AL];
+  const box = (l, v, s, c, hl) => `<div class="kpi${hl?" hl":""}"><div class="l">${c?`<i style="background:${c}"></i>`:""}${l}</div><div class="v">${v}</div><div class="s">${s}</div></div>`;
+  $("#kpis").innerHTML =
+    box("Lula, presidente", nf.format(lula), `${pf(100*lula/EST.vp)}% dos válidos para presidente`, null) +
+    box("Cadu de Lula, governador", nf.format(cadu), `${pf(100*cadu/EST.vg)}% dos válidos para governador`, COL.g[CA]) +
+    box("Diferença Lula − Cadu", nf.format(lula-cadu), `${pf(100*(lula-cadu)/lula)}% dos votos de Lula não foram para Cadu`, null, true) +
+    box("Allyson Bezerra, governador", nf.format(al), `${pf(100*al/EST.vg)}% dos válidos · ${al>=cadu?nf.format(al-cadu)+" à frente de Cadu":nf.format(cadu-al)+" atrás de Cadu"}`, COL.g[AL]);
+}
+
+// ---------- fluxo (diagrama de faixas) ----------
+const tip = $("#tip");
+function showTip(ev, html){ tip.innerHTML=html; tip.style.opacity=1; const w=tip.offsetWidth,h=tip.offsetHeight; let x=ev.clientX+14,y=ev.clientY+14; if(x+w>innerWidth-8)x=ev.clientX-w-14; if(y+h>innerHeight-8)y=ev.clientY-h-14; tip.style.left=Math.max(8,x)+"px"; tip.style.top=Math.max(8,y)+"px"; }
+const hideTip = () => tip.style.opacity = 0;
+let flowHL = LU;
+function renderFlow(){
+  const el = $("#flow"); const W = Math.max(260, el.clientWidth-40), H = 430;
+  const narrow = W < 460, lw = narrow? 84 : 128, rw = narrow? 88 : 124, nodeW = 10, gapN = 10;
+  const N = EST.N, tot = sum(N.map(r=>sum(r)));
+  const usable = H - gapN*4;
+  const k = usable / tot;
+  const x0 = lw, x1 = W - rw;
+  // nós
+  let y = 0; const ln = N.map((r,i)=>{ const h=sum(r)*k; const n={i,y,h}; y+=h+gapN; return n; });
+  y = 0; const rn = GV.map((g,j)=>{ const h=sum(N.map(r=>r[j]))*k; const n={j,y,h}; y+=h+gapN; return n; });
+  const lOff = ln.map(n=>n.y), rOff = rn.map(n=>n.y);
+  // posição dos rótulos sem sobreposição (mínimo de 30 px entre centros)
+  const spread = ns => { const c = ns.map(n=>n.y+n.h/2); for (let k=1;k<c.length;k++) c[k]=Math.max(c[k], c[k-1]+30); const over=c[c.length-1]-(H-14); if (over>0) for (let k=c.length-1;k>=0;k--){ c[k]-=over; if (k>0) c[k-1]=Math.min(c[k-1], c[k]-30); } return c; };
+  const lc = spread(ln), rc = spread(rn);
+  const gname = j => narrow ? ["Allyson","Cadu","Álvaro","Outros","Branco/nulo"][j] : GV[j].nome;
+  const ribs = [];
+  N.forEach((r,i)=> r.forEach((v,j)=>{ const h=v*k; ribs.push({i,j,v,ys:lOff[i],yt:rOff[j],h}); lOff[i]+=h; rOff[j]+=h; }));
+  const mx = (x0+nodeW + x1)/2;
+  const rib = d => `M${x0+nodeW},${d.ys}C${mx},${d.ys} ${mx},${d.yt} ${x1},${d.yt}L${x1},${d.yt+d.h}C${mx},${d.yt+d.h} ${mx},${d.ys+d.h} ${x0+nodeW},${d.ys+d.h}Z`;
+  const svg = `<svg viewBox="-4 -4 ${W+8} ${H+8}" role="img" aria-label="Fluxo estimado de eleitores entre o voto para presidente e o voto para governador">
+    ${ribs.filter(d=>d.h>0.2).map((d,n)=>`<path class="rib" data-n="${n}" d="${rib(d)}" fill="${COL.g[d.j]}" opacity="${d.i===flowHL?0.82:0.22}"></path>`).join("")}
+    ${ln.map(n=>`<rect x="${x0}" y="${n.y}" width="${nodeW}" height="${Math.max(1,n.h)}" fill="${COL.ink}" rx="2" style="cursor:pointer" data-i="${n.i}"></rect>
+      <text x="${x0-8}" y="${lc[n.i]-2}" text-anchor="end" style="cursor:pointer;font-weight:${n.i===flowHL?700:500}" data-i="${n.i}">${esc(narrow?["Lula","Flávio","Outros","Branco/nulo"][n.i]:PR[n.i].nome.replace("Outros candidatos","Outros"))}</text>
+      <text class="n" x="${x0-8}" y="${lc[n.i]+13}" text-anchor="end">${nf.format(EST.p[n.i])}</text>`).join("")}
+    ${rn.map(n=>`<rect x="${x1}" y="${n.y}" width="${nodeW}" height="${Math.max(1,n.h)}" fill="${COL.g[n.j]}" rx="2"></rect>
+      <text x="${x1+nodeW+8}" y="${rc[n.j]-2}">${esc(gname(n.j))}</text>
+      <text class="n" x="${x1+nodeW+8}" y="${rc[n.j]+13}">${nf.format(EST.g[n.j])}</text>`).join("")}
+  </svg>`;
+  el.innerHTML = svg + `<p class="note">Toque em um candidato a presidente (à esquerda) para destacar as faixas dele.</p>`;
+  const ribsKept = ribs.filter(d=>d.h>0.2);
+  el.querySelectorAll("path.rib").forEach(p=>{
+    const d = ribsKept[+p.dataset.n];
+    const html = () => `<div class="tt">${esc(PR[d.i].nome)} → ${esc(GV[d.j].nome)}</div><div class="tr"><span>Eleitores (estimado)</span><b>${nf.format(Math.round(realL(EST.N,EST.p,d.i,d.j)))}</b></div><div class="tr"><span>Dos eleitores de ${esc(PR[d.i].nome)}</span><b>${pf(100*rowShare(EST.N,d.i,d.j))}%</b></div><div class="tr"><span>Dos votos de ${esc(GV[d.j].nome)}</span><b>${pf(100*EST.N[d.i][d.j]/EST.g[d.j])}%</b></div>`;
+    p.addEventListener("mousemove", ev=>showTip(ev, html()));
+    p.addEventListener("mouseleave", hideTip);
+    p.addEventListener("click", ev=>{ showTip(ev, html()); });
+  });
+  el.querySelectorAll("[data-i]").forEach(n=>n.addEventListener("click", ()=>{ flowHL = +n.dataset.i; renderFlow(); }));
+}
+
+// ---------- destino por candidato a presidente ----------
+function renderDest(){
+  $("#keysG").innerHTML = GV.map((g,j)=>`<span><i style="background:${COL.g[j]}"></i>${esc(g.nome)}</span>`).join("");
+  $("#dest").innerHTML = PR.map((p,i)=>{
+    const sh = GV.map((g,j)=>rowShare(EST.N,i,j));
+    return `<div class="row"><div class="nm">${esc(p.nome)}<span>${nf.format(EST.p[i])} votos</span></div>
+      <div class="sbar" aria-label="${esc(p.nome)}: ${GV.map((g,j)=>`${g.nome} ${pf(100*sh[j])}%`).join(", ")}">${sh.map((s,j)=>`<i class="${light(j)?"lt":""}" style="flex:${s} 1 0;background:${COL.g[j]}" title="${esc(GV[j].nome)}: ${pf(100*s)}%">${s>0.07?pf(100*s,0)+"%":""}</i>`).join("")}</div></div>`;
+  }).join("");
+  const ci = (i,j) => `<small>[${pf(100*L.lo[i][j],0)}–${pf(100*L.hi[i][j],0)}]</small>`;
+  $("#mx").innerHTML = `<thead><tr><th>Presidente → governador</th>${GV.map(g=>`<th>${esc(g.nome.split(" ")[0])}</th>`).join("")}</tr></thead><tbody>`+
+    PR.map((p,i)=>`<tr><td>${esc(p.nome)}</td>${GV.map((g,j)=>`<td>${pf(100*rowShare(EST.N,i,j))}%${ci(i,j)}</td>`).join("")}</tr>`).join("")+`</tbody>`;
+}
+
+// ---------- margem ----------
+function renderGap(){
+  const lula = EST.p[LU], cadu = EST.g[CA];
+  const toC = realL(EST.N,EST.p,LU,CA), toA = realL(EST.N,EST.p,LU,AL), toV = realL(EST.N,EST.p,LU,AV), toO = realL(EST.N,EST.p,LU,GO)+realL(EST.N,EST.p,LU,GB);
+  const notL = cadu - toC;  // votos de Cadu vindos de quem não votou em Lula
+  const parts = [[AL,toA],[AV,toV],[GB,toO]];
+  $("#gap").innerHTML = `<h3>Os ${nf.format(lula)} eleitores de Lula, para governador (estimado)</h3>
+    <div class="gapbar">${[[CA,toC],...parts].map(([j,v])=>`<i class="${light(j)?"lt":""}" style="flex:${v} 1 0;background:${COL.g[j]}" title="${esc(GV[j].nome)}">${v/lula>0.06?pf(100*v/lula,0)+"%":""}</i>`).join("")}</div>
+    <ul class="gaplist">
+      <li><i style="background:${COL.g[CA]}"></i><span>Votaram em Cadu de Lula</span><b>${nf.format(Math.round(toC))}</b></li>
+      <li><i style="background:${COL.g[AL]}"></i><span>Votaram em Allyson Bezerra</span><b>${nf.format(Math.round(toA))}</b></li>
+      <li><i style="background:${COL.g[AV]}"></i><span>Votaram em Álvaro Dias</span><b>${nf.format(Math.round(toV))}</b></li>
+      <li><i style="background:${COL.g[GB]}"></i><span>Branco, nulo ou outro candidato</span><b>${nf.format(Math.round(toO))}</b></li>
+    </ul>
+    <p class="note">Lula teve ${nf.format(lula-cadu)} votos a mais que Cadu. Essa diferença é o saldo entre os eleitores de Lula que não votaram em Cadu (cerca de ${nf.format(Math.round(lula-toC))}) e os eleitores de Cadu que não votaram em Lula (cerca de ${nf.format(Math.round(notL))}).</p>`;
+  // composição de cada candidato a governador
+  const shades = [COL.ink, d3.interpolateRgb(COL.ink, COL.surface)(0.45), d3.interpolateRgb(COL.ink, COL.surface)(0.7), d3.interpolateRgb(COL.ink, COL.surface)(0.85)];
+  $("#comp").innerHTML = `<h3>De quem vieram os votos de cada candidato a governador (estimado)</h3>
+    <div class="keys" style="margin-top:10px">${PR.map((p,i)=>`<span><i style="background:${shades[i]};outline:1px solid var(--line-2)"></i>Eleitores de ${esc(p.nome==="Branco ou nulo"?"branco/nulo":p.nome==="Outros candidatos"?"outros":p.nome)}</span>`).join("")}</div>
+    <div class="dest">${[AL,CA,AV].map(j=>{
+      const col = PR.map((p,i)=>EST.N[i][j]), t = sum(col);
+      return `<div class="row"><div class="nm"><span style="display:inline-flex;align-items:center;gap:6px;color:var(--ink);font-weight:600;font-size:13px"><i style="width:10px;height:10px;border-radius:3px;background:${COL.g[j]};display:inline-block"></i>${esc(GV[j].nome)}</span><span>${nf.format(EST.g[j])} votos</span></div>
+        <div class="sbar">${col.map((v,i)=>`<i class="${i>=1?"lt":""}" style="flex:${v} 1 0;background:${shades[i]}${i===0?";color:var(--bg)":""}" title="${esc(PR[i].nome)}: ${pf(100*v/t)}%">${v/t>0.08?pf(100*v/t,0)+"%":""}</i>`).join("")}</div></div>`;
+    }).join("")}</div>
+    <p class="note">Ex.: ${pf(100*EST.N[LU][AL]/EST.g[AL],0)}% dos votos de Allyson Bezerra e ${pf(100*EST.N[LU][CA]/EST.g[CA],0)}% dos de Cadu de Lula vieram de eleitores de Lula.</p>`;
+}
+
+// ---------- simulação ----------
+// grupos: [linha presidente, coluna governador]; tipo "sw" = muda para o adversário; "fr" = votos livres divididos
+const GR = [
+  {id:"la", i:[LU], j:AL, t:"sw", to:CA, nome:"Eleitores de Lula que votaram em Allyson"},
+  {id:"lc", i:[LU], j:CA, t:"sw", to:AL, nome:"Eleitores de Lula que votaram em Cadu"},
+  {id:"lv", i:[LU], j:AV, t:"fr", nome:"Eleitores de Lula que votaram em Álvaro Dias"},
+  {id:"lb", i:[LU], j:[GO,GB], t:"fr", nome:"Eleitores de Lula que votaram branco, nulo ou outro"},
+  {id:"fv", i:[FL], j:AV, t:"fr", nome:"Eleitores de Flávio Bolsonaro que votaram em Álvaro Dias"},
+  {id:"fa", i:[FL], j:AL, t:"sw", to:CA, nome:"Eleitores de Flávio Bolsonaro que votaram em Allyson"},
+  {id:"fc", i:[FL], j:CA, t:"sw", to:AL, nome:"Eleitores de Flávio Bolsonaro que votaram em Cadu"},
+  {id:"ov", i:[PO,PB], j:AV, t:"fr", nome:"Demais eleitores de Álvaro Dias"},
+];
+const V = {}; GR.forEach(g=>V[g.id] = g.t==="sw" ? {s:0} : {a:0,c:0});
+const cells = (N, g) => sum(g.i.map(i=>[].concat(g.j).reduce((s,j)=>s+N[i][j],0)));
+function simulate(N, g){
+  let a = g[AL], c = g[CA];   // votos reais do 1º turno; os grupos vêm da estimativa
+  for (const g of GR){
+    const n = cells(N,g), v = V[g.id];
+    if (g.t==="sw"){ const m = n*v.s/100; if (g.j===AL){ a-=m; c+=m; } else { c-=m; a+=m; } }
+    else { a += n*v.a/100; c += n*v.c/100; }
+  }
+  return {a, c, v:a+c};
+}
+const presets = [
+  {nome:"1º turno (zerar)", f:()=>{}},
+  {nome:"Álvaro dividido ao meio", f:()=>{ ["lv","fv","ov"].forEach(k=>V[k]={a:50,c:50}); }},
+  {nome:"Álvaro dividido como o voto para presidente", f:()=>{ V.lv={a:0,c:100}; V.fv={a:100,c:0}; V.ov={a:50,c:50}; }},
+  {nome:"Todos os eleitores de Lula com Cadu", f:()=>{ V.la={s:100}; V.lv={a:0,c:100}; V.lb={a:0,c:100}; }},
+  {nome:"Todos os eleitores de Flávio com Allyson", f:()=>{ V.fc={s:100}; V.fv={a:100,c:0}; }},
+];
+function renderPresets(){
+  $("#presets").innerHTML = presets.map((p,n)=>`<button type="button" class="btn" data-p="${n}">${esc(p.nome)}</button>`).join("");
+  $("#presets").addEventListener("click", e=>{ const b=e.target.closest("[data-p]"); if(!b) return;
+    GR.forEach(g=>V[g.id] = g.t==="sw" ? {s:0} : {a:0,c:0}); presets[+b.dataset.p].f(); renderGroups(); update(); });
+}
+const slider = (gid, key, lab, color, val, extra) => `<div class="sl"><label for="s-${gid}-${key}"><i style="background:${color}"></i>${lab}</label><input type="range" id="s-${gid}-${key}" data-g="${gid}" data-k="${key}" min="0" max="100" step="1" value="${val}"><output id="o-${gid}-${key}"></output></div>`;
+function renderGroups(){
+  $("#groups").innerHTML = GR.map(g=>{
+    const n = Math.round(cells(EST.N,g)), v = V[g.id];
+    const head = `<div class="gh"><b>${esc(g.nome)}</b><span>≈ ${nf.format(n)}</span></div>`;
+    if (g.t==="sw") return `<div class="grp">${head}${slider(g.id,"s",`Passam a ${g.to===CA?"Cadu":"Allyson"}`, COL.g[g.to], v.s)}</div>`;
+    return `<div class="grp">${head}${slider(g.id,"a","Para Allyson",COL.g[AL],v.a)}${slider(g.id,"c","Para Cadu",COL.g[CA],v.c)}</div>`;
+  }).join("");
+  syncOutputs();
+}
+function syncOutputs(){
+  GR.forEach(g=>{
+    const n = cells(EST.N,g), v = V[g.id];
+    (g.t==="sw"?["s"]:["a","c"]).forEach(k=>{ const o = document.getElementById(`o-${g.id}-${k}`); if (o) o.innerHTML = `${v[k]}%<small>${nf.format(Math.round(n*v[k]/100))}</small>`; const s=document.getElementById(`s-${g.id}-${k}`); if (s && +s.value!==v[k]) s.value=v[k]; });
+  });
+}
+$("#groups").addEventListener("input", e=>{
+  const s = e.target; if (!s.dataset.g) return;
+  const v = V[s.dataset.g], k = s.dataset.k; v[k] = +s.value;
+  if (k!=="s"){ const o = k==="a"?"c":"a"; if (v.a+v.c>100) v[o] = 100 - v[k]; }
+  syncOutputs(); update();
+});
+function renderResult(){
+  const r = simulate(EST.N,EST.g), pa = 100*r.a/r.v, pc = 100*r.c/r.v;
+  const lead = r.a>=r.c ? AL : CA, diff = Math.abs(r.a-r.c);
+  // ponto de empate pelo grupo "eleitores de Lula que votaram em Allyson" (se Allyson à frente) ou "de Flávio que votaram em Cadu" (se Cadu à frente)
+  let tie = "";
+  if (diff >= 1){
+    const g = GR.find(x=>x.id===(lead===AL?"la":"fc")), n = cells(EST.N,g), cur = V[g.id].s;
+    const need = diff/2, rest = n*(100-cur)/100;
+    tie = rest>0 && need<=rest
+      ? `Para empatar, mantidos os demais ajustes, bastaria que mais <b>${nf.format(Math.round(need))}</b> ${lead===AL?"eleitores de Lula que votaram em Allyson passassem a votar em Cadu":"eleitores de Flávio Bolsonaro que votaram em Cadu passassem a votar em Allyson"} (${pf(100*need/n)}% desse grupo).`
+      : `Nem a mudança de todos os ${lead===AL?"eleitores de Lula que votaram em Allyson":"eleitores de Flávio que votaram em Cadu"} empataria, mantidos os demais ajustes.`;
+  }
+  $("#result").innerHTML = `<h3>Resultado simulado do 2º turno</h3>
+    ${[[AL,r.a,pa],[CA,r.c,pc]].map(([j,v,p])=>`<div class="row"><span class="sw" style="background:${COL.g[j]}"></span><span class="nm">${esc(GV[j].nome)}</span><span class="pc">${pf(p)}%</span><span class="vv">${nf.format(Math.round(v))} votos</span></div>`).join("")}
+    <div class="duel"><i style="width:${pa}%;background:${COL.g[AL]}"></i><i style="width:${pc}%;background:${COL.g[CA]}"></i></div>
+    <p class="verdict">${diff<1?"Empate.":`<b>${esc(GV[lead].nome)}</b> à frente por ${nf.format(Math.round(diff))} votos (${pf(Math.abs(pa-pc))} p.p.).`}</p>
+    ${tie?`<div class="tie">${tie}</div>`:""}
+    <p class="note">Votos válidos. Quem não é atribuído a nenhum dos dois não entra na conta (equivale a branco, nulo ou abstenção). Comparecimento igual ao do 1º turno.</p>`;
+}
+
+// ---------- mapa ----------
+const svgM = d3.select("#mapsvg").append("svg");
+const g0 = svgM.append("g");
+const proj = d3.geoMercator(), path = d3.geoPath(proj);
+const MV = {view:"gap", unit:"pct", sel:null};
+const RAMP = [0.12,0.3,0.5,0.72,0.92];
+const paths = g0.selectAll("path.m").data(G.mapa.features).join("path").attr("class","m").attr("vector-effect","non-scaling-stroke").style("cursor","pointer")
+  .on("mousemove",(ev,f)=>{ const m=byId.get(f.properties.id); if (m) showTip(ev, tipFor(m)); })
+  .on("mouseleave",hideTip)
+  .on("click",(ev,f)=>{ hideTip(); selectM(f.properties.id); });
+function sizeMap(){
+  const b = $("#mapsvg").getBoundingClientRect(); const W=Math.max(280,b.width), H=Math.max(320,b.height);
+  svgM.attr("viewBox",`0 0 ${W} ${H}`);
+  const topPad = ($("#mapsvg .maptools").getBoundingClientRect().height||60) + 22;
+  const botPad = innerWidth<560 ? ($("#legend").offsetHeight||110) + 18 : 14;
+  proj.fitExtent([[14,topPad],[W-14,H-botPad]], G.mapa); paths.attr("d",path);
+}
+function metric(m){
+  const r = simulate(m.N,m.g);
+  switch(MV.view){
+    case "gap": return MV.unit==="pct" ? m.gapP : m.gapV;
+    case "la": return MV.unit==="pct" ? 100*rowShare(m.N,LU,AL) : realL(m.N,m.p,LU,AL);
+    case "lc": return MV.unit==="pct" ? 100*rowShare(m.N,LU,CA) : realL(m.N,m.p,LU,CA);
+    case "sim": return MV.unit==="pct" ? 100*(r.a-r.c)/Math.max(r.v,1) : r.a-r.c;
+  }
+}
+function scaleFor(){
+  const vals = M.map(metric);
+  if (MV.view==="sim"){
+    const B = MV.unit==="pct" ? [5,15,30] : [500,2000,10000];
+    return {kind:"div", B, f:v=>{ const a=Math.abs(v), i=a<B[0]?0:a<B[1]?1:a<B[2]?2:3; return d3.interpolateRgb(COL.surface, v>=0?COL.g[AL]:COL.g[CA])([0.25,0.5,0.72,0.92][i]); }};
+  }
+  const col = MV.view==="la"?COL.g[AL]:MV.view==="lc"?COL.g[CA]:COL.ink;
+  const sorted = [...vals].sort(d3.ascending);
+  let th = [0.2,0.4,0.6,0.8].map(q=>d3.quantile(sorted,q));
+  th = th.map(v=> MV.unit==="v" ? (Math.abs(v)>=1000? Math.round(v/100)*100 : Math.round(v/10)*10) : Math.round(v));
+  return {kind:"seq", th, f:v=>{ let i=0; while(i<th.length && v>=th[i]) i++; return d3.interpolateRgb(COL.surface,col)(RAMP[i]); }, col};
+}
+let SC;
+function paintMap(){
+  SC = scaleFor();
+  paths.attr("fill", f=>{ const m=byId.get(f.properties.id); return m? SC.f(metric(m)) : COL.empty; })
+    .attr("stroke", f=> MV.sel===f.properties.id ? COL.ink : COL.surface)
+    .attr("stroke-width", f=> MV.sel===f.properties.id ? 2.2 : 0.6);
+  paths.filter(f=>MV.sel===f.properties.id).raise();
+  const fmt = v => MV.unit==="v" ? nf.format(v) : pf(v,0);
+  const title = {gap: MV.unit==="pct"?"Lula − Cadu (p.p. dos válidos)":"Lula − Cadu (votos)", la:"Eleitores de Lula que votaram em Allyson (estimado"+(MV.unit==="pct"?", %)":", votos)"), lc:"Eleitores de Lula que votaram em Cadu (estimado"+(MV.unit==="pct"?", %)":", votos)"), sim:"À frente no 2º turno simulado"}[MV.view];
+  if (SC.kind==="div"){
+    $("#legend").innerHTML = `<div class="lt">${title}</div>`+[AL,CA].map(j=>`<div class="lrow"><div class="ramp">${[0.25,0.5,0.72,0.92].map(t=>`<span style="background:${d3.interpolateRgb(COL.surface,COL.g[j])(t)}"></span>`).join("")}</div>${esc(GV[j].nome)}</div>`).join("")+
+      `<div class="ticks" style="gap:10px"><span>menos de ${fmt(SC.B[0])}</span><span>${fmt(SC.B[2])}+ ${MV.unit==="pct"?"p.p.":"votos"} de margem</span></div>`;
+  } else {
+    $("#legend").innerHTML = `<div class="lt">${title}</div><div class="ramp">${RAMP.map(t=>`<span style="background:${d3.interpolateRgb(COL.surface,SC.col)(t)}"></span>`).join("")}</div>`+
+      `<div class="ticks" style="width:${RAMP.length*24}px;margin-left:12px"><span>${fmt(SC.th[0])}</span><span>${fmt(SC.th[1])}</span><span>${fmt(SC.th[2])}</span><span>${fmt(SC.th[3])}</span></div><div class="lrow" style="color:var(--muted);font-size:11px">limites de cada faixa (quintis dos municípios)</div>`;
+  }
+}
+function tipFor(m){
+  const r = simulate(m.N,m.g);
+  return `<div class="tt">${esc(m.n)}</div>
+    <div class="tr"><span>Lula</span><b>${nf.format(m.p[LU])} · ${pf(m.pL)}%</b></div>
+    <div class="tr"><span><i style="background:${COL.g[CA]}"></i>Cadu de Lula</span><b>${nf.format(m.g[CA])} · ${pf(m.pC)}%</b></div>
+    <div class="tr"><span>Diferença</span><b>${sgn(m.gapV)} · ${pf(m.gapP)} p.p.</b></div>
+    <div class="tm">Eleitores de Lula (estimado): ${pf(100*rowShare(m.N,LU,CA),0)}% Cadu, ${pf(100*rowShare(m.N,LU,AL),0)}% Allyson, ${pf(100*rowShare(m.N,LU,AV),0)}% Álvaro<br>2º turno simulado: ${r.a>=r.c?"Allyson":"Cadu"} à frente por ${nf.format(Math.round(Math.abs(r.a-r.c)))} votos</div>`;
+}
+function selectM(id){
+  const m = byId.get(id); if (!m) return; MV.sel = id; $("#q").value = m.n; paintMap(); renderPanel();
+}
+function renderPanel(){
+  const m = byId.get(MV.sel); if (!m) return;
+  const r = simulate(m.N,m.g), pa = 100*r.a/Math.max(r.v,1);
+  const bar = (lab, v, p, c) => `<div class="r"><span>${lab}</span><span><b>${pf(p)}%</b> <span class="v">${nf.format(Math.round(v))}</span></span><span class="bar"><i style="width:${Math.min(100,p)}%;background:${c}"></i></span></div>`;
+  $("#panel").innerHTML = `<h3>${esc(m.n)}</h3><div class="meta">${m.s} seções · ${nf.format(m.vp)} votos válidos para presidente · ${nf.format(m.vg)} para governador</div>
+    <div class="ptitle">Votos (% dos válidos de cada cargo)</div><div class="mini">
+      ${bar("Lula (presidente)", m.p[LU], m.pL, COL.ink)}
+      ${bar("Cadu de Lula (governador)", m.g[CA], m.pC, COL.g[CA])}
+      ${bar("Allyson Bezerra (governador)", m.g[AL], 100*m.g[AL]/m.vg, COL.g[AL])}
+      ${bar("Álvaro Dias (governador)", m.g[AV], 100*m.g[AV]/m.vg, COL.g[AV])}
+    </div>
+    <p class="note" style="margin-top:4px">Diferença Lula − Cadu: <b style="color:var(--ink)">${sgn(m.gapV)}</b> votos (${pf(m.gapP)} p.p.).</p>
+    <div class="ptitle">Os ${nf.format(m.p[LU])} eleitores de Lula, para governador (estimado)</div>
+    <div class="sbar">${GV.map((g,j)=>{ const s=rowShare(m.N,LU,j); return `<i class="${light(j)?"lt":""}" style="flex:${s} 1 0;background:${COL.g[j]}">${s>0.1?pf(100*s,0)+"%":""}</i>`; }).join("")}</div>
+    <div class="mini">${GV.map((g,j)=>bar(g.nome, realL(m.N,m.p,LU,j), 100*rowShare(m.N,LU,j), COL.g[j])).join("")}</div>
+    <div class="ptitle">2º turno simulado</div>
+    <div class="duel"><i style="width:${pa}%;background:${COL.g[AL]}"></i><i style="width:${100-pa}%;background:${COL.g[CA]}"></i></div>
+    <div class="mini">${bar("Allyson Bezerra", r.a, pa, COL.g[AL])}${bar("Cadu de Lula", r.c, 100-pa, COL.g[CA])}</div>
+    <p class="note">Estimativas municipais têm mais incerteza que a estadual, sobretudo onde há poucas seções.</p>`;
+}
+$("#mview").addEventListener("click", e=>{ const b=e.target.closest("button"); if(!b) return; MV.view=b.dataset.v; $("#mview").querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed", x===b)); paintMap(); });
+$("#munit").addEventListener("click", e=>{ const b=e.target.closest("button"); if(!b) return; MV.unit=b.dataset.u; $("#munit").querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed", x===b)); paintMap(); });
+$("#mlist").innerHTML = [...M].sort((a,b)=>a.n.localeCompare(b.n,"pt-BR")).map(m=>`<option value="${esc(m.n)}">`).join("");
+$("#q").addEventListener("change", e=>{ const m = M.find(x=>x.n.toLowerCase()===e.target.value.trim().toLowerCase()); if (m) selectM(m.id); });
+
+// ---------- dispersão ----------
+const SEC = []; for (let k=0;k<L.sec.length;k+=6) SEC.push(L.sec.slice(k,k+6));
+const scm = $("#scm"); scm.innerHTML += M.map((m,i)=>({m,i})).sort((a,b)=>a.m.n.localeCompare(b.m.n,"pt-BR")).map(o=>`<option value="${o.i}">${esc(o.m.n)}</option>`).join("");
+function renderScatter(){
+  const cv = $("#scv"), box = $("#scat"); const W = box.clientWidth, H = cv.clientHeight || 420, dpr = devicePixelRatio||1;
+  cv.width = W*dpr; cv.height = H*dpr; const ctx = cv.getContext("2d"); ctx.scale(dpr,dpr); ctx.clearRect(0,0,W,H);
+  const yi = +$("#scy").value, j = [null,CA,AL,AV][yi], hm = scm.value===""?null:+scm.value;
+  const mg = {l:44,r:12,t:12,b:38};
+  const x = d3.scaleLinear([0,100],[mg.l,W-mg.r]), y = d3.scaleLinear([0,100],[H-mg.b,mg.t]);
+  const c = d3.color(COL.g[j]);
+  for (const s of SEC){ if (hm!=null && s[5]===hm) continue; ctx.fillStyle = `rgba(${c.r},${c.g},${c.b},${hm!=null?0.08:0.22})`; ctx.beginPath(); ctx.arc(x(s[0]), y(s[yi]), 1.8, 0, 7); ctx.fill(); }
+  if (hm!=null){ ctx.fillStyle = COL.ink; ctx.strokeStyle = COL.surface; for (const s of SEC) if (s[5]===hm){ ctx.beginPath(); ctx.arc(x(s[0]), y(s[yi]), 3.4, 0, 7); ctx.fill(); ctx.stroke(); } }
+  // média por faixa de 5 p.p. (ponderada pelo comparecimento)
+  const bins = d3.range(0,100,5).map(b=>{ const ss = SEC.filter(s=>s[0]>=b && s[0]<b+5); const w = d3.sum(ss,s=>s[4]); return ss.length>=10 ? {x:b+2.5, y:d3.sum(ss,s=>s[yi]*s[4])/w} : null; }).filter(Boolean);
+  const line = d3.line().x(d=>x(d.x)).y(d=>y(d.y));
+  // correlação ponderada
+  const w = SEC.map(s=>s[4]), sw = d3.sum(w), mx = d3.sum(SEC,(s,k)=>s[0]*w[k])/sw, my = d3.sum(SEC,(s,k)=>s[yi]*w[k])/sw;
+  let cxy=0,cxx=0,cyy=0; SEC.forEach((s,k)=>{ const dx=s[0]-mx, dy=s[yi]-my; cxy+=w[k]*dx*dy; cxx+=w[k]*dx*dx; cyy+=w[k]*dy*dy; });
+  $("#scr").textContent = `Correlação entre as seções: ${pf(cxy/Math.sqrt(cxx*cyy),2)}`;
+  const sv = d3.select("#scs").attr("viewBox",`0 0 ${W} ${H}`); sv.selectAll("*").remove();
+  const ax = sv.append("g");
+  [0,25,50,75,100].forEach(t=>{
+    ax.append("line").attr("x1",x(t)).attr("x2",x(t)).attr("y1",mg.t).attr("y2",H-mg.b).attr("stroke",COL.line);
+    ax.append("line").attr("x1",mg.l).attr("x2",W-mg.r).attr("y1",y(t)).attr("y2",y(t)).attr("stroke",COL.line);
+    ax.append("text").attr("x",x(t)).attr("y",H-mg.b+16).attr("text-anchor","middle").text(t+"%");
+    ax.append("text").attr("x",mg.l-6).attr("y",y(t)+4).attr("text-anchor","end").text(t+"%");
+  });
+  ax.append("text").attr("x",(mg.l+W-mg.r)/2).attr("y",H-4).attr("text-anchor","middle").text("Lula (% dos votos na seção)");
+  sv.append("path").attr("d",line(bins)).attr("fill","none").attr("stroke",COL.ink).attr("stroke-width",2.4);
+  sv.append("line").attr("x1",x(0)).attr("y1",y(0)).attr("x2",x(100)).attr("y2",y(100)).attr("stroke",COL.muted).attr("stroke-dasharray","4 4");
+  sv.append("text").attr("x",x(96)).attr("y",y(96)-8).attr("text-anchor","end").text("mesma % que Lula");
+}
+$("#scy").addEventListener("change", renderScatter); scm.addEventListener("change", renderScatter);
+
+// ---------- tabela ----------
+const COLS = [
+  {k:"n", t:"Município", v:m=>m.n, f:m=>esc(m.n)},
+  {k:"l", t:"Lula", v:m=>m.p[LU], f:m=>nf.format(m.p[LU])},
+  {k:"c", t:"Cadu", v:m=>m.g[CA], f:m=>nf.format(m.g[CA])},
+  {k:"d", t:"Lula − Cadu", v:m=>m.gapV, f:m=>sgn(m.gapV)},
+  {k:"pl", t:"Lula %", v:m=>m.pL, f:m=>pf(m.pL)},
+  {k:"pc", t:"Cadu %", v:m=>m.pC, f:m=>pf(m.pC)},
+  {k:"dp", t:"Dif. p.p.", v:m=>m.gapP, f:m=>pf(m.gapP)},
+  {k:"la", t:"Lula→Cadu (est.)", v:m=>rowShare(m.N,LU,CA), f:m=>pf(100*rowShare(m.N,LU,CA),0)+"%"},
+  {k:"lA", t:"Lula→Allyson (est.)", v:m=>rowShare(m.N,LU,AL), f:m=>pf(100*rowShare(m.N,LU,AL),0)+"%"},
+  {k:"lv", t:"Lula→Álvaro (est.)", v:m=>rowShare(m.N,LU,AV), f:m=>pf(100*rowShare(m.N,LU,AV),0)+"%"},
+  {k:"s", t:"2º turno simulado", v:m=>{ const r=simulate(m.N,m.g); return r.a-r.c; }, f:m=>{ const r=simulate(m.N,m.g), j=r.a>=r.c?AL:CA; return `<span class="chip"><i style="background:${COL.g[j]}"></i>${j===AL?"Allyson":"Cadu"} ${nf.format(Math.round(Math.abs(r.a-r.c)))}</span>`; }},
+];
+const TS = {k:"l", dir:-1};
+function renderTable(){
+  $("#tbl thead").innerHTML = `<tr>${COLS.map(c=>`<th data-k="${c.k}" aria-sort="${TS.k===c.k?(TS.dir>0?"ascending":"descending"):"none"}">${c.t}</th>`).join("")}</tr>`;
+  const q = $("#tq").value.trim().toLowerCase().normalize("NFD").replace(/\p{M}/gu,"");
+  const col = COLS.find(c=>c.k===TS.k);
+  const rows = M.filter(m=>!q || m.n.toLowerCase().normalize("NFD").replace(/\p{M}/gu,"").includes(q))
+    .sort((a,b)=>{ const x=col.v(a), y=col.v(b); return (typeof x==="string" ? x.localeCompare(y,"pt-BR") : x-y)*TS.dir; });
+  $("#tbl tbody").innerHTML = rows.map(m=>`<tr data-id="${m.id}">${COLS.map(c=>`<td>${c.f(m)}</td>`).join("")}</tr>`).join("");
+  $("#tcount").textContent = `${rows.length} de ${M.length} municípios`;
+}
+$("#tbl thead").addEventListener("click", e=>{ const th=e.target.closest("th"); if(!th) return; const k=th.dataset.k; TS.dir = TS.k===k ? -TS.dir : (k==="n"?1:-1); TS.k=k; renderTable(); });
+$("#tbl tbody").addEventListener("click", e=>{ const tr=e.target.closest("tr"); if(!tr) return; selectM(tr.dataset.id); document.getElementById("mapa").scrollIntoView({behavior:"smooth"}); });
+$("#tq").addEventListener("input", renderTable);
+
+// ---------- método ----------
+const r2 = L.meta.r2;
+$("#r2txt").textContent = `Qualidade do ajuste: o modelo municipal explica ${pf(100*r2.allyson,0)}% da variação entre seções do voto em Allyson Bezerra, ${pf(100*r2.cadu,0)}% do voto em Cadu de Lula e ${pf(100*r2.alvaro,0)}% do voto em Álvaro Dias. O restante é variação que o voto para presidente não explica.`;
+
+// ---------- atualização e tema ----------
+let raf = null;
+function update(){ if (raf) return; raf = requestAnimationFrame(()=>{ raf=null; renderResult(); paintMap(); if (MV.sel) renderPanel(); renderTable(); }); }
+function renderAll(){ renderKpis(); renderFlow(); renderDest(); renderGap(); renderGroups(); renderResult(); paintMap(); if (MV.sel) renderPanel(); renderScatter(); renderTable(); }
+const btn = $("#themeBtn");
+const curTheme = () => document.documentElement.dataset.theme || (matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");
+const syncBtn = () => btn.textContent = curTheme()==="dark" ? "Tema claro" : "Tema escuro";
+try { const t = localStorage.getItem("tema"); if (t) document.documentElement.dataset.theme = t; } catch(e){}
+btn.addEventListener("click", ()=>{ const t = curTheme()==="dark"?"light":"dark"; document.documentElement.dataset.theme=t; try{localStorage.setItem("tema",t)}catch(e){} syncBtn(); readColors(); renderAll(); });
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ()=>{ syncBtn(); readColors(); renderAll(); });
+syncBtn();
+readColors(); renderPresets(); renderAll(); sizeMap();
+let rz; addEventListener("resize", ()=>{ clearTimeout(rz); rz = setTimeout(()=>{ sizeMap(); renderFlow(); renderScatter(); }, 120); });
+})();
+</script>
+</body>
+</html>

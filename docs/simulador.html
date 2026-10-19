@@ -42,7 +42,7 @@ a{color:inherit;text-underline-offset:3px}
 .top{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
 .top .wrap{display:flex;align-items:center;gap:24px;height:52px}
 .brand{font:700 15px/1 "Archivo",system-ui,sans-serif;font-stretch:112%;text-decoration:none}
-.top nav{display:flex;gap:18px;font-size:14px;color:var(--ink-2)}
+.top nav{display:flex;gap:18px;font-size:14px;color:var(--ink-2);overflow-x:auto;scrollbar-width:none}
 .top nav a{text-decoration:none;white-space:nowrap}
 .top nav a[aria-current]{color:var(--ink);font-weight:600}
 .theme{margin-left:auto;background:none;border:1px solid var(--line-2);color:var(--ink-2);border-radius:999px;font-size:13px;padding:5px 12px;cursor:pointer}
@@ -255,7 +255,7 @@ footer{padding-bottom:140px !important;margin-top:56px;padding:24px 0 48px;borde
 <body>
 <header class="top"><div class="wrap">
   <a class="brand" href="index.html">RN 2026</a>
-  <nav aria-label="Páginas"><a href="index.html?cargo=governador">Resultados</a><a href="deputados.html">Deputados</a><a href="gestao.html">Gestão</a><a href="simulador.html" aria-current="page">Simulador do 2º turno</a></nav>
+  <nav aria-label="Páginas"><a href="index.html?cargo=governador">Resultados</a><a href="deputados.html">Deputados</a><a href="gestao.html">Gestão</a><a href="simulador.html" aria-current="page">Simulador do 2º turno</a><a href="lula.html">Lula × Governo</a></nav>
   <button class="theme" id="themeBtn" type="button">Tema escuro</button>
 </div></header>
 
