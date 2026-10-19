@@ -168,7 +168,7 @@ table.mx td small{color:var(--muted);font-size:11.5px;display:block}
 /* tabela */
 .tablebox{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
 .tabletools{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:12px 14px;border-bottom:1px solid var(--line);font:400 13px "Archivo",system-ui,sans-serif;color:var(--ink-2)}
-.tabletools input{font-size:13px;padding:6px 12px;border-radius:999px;border:1px solid var(--line-2);background:var(--bg);color:var(--ink);width:220px}
+.tabletools input:not([type=checkbox]){font-size:13px;padding:6px 12px;border-radius:999px;border:1px solid var(--line-2);background:var(--bg);color:var(--ink);width:220px}
 .tscroll{max-height:540px;overflow:auto}
 table.big{border-collapse:collapse;width:100%;font-size:13.5px}
 table.big th,table.big td{padding:8px 12px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
@@ -289,6 +289,35 @@ footer{margin-top:56px;padding:24px 0 48px;border-top:1px solid var(--line);font
   </div>
 </section>
 
+<section id="bairros">
+  <h2>Por bairro</h2>
+  <p class="sub">O mesmo levantamento nos bairros dos municípios que têm bairros delimitados pelo IBGE. O voto é contado no bairro do local de votação, não no bairro onde o eleitor mora. Bairros em cinza não têm local de votação.</p>
+  <div class="mapwrap">
+    <div class="mapsvg" id="bmapsvg">
+      <div class="maptools">
+        <select id="bcity" aria-label="Município" class="ui" style="font:500 13px Archivo,system-ui,sans-serif;padding:6px 10px;border-radius:999px;border:1px solid var(--line-2);background:var(--bg);color:var(--ink)"></select>
+        <div class="useg" id="bview" role="group" aria-label="O que o mapa de bairros mostra">
+          <button type="button" data-v="gap" aria-pressed="true">Lula − Cadu</button>
+          <button type="button" data-v="la">Lula → Allyson</button>
+          <button type="button" data-v="lc">Lula → Cadu</button>
+          <button type="button" data-v="sim">2º turno simulado</button>
+        </div>
+        <div class="useg" id="bunit" role="group" aria-label="Unidade">
+          <button type="button" data-u="pct" aria-pressed="true">%</button>
+          <button type="button" data-u="v">Votos</button>
+        </div>
+      </div>
+      <div class="legend" id="blegend"></div>
+    </div>
+    <aside class="panel" id="bpanel"><p class="empty">Toque em um bairro no mapa ou na tabela para ver os votos de Lula e de Cadu e a estimativa de como os eleitores de Lula votaram para governador, com o intervalo de 90%.</p></aside>
+  </div>
+  <div class="tablebox" style="margin-top:16px">
+    <div class="tabletools"><input id="bq" placeholder="Filtrar bairro" aria-label="Filtrar bairro"><label class="ui" style="display:inline-flex;gap:6px;align-items:center"><input type="checkbox" id="ball"> todos os municípios</label><span id="bcount"></span><a href="dados/lula/transferencia_estimada_bairros.csv" download>Baixar bairros (CSV)</a><a href="relatorio/lula_bairros_RN_2026.pdf">Relatório em PDF</a></div>
+    <div class="tscroll"><table class="big" id="btbl"><thead></thead><tbody></tbody></table></div>
+  </div>
+  <p class="note">Entre colchetes, intervalo de 90%. Bairros com poucas seções ficam próximos da estimativa do município, porque a estimativa é puxada para ela quando há pouca informação.</p>
+</section>
+
 <section id="secoes">
   <h2>Seção por seção</h2>
   <p class="sub">Cada ponto é uma seção eleitoral: no eixo horizontal, a parcela de votos em Lula; no vertical, a do candidato a governador escolhido. A linha é a média das seções em cada faixa de 5 pontos. Quanto mais a nuvem sobe junto com Lula, mais o voto desse candidato acompanha o de Lula.</p>
@@ -315,10 +344,10 @@ footer{margin-top:56px;padding:24px 0 48px;border-top:1px solid var(--line);font
   <h2>Como foi feito</h2>
   <p>Os resultados de Presidente vêm dos boletins de urna e os de Governador do arquivo de votação por seção do TSE. As duas fontes foram casadas pela zona e pelo número da seção: as 8.115 seções do estado têm os dois cargos. Os votos de candidatos a governador com registro indeferido entram como nulos, como na totalização oficial.</p>
   <p>Como o voto é secreto, a relação entre os dois votos é estimada por inferência ecológica. Em cada seção se conhece a parcela de Lula, de Flávio Bolsonaro, dos demais candidatos e de brancos e nulos para presidente, e a parcela de cada opção para governador. Procura-se a tabela de transferência (que fração dos eleitores de cada candidato a presidente votou em cada candidato a governador) que melhor reproduz os resultados de todas as seções ao mesmo tempo, com cada fração entre 0 e 100% e cada linha somando 100%. As seções têm peso proporcional ao comparecimento.</p>
-  <p>A tabela é estimada para cada município com as seções do próprio município, puxada em direção à tabela estadual quando há poucas seções. Depois, os números de cada município são ajustados para somar exatamente os votos reais de cada candidato a governador e as proporções reais de cada candidato a presidente. O total do estado é a soma dos municípios. O intervalo de 90% vem de 200 reamostragens das seções dentro de cada município.</p>
+  <p>A tabela é estimada para cada município com as seções do próprio município, puxada em direção à tabela estadual quando há poucas seções. Nos 19 municípios com bairros delimitados pelo IBGE, o mesmo é feito em cada bairro com as seções dos locais de votação do bairro, puxada em direção à tabela do município. Depois, os números de cada município são ajustados para somar exatamente os votos reais de cada candidato a governador e as proporções reais de cada candidato a presidente. O total do estado é a soma dos municípios. O intervalo de 90% vem de 200 reamostragens das seções dentro de cada município e bairro.</p>
   <p id="r2txt"></p>
   <p><b>Limites.</b> A estimativa supõe que, dentro de um município, eleitores de Lula de seções diferentes votam para governador de forma parecida. Se, por exemplo, os eleitores de Lula de bairros mais pobres votam diferente dos de bairros mais ricos, a estimativa pode ficar enviesada, e o intervalo de confiança não captura isso. Use os números como ordem de grandeza e compare com pesquisas de opinião, que perguntam diretamente. A simulação de 2º turno não é previsão: ela mostra o que acontece com a margem sob as hipóteses que você escolher.</p>
-  <p>Arquivos: <a href="dados/lula/transferencia_estimada_estado.csv" download>tabela estadual com intervalos (CSV)</a> e <a href="dados/lula/transferencia_estimada_municipios.csv" download>estimativas por município (CSV)</a>. Script: <code>scripts/gerar_lula.py</code>.</p>
+  <p>Arquivos: <a href="dados/lula/transferencia_estimada_estado.csv" download>tabela estadual com intervalos (CSV)</a> e <a href="dados/lula/transferencia_estimada_municipios.csv" download>estimativas por município (CSV)</a>, <a href="dados/lula/transferencia_estimada_bairros.csv" download>estimativas por bairro (CSV)</a> e o <a href="relatorio/lula_bairros_RN_2026.pdf">relatório em PDF por bairro</a>. Script: <code>scripts/gerar_lula.py</code>.</p>
 </section>
 </main>
 
@@ -354,6 +383,10 @@ const M = L.munis.map(m=>{
     rowL: sum(m.N[LU])};
 });
 const byId = new Map(M.map(m=>[m.id,m]));
+const prep = m => { const vp = m.p[LU]+m.p[FL]+m.p[PO], vg = m.g[AL]+m.g[CA]+m.g[AV]+m.g[GO];
+  return {...m, vp, vg, pL:100*m.p[LU]/Math.max(vp,1), pC:100*m.g[CA]/Math.max(vg,1), gapV:m.p[LU]-m.g[CA], gapP:100*m.p[LU]/Math.max(vp,1)-100*m.g[CA]/Math.max(vg,1)}; };
+const BR = (L.bairros||[]).map(b=>({...prep(b), mn:(L.munis.find(x=>x.id===b.m)||{}).n}));
+const bById = new Map(BR.map(b=>[b.id,b]));
 const EST = { p:[0,1,2,3].map(i=>sum(M.map(m=>m.p[i]))), g:[0,1,2,3,4].map(j=>sum(M.map(m=>m.g[j]))),
   N:[0,1,2,3].map(i=>[0,1,2,3,4].map(j=>sum(M.map(m=>m.N[i][j])))) };
 EST.vp = EST.p[LU]+EST.p[FL]+EST.p[PO]; EST.vg = EST.g[AL]+EST.g[CA]+EST.g[AV]+EST.g[GO];
@@ -551,47 +584,46 @@ function sizeMap(){
   const botPad = innerWidth<560 ? ($("#legend").offsetHeight||110) + 18 : 14;
   proj.fitExtent([[14,topPad],[W-14,H-botPad]], G.mapa); paths.attr("d",path);
 }
-function metric(m){
+function metric(m, V){
   const r = simulate(m.N,m.g);
-  switch(MV.view){
-    case "gap": return MV.unit==="pct" ? m.gapP : m.gapV;
-    case "la": return MV.unit==="pct" ? 100*rowShare(m.N,LU,AL) : realL(m.N,m.p,LU,AL);
-    case "lc": return MV.unit==="pct" ? 100*rowShare(m.N,LU,CA) : realL(m.N,m.p,LU,CA);
-    case "sim": return MV.unit==="pct" ? 100*(r.a-r.c)/Math.max(r.v,1) : r.a-r.c;
+  switch(V.view){
+    case "gap": return V.unit==="pct" ? m.gapP : m.gapV;
+    case "la": return V.unit==="pct" ? 100*rowShare(m.N,LU,AL) : realL(m.N,m.p,LU,AL);
+    case "lc": return V.unit==="pct" ? 100*rowShare(m.N,LU,CA) : realL(m.N,m.p,LU,CA);
+    case "sim": return V.unit==="pct" ? 100*(r.a-r.c)/Math.max(r.v,1) : r.a-r.c;
   }
 }
-function scaleFor(){
-  const vals = M.map(metric);
-  if (MV.view==="sim"){
-    const B = MV.unit==="pct" ? [5,15,30] : [500,2000,10000];
+function scaleFor(list, V){
+  if (V.view==="sim"){
+    const B = V.unit==="pct" ? [5,15,30] : (list===M ? [500,2000,10000] : [100,500,2000]);
     return {kind:"div", B, f:v=>{ const a=Math.abs(v), i=a<B[0]?0:a<B[1]?1:a<B[2]?2:3; return d3.interpolateRgb(COL.surface, v>=0?COL.g[AL]:COL.g[CA])([0.25,0.5,0.72,0.92][i]); }};
   }
-  const col = MV.view==="la"?COL.g[AL]:MV.view==="lc"?COL.g[CA]:COL.ink;
-  const sorted = [...vals].sort(d3.ascending);
+  const col = V.view==="la"?COL.g[AL]:V.view==="lc"?COL.g[CA]:COL.ink;
+  const sorted = list.map(m=>metric(m,V)).sort(d3.ascending);
   let th = [0.2,0.4,0.6,0.8].map(q=>d3.quantile(sorted,q));
-  th = th.map(v=> MV.unit==="v" ? (Math.abs(v)>=1000? Math.round(v/100)*100 : Math.round(v/10)*10) : Math.round(v));
+  th = th.map(v=> V.unit==="v" ? (Math.abs(v)>=1000? Math.round(v/100)*100 : Math.round(v/10)*10) : Math.round(v));
   return {kind:"seq", th, f:v=>{ let i=0; while(i<th.length && v>=th[i]) i++; return d3.interpolateRgb(COL.surface,col)(RAMP[i]); }, col};
+}
+function legendHTML(SC, V, quem){
+  const fmt = v => V.unit==="v" ? nf.format(v) : pf(v,0);
+  const title = {gap: V.unit==="pct"?"Lula − Cadu (p.p. dos válidos)":"Lula − Cadu (votos)", la:"Eleitores de Lula que votaram em Allyson (estimado"+(V.unit==="pct"?", %)":", votos)"), lc:"Eleitores de Lula que votaram em Cadu (estimado"+(V.unit==="pct"?", %)":", votos)"), sim:"À frente no 2º turno simulado"}[V.view];
+  if (SC.kind==="div") return `<div class="lt">${title}</div>`+[AL,CA].map(j=>`<div class="lrow"><div class="ramp">${[0.25,0.5,0.72,0.92].map(t=>`<span style="background:${d3.interpolateRgb(COL.surface,COL.g[j])(t)}"></span>`).join("")}</div>${esc(GV[j].nome)}</div>`).join("")+
+      `<div class="ticks" style="gap:10px"><span>menos de ${fmt(SC.B[0])}</span><span>${fmt(SC.B[2])}+ ${V.unit==="pct"?"p.p.":"votos"} de margem</span></div>`;
+  return `<div class="lt">${title}</div><div class="ramp">${RAMP.map(t=>`<span style="background:${d3.interpolateRgb(COL.surface,SC.col)(t)}"></span>`).join("")}</div>`+
+      `<div class="ticks" style="width:${RAMP.length*24}px;margin-left:12px"><span>${fmt(SC.th[0])}</span><span>${fmt(SC.th[1])}</span><span>${fmt(SC.th[2])}</span><span>${fmt(SC.th[3])}</span></div><div class="lrow" style="color:var(--muted);font-size:11px">limites de cada faixa (quintis ${quem})</div>`;
 }
 let SC;
 function paintMap(){
-  SC = scaleFor();
-  paths.attr("fill", f=>{ const m=byId.get(f.properties.id); return m? SC.f(metric(m)) : COL.empty; })
+  SC = scaleFor(M, MV);
+  paths.attr("fill", f=>{ const m=byId.get(f.properties.id); return m? SC.f(metric(m,MV)) : COL.empty; })
     .attr("stroke", f=> MV.sel===f.properties.id ? COL.ink : COL.surface)
     .attr("stroke-width", f=> MV.sel===f.properties.id ? 2.2 : 0.6);
   paths.filter(f=>MV.sel===f.properties.id).raise();
-  const fmt = v => MV.unit==="v" ? nf.format(v) : pf(v,0);
-  const title = {gap: MV.unit==="pct"?"Lula − Cadu (p.p. dos válidos)":"Lula − Cadu (votos)", la:"Eleitores de Lula que votaram em Allyson (estimado"+(MV.unit==="pct"?", %)":", votos)"), lc:"Eleitores de Lula que votaram em Cadu (estimado"+(MV.unit==="pct"?", %)":", votos)"), sim:"À frente no 2º turno simulado"}[MV.view];
-  if (SC.kind==="div"){
-    $("#legend").innerHTML = `<div class="lt">${title}</div>`+[AL,CA].map(j=>`<div class="lrow"><div class="ramp">${[0.25,0.5,0.72,0.92].map(t=>`<span style="background:${d3.interpolateRgb(COL.surface,COL.g[j])(t)}"></span>`).join("")}</div>${esc(GV[j].nome)}</div>`).join("")+
-      `<div class="ticks" style="gap:10px"><span>menos de ${fmt(SC.B[0])}</span><span>${fmt(SC.B[2])}+ ${MV.unit==="pct"?"p.p.":"votos"} de margem</span></div>`;
-  } else {
-    $("#legend").innerHTML = `<div class="lt">${title}</div><div class="ramp">${RAMP.map(t=>`<span style="background:${d3.interpolateRgb(COL.surface,SC.col)(t)}"></span>`).join("")}</div>`+
-      `<div class="ticks" style="width:${RAMP.length*24}px;margin-left:12px"><span>${fmt(SC.th[0])}</span><span>${fmt(SC.th[1])}</span><span>${fmt(SC.th[2])}</span><span>${fmt(SC.th[3])}</span></div><div class="lrow" style="color:var(--muted);font-size:11px">limites de cada faixa (quintis dos municípios)</div>`;
-  }
+  $("#legend").innerHTML = legendHTML(SC, MV, "dos municípios");
 }
 function tipFor(m){
   const r = simulate(m.N,m.g);
-  return `<div class="tt">${esc(m.n)}</div>
+  return `<div class="tt">${esc(m.n)}${m.mn?` <span style="font-weight:400;color:var(--muted)">· ${esc(m.mn)}</span>`:""}</div>
     <div class="tr"><span>Lula</span><b>${nf.format(m.p[LU])} · ${pf(m.pL)}%</b></div>
     <div class="tr"><span><i style="background:${COL.g[CA]}"></i>Cadu de Lula</span><b>${nf.format(m.g[CA])} · ${pf(m.pC)}%</b></div>
     <div class="tr"><span>Diferença</span><b>${sgn(m.gapV)} · ${pf(m.gapP)} p.p.</b></div>
@@ -600,11 +632,11 @@ function tipFor(m){
 function selectM(id){
   const m = byId.get(id); if (!m) return; MV.sel = id; $("#q").value = m.n; paintMap(); renderPanel();
 }
-function renderPanel(){
-  const m = byId.get(MV.sel); if (!m) return;
+function panelHTML(m, nota){
   const r = simulate(m.N,m.g), pa = 100*r.a/Math.max(r.v,1);
   const bar = (lab, v, p, c) => `<div class="r"><span>${lab}</span><span><b>${pf(p)}%</b> <span class="v">${nf.format(Math.round(v))}</span></span><span class="bar"><i style="width:${Math.min(100,p)}%;background:${c}"></i></span></div>`;
-  $("#panel").innerHTML = `<h3>${esc(m.n)}</h3><div class="meta">${m.s} seções · ${nf.format(m.vp)} votos válidos para presidente · ${nf.format(m.vg)} para governador</div>
+  const ci = m.lo ? (j => ` <span class="v">[${pf(100*m.lo[j],0)}–${pf(100*m.hi[j],0)}]</span>`) : (()=> "");
+  return `<h3>${esc(m.n)}</h3><div class="meta">${m.mn?esc(m.mn)+" · ":""}${m.nl?`${m.nl} ${m.nl===1?"local":"locais"} de votação · `:""}${m.s} seções · ${nf.format(m.vp)} votos válidos para presidente · ${nf.format(m.vg)} para governador</div>
     <div class="ptitle">Votos (% dos válidos de cada cargo)</div><div class="mini">
       ${bar("Lula (presidente)", m.p[LU], m.pL, COL.ink)}
       ${bar("Cadu de Lula (governador)", m.g[CA], m.pC, COL.g[CA])}
@@ -614,16 +646,100 @@ function renderPanel(){
     <p class="note" style="margin-top:4px">Diferença Lula − Cadu: <b style="color:var(--ink)">${sgn(m.gapV)}</b> votos (${pf(m.gapP)} p.p.).</p>
     <div class="ptitle">Os ${nf.format(m.p[LU])} eleitores de Lula, para governador (estimado)</div>
     <div class="sbar">${GV.map((g,j)=>{ const s=rowShare(m.N,LU,j); return `<i class="${light(j)?"lt":""}" style="flex:${s} 1 0;background:${COL.g[j]}">${s>0.1?pf(100*s,0)+"%":""}</i>`; }).join("")}</div>
-    <div class="mini">${GV.map((g,j)=>bar(g.nome, realL(m.N,m.p,LU,j), 100*rowShare(m.N,LU,j), COL.g[j])).join("")}</div>
+    <div class="mini">${GV.map((g,j)=>bar(g.nome+ci(j), realL(m.N,m.p,LU,j), 100*rowShare(m.N,LU,j), COL.g[j])).join("")}</div>
     <div class="ptitle">2º turno simulado</div>
     <div class="duel"><i style="width:${pa}%;background:${COL.g[AL]}"></i><i style="width:${100-pa}%;background:${COL.g[CA]}"></i></div>
     <div class="mini">${bar("Allyson Bezerra", r.a, pa, COL.g[AL])}${bar("Cadu de Lula", r.c, 100-pa, COL.g[CA])}</div>
-    <p class="note">Estimativas municipais têm mais incerteza que a estadual, sobretudo onde há poucas seções.</p>`;
+    <p class="note">${nota}</p>`;
+}
+function renderPanel(){
+  const m = byId.get(MV.sel); if (!m) return;
+  const temB = BR.some(b=>b.m===m.id);
+  $("#panel").innerHTML = panelHTML(m, "Estimativas municipais têm mais incerteza que a estadual, sobretudo onde há poucas seções.") +
+    (temB ? `<button type="button" class="btn" id="goB" style="margin-top:10px">Ver os bairros de ${esc(m.n)}</button>` : "");
+  if (temB) $("#goB").addEventListener("click", ()=>{ setCity(m.id); document.getElementById("bairros").scrollIntoView({behavior:"smooth"}); });
 }
 $("#mview").addEventListener("click", e=>{ const b=e.target.closest("button"); if(!b) return; MV.view=b.dataset.v; $("#mview").querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed", x===b)); paintMap(); });
 $("#munit").addEventListener("click", e=>{ const b=e.target.closest("button"); if(!b) return; MV.unit=b.dataset.u; $("#munit").querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed", x===b)); paintMap(); });
 $("#mlist").innerHTML = [...M].sort((a,b)=>a.n.localeCompare(b.n,"pt-BR")).map(m=>`<option value="${esc(m.n)}">`).join("");
 $("#q").addEventListener("change", e=>{ const m = M.find(x=>x.n.toLowerCase()===e.target.value.trim().toLowerCase()); if (m) selectM(m.id); });
+
+// ---------- bairros ----------
+const BV = {view:"gap", unit:"pct", sel:null, city:null};
+const cities = [...new Set(BR.map(b=>b.m))].map(id=>byId.get(id)).filter(Boolean).sort((a,b)=>b.p[LU]-a.p[LU]);
+$("#bcity").innerHTML = cities.map(m=>`<option value="${m.id}">${esc(m.n)} (${BR.filter(b=>b.m===m.id).length} bairros)</option>`).join("");
+const svgB = d3.select("#bmapsvg").append("svg"), gB = svgB.append("g");
+const projB = d3.geoMercator(), pathB = d3.geoPath(projB);
+let bpaths = gB.selectAll("path");
+function setCity(id){
+  BV.city = id; BV.sel = null; $("#bcity").value = id;
+  const feats = G.bmapa.features.filter(f=>f.properties.id.slice(0,7)===id);
+  bpaths = gB.selectAll("path.b").data(feats, f=>f.properties.id).join("path").attr("class","b").attr("vector-effect","non-scaling-stroke")
+    .style("cursor", f=>bById.has(f.properties.id)?"pointer":"default")
+    .on("mousemove",(ev,f)=>{ const b=bById.get(f.properties.id); showTip(ev, b? tipFor(b) : `<div class="tt">${esc((L.bnomes||{})[f.properties.id]||"Bairro")}</div><div class="tm">Sem local de votação neste bairro.</div>`); })
+    .on("mouseleave",hideTip)
+    .on("click",(ev,f)=>{ hideTip(); if (bById.has(f.properties.id)) selectB(f.properties.id); });
+  sizeB(); paintB();
+  $("#bpanel").innerHTML = `<p class="empty">Toque em um bairro de ${esc(byId.get(id).n)} no mapa ou na tabela para ver a estimativa.</p>`;
+  renderBTable();
+}
+function sizeB(){
+  const b = $("#bmapsvg").getBoundingClientRect(); const W=Math.max(280,b.width), H=Math.max(320,b.height);
+  svgB.attr("viewBox",`0 0 ${W} ${H}`);
+  const topPad = ($("#bmapsvg .maptools").getBoundingClientRect().height||60) + 22;
+  const botPad = innerWidth<560 ? ($("#blegend").offsetHeight||110) + 18 : Math.min(150, ($("#blegend").offsetHeight||100)) + 10;
+  const fc = {type:"FeatureCollection", features: bpaths.data()};
+  if (fc.features.length) projB.fitExtent([[14,topPad],[W-14,H-botPad]], fc);
+  bpaths.attr("d",pathB);
+}
+let SCB;
+function paintB(){
+  SCB = scaleFor(BR, BV);
+  bpaths.attr("fill", f=>{ const b=bById.get(f.properties.id); return b? SCB.f(metric(b,BV)) : COL.empty; })
+    .attr("stroke", f=> BV.sel===f.properties.id ? COL.ink : COL.surface)
+    .attr("stroke-width", f=> BV.sel===f.properties.id ? 2.2 : 0.8);
+  bpaths.filter(f=>BV.sel===f.properties.id).raise();
+  $("#blegend").innerHTML = legendHTML(SCB, BV, "dos bairros do estado");
+}
+function selectB(id){
+  const b = bById.get(id); if (!b) return;
+  if (b.m!==BV.city) setCity(b.m);
+  BV.sel = id; paintB(); renderBPanel();
+}
+function renderBPanel(){
+  const b = bById.get(BV.sel); if (!b) return;
+  $("#bpanel").innerHTML = panelHTML(b, b.s<10 ? "Poucas seções neste bairro: a estimativa fica próxima da do município e deve ser lida com cautela." : "O voto é contado no bairro do local de votação.");
+}
+$("#bcity").addEventListener("change", e=>setCity(e.target.value));
+$("#bview").addEventListener("click", e=>{ const b=e.target.closest("button"); if(!b) return; BV.view=b.dataset.v; $("#bview").querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed", x===b)); paintB(); });
+$("#bunit").addEventListener("click", e=>{ const b=e.target.closest("button"); if(!b) return; BV.unit=b.dataset.u; $("#bunit").querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed", x===b)); paintB(); });
+const BCOLS = [
+  {k:"n", t:"Bairro", v:b=>b.n, f:b=>esc(b.n)+(b.s<10?' <span style="color:var(--muted)" title="Poucas seções">*</span>':"")},
+  {k:"mn", t:"Município", v:b=>b.mn, f:b=>esc(b.mn)},
+  {k:"s", t:"Seções", v:b=>b.s, f:b=>nf.format(b.s)},
+  {k:"l", t:"Lula", v:b=>b.p[LU], f:b=>nf.format(b.p[LU])},
+  {k:"c", t:"Cadu", v:b=>b.g[CA], f:b=>nf.format(b.g[CA])},
+  {k:"d", t:"Lula − Cadu", v:b=>b.gapV, f:b=>sgn(b.gapV)},
+  {k:"dp", t:"Dif. p.p.", v:b=>b.gapP, f:b=>pf(b.gapP)},
+  {k:"lc", t:"Lula→Cadu (est.)", v:b=>rowShare(b.N,LU,CA), f:b=>`${pf(100*rowShare(b.N,LU,CA),0)}% <small style="color:var(--muted)">[${pf(100*b.lo[CA],0)}–${pf(100*b.hi[CA],0)}]</small>`},
+  {k:"la", t:"Lula→Allyson (est.)", v:b=>rowShare(b.N,LU,AL), f:b=>`${pf(100*rowShare(b.N,LU,AL),0)}% <small style="color:var(--muted)">[${pf(100*b.lo[AL],0)}–${pf(100*b.hi[AL],0)}]</small>`},
+  {k:"lv", t:"Lula→Álvaro (est.)", v:b=>rowShare(b.N,LU,AV), f:b=>pf(100*rowShare(b.N,LU,AV),0)+"%"},
+  {k:"sim", t:"2º turno simulado", v:b=>{ const r=simulate(b.N,b.g); return r.a-r.c; }, f:b=>{ const r=simulate(b.N,b.g), j=r.a>=r.c?AL:CA; return `<span class="chip"><i style="background:${COL.g[j]}"></i>${j===AL?"Allyson":"Cadu"} ${nf.format(Math.round(Math.abs(r.a-r.c)))}</span>`; }},
+];
+const BTS = {k:"l", dir:-1};
+function renderBTable(){
+  const all = $("#ball").checked;
+  $("#btbl thead").innerHTML = `<tr>${BCOLS.filter(c=>all||c.k!=="mn").map(c=>`<th data-k="${c.k}" aria-sort="${BTS.k===c.k?(BTS.dir>0?"ascending":"descending"):"none"}">${c.t}</th>`).join("")}</tr>`;
+  const q = $("#bq").value.trim().toLowerCase().normalize("NFD").replace(/\p{M}/gu,"");
+  const col = BCOLS.find(c=>c.k===BTS.k);
+  const rows = BR.filter(b=>(all || b.m===BV.city) && (!q || b.n.toLowerCase().normalize("NFD").replace(/\p{M}/gu,"").includes(q)))
+    .sort((a,b)=>{ const x=col.v(a), y=col.v(b); return (typeof x==="string" ? x.localeCompare(y,"pt-BR") : x-y)*BTS.dir; });
+  $("#btbl tbody").innerHTML = rows.map(b=>`<tr data-id="${b.id}">${BCOLS.filter(c=>all||c.k!=="mn").map(c=>`<td>${c.f(b)}</td>`).join("")}</tr>`).join("");
+  $("#bcount").textContent = `${rows.length} bairros${all?"":" em "+byId.get(BV.city).n} · * poucas seções`;
+}
+$("#btbl thead").addEventListener("click", e=>{ const th=e.target.closest("th"); if(!th) return; const k=th.dataset.k; BTS.dir = BTS.k===k ? -BTS.dir : (k==="n"||k==="mn"?1:-1); BTS.k=k; renderBTable(); });
+$("#btbl tbody").addEventListener("click", e=>{ const tr=e.target.closest("tr"); if(!tr) return; selectB(tr.dataset.id); document.getElementById("bmapsvg").scrollIntoView({behavior:"smooth", block:"center"}); });
+$("#bq").addEventListener("input", renderBTable); $("#ball").addEventListener("change", renderBTable);
 
 // ---------- dispersão ----------
 const SEC = []; for (let k=0;k<L.sec.length;k+=6) SEC.push(L.sec.slice(k,k+6));
@@ -693,8 +809,8 @@ $("#r2txt").textContent = `Qualidade do ajuste: o modelo municipal explica ${pf(
 
 // ---------- atualização e tema ----------
 let raf = null;
-function update(){ if (raf) return; raf = requestAnimationFrame(()=>{ raf=null; renderResult(); paintMap(); if (MV.sel) renderPanel(); renderTable(); }); }
-function renderAll(){ renderKpis(); renderFlow(); renderDest(); renderGap(); renderGroups(); renderResult(); paintMap(); if (MV.sel) renderPanel(); renderScatter(); renderTable(); }
+function update(){ if (raf) return; raf = requestAnimationFrame(()=>{ raf=null; renderResult(); paintMap(); if (MV.sel) renderPanel(); renderTable(); paintB(); if (BV.sel) renderBPanel(); renderBTable(); }); }
+function renderAll(){ renderKpis(); renderFlow(); renderDest(); renderGap(); renderGroups(); renderResult(); paintMap(); if (MV.sel) renderPanel(); paintB(); if (BV.sel) renderBPanel(); renderBTable(); renderScatter(); renderTable(); }
 const btn = $("#themeBtn");
 const curTheme = () => document.documentElement.dataset.theme || (matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");
 const syncBtn = () => btn.textContent = curTheme()==="dark" ? "Tema claro" : "Tema escuro";
@@ -702,8 +818,8 @@ try { const t = localStorage.getItem("tema"); if (t) document.documentElement.da
 btn.addEventListener("click", ()=>{ const t = curTheme()==="dark"?"light":"dark"; document.documentElement.dataset.theme=t; try{localStorage.setItem("tema",t)}catch(e){} syncBtn(); readColors(); renderAll(); });
 matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ()=>{ syncBtn(); readColors(); renderAll(); });
 syncBtn();
-readColors(); renderPresets(); renderAll(); sizeMap();
-let rz; addEventListener("resize", ()=>{ clearTimeout(rz); rz = setTimeout(()=>{ sizeMap(); renderFlow(); renderScatter(); }, 120); });
+readColors(); if (cities.length) setCity(cities[0].id); renderPresets(); renderAll(); sizeMap(); sizeB();
+let rz; addEventListener("resize", ()=>{ clearTimeout(rz); rz = setTimeout(()=>{ sizeMap(); sizeB(); renderFlow(); renderScatter(); }, 120); });
 })();
 </script>
 </body>

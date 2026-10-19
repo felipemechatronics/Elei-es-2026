@@ -7,3 +7,4 @@ python scripts/gerar_dados.py dados_tse/votacao_secao_2026_RN.csv --cargo Govern
 python scripts/gerar_relatorio.py
 python scripts/gerar_deputados.py dados_tse/votacao_secao_2026_RN.csv
 python scripts/gerar_lula.py dados_tse/Urnas_Presidente.xlsx dados_tse/votacao_secao_2026_RN.csv
+python scripts/gerar_pdf_lula.py
