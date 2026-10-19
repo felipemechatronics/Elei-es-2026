@@ -356,7 +356,7 @@ footer{margin-top:56px;padding:24px 0 48px;border-top:1px solid var(--line);font
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
 <script src="geo.js"></script>
-<script src="lula.js"></script>
+<script src="lula.js?v=20261019"></script>
 <script>
 (() => {
 const L = window.LULA, G = window.GEO;
@@ -694,6 +694,7 @@ function sizeB(){
 }
 let SCB;
 function paintB(){
+  if (!BV.city) return;
   SCB = scaleFor(BR, BV);
   bpaths.attr("fill", f=>{ const b=bById.get(f.properties.id); return b? SCB.f(metric(b,BV)) : COL.empty; })
     .attr("stroke", f=> BV.sel===f.properties.id ? COL.ink : COL.surface)
@@ -728,6 +729,7 @@ const BCOLS = [
 ];
 const BTS = {k:"l", dir:-1};
 function renderBTable(){
+  if (!BV.city) { $("#bcount").textContent = "Sem dados de bairros."; return; }
   const all = $("#ball").checked;
   $("#btbl thead").innerHTML = `<tr>${BCOLS.filter(c=>all||c.k!=="mn").map(c=>`<th data-k="${c.k}" aria-sort="${BTS.k===c.k?(BTS.dir>0?"ascending":"descending"):"none"}">${c.t}</th>`).join("")}</tr>`;
   const q = $("#bq").value.trim().toLowerCase().normalize("NFD").replace(/\p{M}/gu,"");
