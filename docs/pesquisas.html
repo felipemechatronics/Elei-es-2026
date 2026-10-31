@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pesquisas e projeção</title>
+<meta name="description" content="Acompanhamento das pesquisas eleitorais registradas no RN em 2026, com linha de projeção para o fim de cada turno e comparação com o resultado oficial.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme: light;
+  --bg:#f5f7f8; --surface:#ffffff; --ink:#15212c; --ink-2:#4a5966; --muted:#7a8792;
+  --line:#dce2e6; --line-2:#c3ccd3;
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100; --s5:#e87ba4; --outros:#c3c9ce;
+  --focus:#2a78d6;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --bg:#0e151b; --surface:#121a21; --ink:#e9eef1; --ink-2:#b4c0c9; --muted:#7f8c96;
+    --line:#24313b; --line-2:#33424e;
+    --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181; --outros:#444d55;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --bg:#0e151b; --surface:#121a21; --ink:#e9eef1; --ink-2:#b4c0c9; --muted:#7f8c96;
+  --line:#24313b; --line-2:#33424e;
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181; --outros:#444d55;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 17px/1.6 "Literata",Georgia,serif;-webkit-font-smoothing:antialiased}
+h1,h2,h3,button,input,select,table,.tip,nav,.ui{font-family:"Archivo",system-ui,sans-serif}
+a{color:inherit;text-underline-offset:3px}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.wrap{max-width:1240px;margin:0 auto;padding:0 24px}
+.top{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;gap:24px;height:52px}
+.brand{font:700 15px/1 "Archivo",system-ui,sans-serif;font-stretch:112%;text-decoration:none}
+.top nav{display:flex;gap:18px;font-size:14px;color:var(--ink-2);overflow-x:auto;scrollbar-width:none}
+.top nav a{text-decoration:none;white-space:nowrap}
+.top nav a[aria-current]{color:var(--ink);font-weight:600}
+.theme{margin-left:auto;background:none;border:1px solid var(--line-2);color:var(--ink-2);border-radius:999px;font-size:13px;padding:5px 12px;cursor:pointer;white-space:nowrap}
+header.intro{padding:36px 0 8px;max-width:800px}
+.kicker{font:500 14px/1.3 "Archivo",system-ui,sans-serif;color:var(--ink-2);margin:0 0 12px}
+h1{font-weight:800;font-stretch:118%;font-size:clamp(32px,4.2vw,50px);line-height:1;letter-spacing:-.025em;margin:0 0 16px}
+.lede{font-size:18px;color:var(--ink-2);margin:0}
+h2{font-weight:800;font-stretch:115%;font-size:clamp(22px,2.6vw,30px);line-height:1.1;letter-spacing:-.02em;margin:0 0 10px}
+h3{font:700 17px/1.25 "Archivo",system-ui,sans-serif;margin:0 0 6px}
+.sub{font:400 14px/1.5 "Archivo",system-ui,sans-serif;color:var(--ink-2);margin:0 0 14px;max-width:800px}
+section{padding:36px 0 0}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px}
+.note{font:400 12.5px/1.5 "Archivo",system-ui,sans-serif;color:var(--muted);margin-top:10px}
+
+.raceseg{display:flex;gap:8px;flex-wrap:wrap;margin:22px 0 0}
+.raceseg button{font:600 14px "Archivo",system-ui,sans-serif;border:1px solid var(--line-2);background:var(--surface);color:var(--ink-2);border-radius:12px;padding:10px 16px;cursor:pointer;text-align:left}
+.raceseg button small{display:block;font-weight:400;font-size:12px;color:var(--muted)}
+.raceseg button[aria-pressed="true"]{border-color:var(--ink);color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+
+.controls{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;font:400 13px "Archivo",system-ui,sans-serif;color:var(--ink-2);margin-bottom:14px}
+.controls label{display:inline-flex;align-items:center;gap:6px}
+.controls select{font:400 13px "Archivo",system-ui,sans-serif;padding:5px 10px;border-radius:999px;border:1px solid var(--line-2);background:var(--bg);color:var(--ink)}
+.useg{display:inline-flex;border:1px solid var(--line-2);border-radius:999px;padding:2px;gap:2px;background:var(--surface)}
+.useg button{border:0;background:none;color:var(--ink-2);font:500 12.5px "Archivo",system-ui,sans-serif;padding:4px 10px;border-radius:999px;cursor:pointer}
+.useg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+
+.chartbox{position:relative}
+.chartbox svg{display:block;width:100%;height:auto;overflow:visible}
+.chartbox text{font:400 12px "Archivo",system-ui,sans-serif;fill:var(--ink-2)}
+.chartbox text.lbl{font-weight:600;fill:var(--ink)}
+.chartbox text.val{font-variant-numeric:tabular-nums}
+.keys{display:flex;flex-wrap:wrap;gap:6px 16px;font:400 13px "Archivo",system-ui,sans-serif;color:var(--ink-2);margin:0 0 8px}
+.keys span{display:inline-flex;align-items:center;gap:6px}
+.keys i{width:10px;height:10px;border-radius:3px;display:inline-block}
+.keys svg{display:inline-block}
+
+.proj{display:grid;grid-template-columns:1.2fr 1fr;gap:24px;margin-top:24px}
+.proj>*{min-width:0}
+.verdict{font:500 15px/1.5 "Archivo",system-ui,sans-serif;margin:0 0 12px}
+table.t{border-collapse:collapse;width:100%;font:400 13.5px "Archivo",system-ui,sans-serif}
+table.t th,table.t td{padding:8px 10px;text-align:right;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;white-space:nowrap}
+table.t th:first-child,table.t td:first-child,table.t th:nth-child(2),table.t td:nth-child(2){text-align:left}
+table.t th{font-weight:600;color:var(--ink-2);background:var(--surface)}
+table.t td small{color:var(--muted)}
+.pos{display:inline-flex;width:22px;height:22px;border-radius:999px;align-items:center;justify-content:center;font-weight:700;font-size:12px;background:color-mix(in srgb,var(--ink) 8%,transparent)}
+.pos.win{background:var(--ink);color:var(--bg)}
+.chip{display:inline-flex;align-items:center;gap:7px}
+.chip i{width:10px;height:10px;border-radius:3px;display:inline-block;flex:none}
+.ok{font-weight:600}
+.scroll{overflow-x:auto}
+
+.tablebox{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.tabletools{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:12px 14px;border-bottom:1px solid var(--line);font:400 13px "Archivo",system-ui,sans-serif;color:var(--ink-2)}
+.tscroll{max-height:520px;overflow:auto}
+table.big{border-collapse:collapse;width:100%;font:400 13px "Archivo",system-ui,sans-serif}
+table.big th,table.big td{padding:7px 10px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+table.big th:first-child,table.big td:first-child{text-align:left}
+table.big th{position:sticky;top:0;background:var(--surface);font-weight:600;color:var(--ink-2);cursor:pointer;z-index:1}
+table.big th[aria-sort="ascending"]::after{content:" ▲";font-size:9px}
+table.big th[aria-sort="descending"]::after{content:" ▼";font-size:9px}
+table.big tr.off td{color:var(--muted)}
+.bar{display:inline-block;height:6px;border-radius:3px;background:var(--ink-2);vertical-align:middle;margin-left:6px;opacity:.6}
+
+.method{max-width:800px}
+.method p{font-size:15.5px;color:var(--ink-2);margin:0 0 .8em}
+footer{margin-top:56px;padding:24px 0 48px;border-top:1px solid var(--line);font:400 13px/1.6 "Archivo",system-ui,sans-serif;color:var(--muted)}
+.tip{position:fixed;z-index:50;pointer-events:none;background:var(--surface);color:var(--ink);border:1px solid var(--line-2);border-radius:10px;padding:9px 11px;font-size:12.5px;line-height:1.4;box-shadow:0 6px 22px rgba(0,0,0,.14);max-width:300px;opacity:0}
+.tip .tt{font-weight:700;font-size:13.5px;margin-bottom:3px}
+.tip .tr{display:flex;justify-content:space-between;gap:14px}
+.tip .tr i{width:8px;height:8px;border-radius:2px;display:inline-block;margin-right:6px}
+.tip .tm{color:var(--muted);margin-top:3px}
+@media (max-width:960px){ .proj{grid-template-columns:1fr} }
+@media (max-width:560px){
+  .wrap{padding:0 16px}
+  .top nav{gap:12px;font-size:13px}
+  .brand{display:none}
+  .raceseg button{flex:1;min-width:0;padding:8px 10px;font-size:13px}
+}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="brand" href="index.html">RN 2026</a>
+  <nav aria-label="Páginas"><a href="index.html">Resultados</a><a href="deputados.html">Deputados</a><a href="simulador.html">Simulador 2º turno</a><a href="lula.html">Lula × Governo</a><a href="pesquisas.html" aria-current="page">Pesquisas</a><a href="gestao.html">Gestão</a></nav>
+  <button class="theme" id="themeBtn" type="button">Tema escuro</button>
+</div></header>
+
+<main class="wrap">
+<header class="intro">
+  <p class="kicker">Pesquisas registradas no RN · janeiro a outubro de 2026</p>
+  <h1>Pesquisas e projeção para o fim de cada turno</h1>
+  <p class="lede">Cada ponto é uma pesquisa. A linha contínua mostra a tendência das pesquisas; a tracejada projeta essa tendência até o dia da eleição, com uma faixa de incerteza, e indica as posições esperadas. Depois, a projeção é comparada com o resultado oficial.</p>
+</header>
+
+<div class="raceseg" id="race" role="group" aria-label="Disputa"></div>
+
+<section id="grafico" style="padding-top:22px">
+  <div class="card">
+    <div class="controls">
+      <label>Pesquisas usadas na projeção <select id="win"><option value="60">últimos 60 dias</option><option value="90" selected>últimos 90 dias</option><option value="150">últimos 150 dias</option><option value="9999">todas</option></select></label>
+      <label>Tipo de projeção <span class="useg" id="tipo"><button type="button" data-t="tend" aria-pressed="true">Tendência</button><button type="button" data-t="media">Média ponderada</button></span></label>
+      <label><input type="checkbox" id="res" checked> Mostrar resultado oficial</label>
+      <label id="foraLbl"><input type="checkbox" id="fora"> Incluir cenários com candidatos que não concorreram</label>
+    </div>
+    <div class="keys" id="keys"></div>
+    <div class="chartbox" id="chart"></div>
+    <p class="note" id="chartNote"></p>
+  </div>
+</section>
+
+<section id="projecao">
+  <h2>Posições projetadas ao fim do turno</h2>
+  <p class="sub" id="projSub"></p>
+  <div class="proj">
+    <div class="card">
+      <p class="verdict" id="verdict"></p>
+      <div class="scroll"><table class="t" id="ptab"></table></div>
+      <p class="note">Percentuais de votos válidos. Entre colchetes, faixa de 95% da projeção. Erro: projeção menos resultado, em pontos percentuais.</p>
+    </div>
+    <div class="card">
+      <h3>Quem chegou mais perto</h3>
+      <p class="sub" style="margin-bottom:8px">Erro médio de cada pesquisa nos principais candidatos (em pontos percentuais dos válidos), considerando as pesquisas de campo mais recentes de cada instituto.</p>
+      <div class="scroll"><table class="t" id="erros"></table></div>
+    </div>
+  </div>
+</section>
+
+<section id="tabela">
+  <h2>Todas as pesquisas</h2>
+  <div class="tablebox">
+    <div class="tabletools"><span id="tcount"></span><span>Valores em % dos votos válidos (os percentuais da planilha divididos pela soma dos candidatos da pesquisa).</span></div>
+    <div class="tscroll"><table class="big" id="tbl"><thead></thead><tbody></tbody></table></div>
+  </div>
+</section>
+
+<section id="metodo" class="method">
+  <h2>Como foi feito</h2>
+  <p><b>Dados.</b> As pesquisas vêm da planilha de acompanhamento "PESQUISAS RN 2026" (abas de 1º turno de Governador e Senado e de 2º turno de Governador), com as pesquisas registradas no RN a partir de janeiro. A data de cada pesquisa é o último dia do trabalho de campo; quando a planilha não informa o campo, usa-se a data de publicação. Colunas repetidas na planilha foram contadas uma vez.</p>
+  <p><b>Votos válidos.</b> Cada pesquisa traz percentuais sobre o total de entrevistados, com indecisos, brancos e nulos. Para comparar com o resultado, que o TSE divulga em votos válidos, o percentual de cada candidato é dividido pela soma dos candidatos daquela pesquisa. Pesquisas de cenários com candidatos que acabaram não concorrendo (por exemplo, Rogério Marinho e Carlos Eduardo para governador, ou Fátima Bezerra e Álvaro Dias para o Senado) ficam fora da projeção, a não ser que você marque a opção acima.</p>
+  <p><b>Tendência e projeção.</b> A linha contínua é uma média móvel ponderada (cada dia recebe a média das pesquisas próximas, com peso maior para as mais perto daquela data e para as de amostra maior). A projeção usa as pesquisas da janela escolhida e ajusta, para cada candidato, uma reta pelos mínimos quadrados, com peso proporcional à raiz do tamanho da amostra e maior para as pesquisas mais recentes (o peso cai pela metade a cada 30 dias). A reta é prolongada até o dia da eleição. Em "Média ponderada", a projeção é só a média ponderada das pesquisas, sem tendência; é o que se usa quando as pesquisas cobrem menos de três semanas, como no 2º turno. Ao final, os valores projetados são reescalados para somar 100% com os demais candidatos.</p>
+  <p><b>Faixa de incerteza.</b> A faixa de 95% vem da dispersão das pesquisas em torno da reta, somada à incerteza de prolongá-la por mais tempo. Ela não inclui erros que afetam todas as pesquisas na mesma direção.</p>
+  <p><b>Senado.</b> Em 2026 cada eleitor votou em dois candidatos ao Senado e foram eleitos os dois mais votados. As pesquisas da planilha medem a intenção de voto de forma variada (algumas só o primeiro voto, outras os dois), então para o Senado o mais importante é a comparação das posições; os percentuais são parcelas do total de menções e do total de votos válidos.</p>
+  <p><b>Limites.</b> Projeção não é previsão: ela supõe que a tendência das pesquisas continua igual até a eleição. No 1º turno, as pesquisas da planilha terminam no fim de agosto, cinco semanas antes da votação, e a campanha de rádio e TV mudou bastante o quadro nesse período.</p>
+  <p>Arquivo de dados: <code>docs/pesquisas.js</code>, gerado por <code>scripts/gerar_pesquisas.py</code>.</p>
+</section>
+</main>
+<footer><div class="wrap">Pesquisas: planilha "PESQUISAS RN 2026". Resultados: TSE (votação por seção do 1º turno e boletins de urna do 2º turno).</div></footer>
+<div class="tip" id="tip" role="tooltip"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script src="pesquisas.js?v=20261031"></script>
+<script>
+(() => {
+const P = window.PESQ;
+const nf = new Intl.NumberFormat("pt-BR");
+const pf = (x,d=1) => (isFinite(x)?x:0).toLocaleString("pt-BR",{minimumFractionDigits:d,maximumFractionDigits:d});
+const $ = s => document.querySelector(s);
+const esc = s => String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const DAY = 864e5, toD = s => new Date(s+"T12:00:00");
+const fmtD = d => d.toLocaleDateString("pt-BR",{day:"numeric",month:"short"}).replace(".","");
+const RACES = [
+  {id:"gov1", nome:"Governador · 1º turno", sub:"eleição em 4 de outubro"},
+  {id:"sen1", nome:"Senado · 1º turno", sub:"duas vagas, 4 de outubro"},
+  {id:"gov2", nome:"Governador · 2º turno", sub:"eleição em 25 de outubro"},
+];
+// cor por candidato (fixa dentro de cada disputa)
+const SLOT = {allyson:1, cadu:2, alvaro:3, styvenson:1, samanda:2, zenaide:3, helio:4, rafael:5};
+const colorOf = k => SLOT[k] ? css(`--s${SLOT[k]}`) : css("--outros");
+const S = {race:"gov1", win:90, tipo:"tend", res:true, fora:false};
+try { const h = new URLSearchParams(location.hash.slice(1)); if (RACES.some(r=>r.id===h.get("d"))) S.race = h.get("d"); } catch(e){}
+
+// ---------- dados ----------
+function polls(){
+  return P.pesquisas.filter(p=>p.c===S.race && (S.fora || p.fora<=5)).map(p=>{
+    const tot = d3.sum(Object.values(p.v));
+    const s = {}; for (const [k,v] of Object.entries(p.v)) s[k] = 100*v/tot;
+    return {...p, t:toD(p.d), s, tot};
+  }).sort((a,b)=>a.t-b.t);
+}
+function official(){
+  const r = P.resultados[S.race]; const o = {};
+  for (const [k,v] of Object.entries(r.votos)) o[k] = 100*v/r.v;
+  return o;
+}
+const MAIN = () => P.principais[S.race];
+
+// ---------- projeção ----------
+function project(ps){
+  const E = toD(P.eleicao[S.race]);
+  const last = d3.max(ps, p=>p.t);
+  const use = ps.filter(p=> (last - p.t)/DAY <= S.win);
+  const span = (d3.max(use,p=>p.t) - d3.min(use,p=>p.t))/DAY;
+  const trend = S.tipo==="tend" && span >= 21 && use.length >= 4;
+  const tE = (E - last)/DAY;
+  const out = {};
+  for (const k of MAIN()){
+    const pts = use.filter(p=>p.s[k]!=null).map(p=>({x:(p.t-last)/DAY, y:p.s[k], w:Math.sqrt(p.n||1000)*Math.pow(.5, (last-p.t)/DAY/30)}));
+    if (!pts.length) continue;
+    const W = d3.sum(pts,p=>p.w), xm = d3.sum(pts,p=>p.w*p.x)/W, ym = d3.sum(pts,p=>p.w*p.y)/W;
+    const Sxx = d3.sum(pts,p=>p.w*(p.x-xm)**2);
+    let b = trend && Sxx>0 ? d3.sum(pts,p=>p.w*(p.x-xm)*(p.y-ym))/Sxx : 0;
+    const a = ym - b*xm;
+    const res = pts.map(p=>p.y-(a+b*p.x));
+    const df = Math.max(1, pts.length - (trend?2:1));
+    const s2 = d3.sum(pts.map((p,i)=>p.w*res[i]**2))/W * pts.length/df;
+    const neff = W*W/d3.sum(pts,p=>p.w*p.w);
+    const xe = tE;
+    const se = Math.sqrt(s2*(1 + 1/neff + (trend && Sxx>0 ? (W*(xe-xm)**2/Sxx)/neff : 0)));
+    out[k] = {a, b, y:a+b*xe, lo:0, hi:0, se, n:pts.length, xe};
+  }
+  // reescala com os demais candidatos (média ponderada da parcela fora dos principais)
+  const rest = d3.mean(use, p=>100 - d3.sum(MAIN(), k=>p.s[k]||0)) || 0;
+  const sum = d3.sum(Object.values(out), o=>Math.max(0,o.y)) + rest;
+  const f = sum>0 ? 100/sum : 1;
+  for (const o of Object.values(out)){ o.y = Math.max(0,o.y)*f; o.lo = Math.max(0, o.y-1.96*o.se); o.hi = Math.min(100, o.y+1.96*o.se); o.f = f; }
+  return {out, last, E, use, trend, span};
+}
+// média móvel (núcleo gaussiano, 18 dias)
+function smooth(ps, k){
+  const pts = ps.filter(p=>p.s[k]!=null); if (pts.length<2) return [];
+  const t0 = d3.min(pts,p=>p.t), t1 = d3.max(pts,p=>p.t), out=[];
+  const bw = S.race==="gov2" ? 4 : 18;
+  for (let t=+t0; t<=+t1; t+=DAY*(S.race==="gov2"?0.5:2)){
+    let sw=0, sy=0; for (const p of pts){ const w = Math.exp(-0.5*((p.t-t)/DAY/bw)**2)*Math.sqrt(p.n||1000); sw+=w; sy+=w*p.s[k]; }
+    out.push({t:new Date(t), y:sy/sw});
+  }
+  return out;
+}
+
+// ---------- gráfico ----------
+const tip = $("#tip");
+function showTip(ev, html){ tip.innerHTML=html; tip.style.opacity=1; const w=tip.offsetWidth,h=tip.offsetHeight; let x=ev.clientX+14,y=ev.clientY+14; if(x+w>innerWidth-8)x=ev.clientX-w-14; if(y+h>innerHeight-8)y=ev.clientY-h-14; tip.style.left=Math.max(8,x)+"px"; tip.style.top=Math.max(8,y)+"px"; }
+const hideTip = () => tip.style.opacity = 0;
+const nome = k => P.nomes[k] || k;
+
+function draw(){
+  const ps = polls(), pr = project(ps), off = official(), main = MAIN();
+  const el = $("#chart"); const W = Math.max(320, el.clientWidth), narrow = W < 640;
+  const H = narrow ? 380 : 460, mg = {l:40, r: narrow? 92 : 150, t:16, b:34};
+  const x0 = d3.min(ps,p=>p.t), x1 = new Date(+pr.E + DAY*(S.race==="gov2"?1:4));
+  const x = d3.scaleTime([x0, x1],[mg.l, W-mg.r]);
+  const yMax = Math.min(100, Math.ceil((d3.max([...ps.flatMap(p=>main.map(k=>p.s[k]||0)), ...Object.values(pr.out).map(o=>o.hi), ...(S.res?main.map(k=>off[k]||0):[])])+4)/10)*10);
+  const yMinV = d3.min([...ps.flatMap(p=>main.filter(k=>p.s[k]!=null).map(k=>p.s[k])), ...Object.values(pr.out).map(o=>o.lo), ...(S.res?main.map(k=>off[k]??100):[])]);
+  const yMin = yMinV > 25 ? Math.max(0, Math.floor(yMinV/10)*10 - 10) : 0;
+  const y = d3.scaleLinear([yMin, yMax],[H-mg.b, mg.t]);
+  const svg = d3.create("svg").attr("viewBox",`0 0 ${W} ${H}`).attr("role","img").attr("aria-label","Pesquisas ao longo do tempo, tendência e projeção até a eleição");
+  // grade e eixos
+  const gy = svg.append("g");
+  y.ticks(5).forEach(t=>{ gy.append("line").attr("x1",mg.l).attr("x2",W-mg.r).attr("y1",y(t)).attr("y2",y(t)).attr("stroke",css("--line")); gy.append("text").attr("x",mg.l-6).attr("y",y(t)+4).attr("text-anchor","end").text(t+"%"); });
+  const gx = svg.append("g");
+  x.ticks(narrow?4:8).forEach(t=>{ gx.append("text").attr("x",x(t)).attr("y",H-mg.b+18).attr("text-anchor","middle").text(fmtD(t)); });
+  // janela de projeção
+  const wStart = new Date(Math.max(+x0, +pr.last - S.win*DAY));
+  svg.append("rect").attr("x",x(wStart)).attr("y",mg.t).attr("width",Math.max(0,x(pr.last)-x(wStart))).attr("height",H-mg.b-mg.t).attr("fill",css("--ink")).attr("opacity",.035);
+  // dia da eleição
+  svg.append("line").attr("x1",x(pr.E)).attr("x2",x(pr.E)).attr("y1",mg.t).attr("y2",H-mg.b).attr("stroke",css("--ink")).attr("stroke-dasharray","3 3").attr("opacity",.6);
+  svg.append("text").attr("x",x(pr.E)-4).attr("y",mg.t+10).attr("text-anchor","end").text("eleição");
+  // senado: linha das 2 vagas não se aplica a % ; nada
+  const surf = css("--surface");
+  for (const k of main){
+    const c = colorOf(k), o = pr.out[k]; if (!o) continue;
+    // faixa da projeção
+    const xa = pr.last, xb = pr.E;
+    const yA = o.a*o.f;
+    const band = d3.area().x(d=>x(d.t)).y0(d=>y(d.lo)).y1(d=>y(d.hi));
+    const steps = d3.range(0,11).map(i=>{ const t = new Date(+xa + (xb-xa)*i/10); const yy = (o.a + o.b*((t-xa)/DAY))*o.f; const h = 1.96*o.se*(i/10); return {t, lo:Math.max(0,yy-h), hi:yy+h}; });
+    svg.append("path").attr("d",band(steps)).attr("fill",c).attr("opacity",.13);
+    // tendência
+    const sm = smooth(ps, k);
+    svg.append("path").attr("d",d3.line().x(d=>x(d.t)).y(d=>y(d.y)).curve(d3.curveMonotoneX)(sm)).attr("fill","none").attr("stroke",c).attr("stroke-width",2);
+    // projeção tracejada
+    svg.append("line").attr("x1",x(xa)).attr("y1",y(yA)).attr("x2",x(xb)).attr("y2",y(o.y)).attr("stroke",c).attr("stroke-width",2).attr("stroke-dasharray","6 4");
+  }
+  // pontos das pesquisas
+  const gp = svg.append("g");
+  for (const p of ps) for (const k of main){ if (p.s[k]==null) continue;
+    gp.append("circle").attr("cx",x(p.t)).attr("cy",y(p.s[k])).attr("r",4).attr("fill",colorOf(k)).attr("stroke",surf).attr("stroke-width",1.5).attr("opacity", pr.use.includes(p)?.9:.4)
+      .on("mousemove",ev=>showTip(ev, pollTip(p))).on("mouseleave",hideTip);
+  }
+  // fim da projeção + resultado + rótulos diretos
+  const labels = [];
+  for (const k of main){
+    const o = pr.out[k]; if (!o) continue; const c = colorOf(k);
+    svg.append("circle").attr("cx",x(pr.E)).attr("cy",y(o.y)).attr("r",5).attr("fill",surf).attr("stroke",c).attr("stroke-width",2.5)
+      .on("mousemove",ev=>showTip(ev, `<div class="tt">${esc(nome(k))}: projeção</div><div class="tr"><span>${fmtD(pr.E)}</span><b>${pf(o.y)}%</b></div><div class="tm">Faixa de 95%: ${pf(o.lo)}% a ${pf(o.hi)}%${S.res&&off[k]!=null?`<br>Resultado oficial: ${pf(off[k])}%`:""}</div>`)).on("mouseleave",hideTip);
+    if (S.res && off[k]!=null){
+      const yy = y(off[k]);
+      svg.append("path").attr("d",`M${x(pr.E)},${yy-7}L${x(pr.E)+7},${yy}L${x(pr.E)},${yy+7}L${x(pr.E)-7},${yy}Z`).attr("fill",c).attr("stroke",surf).attr("stroke-width",1.5)
+        .on("mousemove",ev=>showTip(ev, `<div class="tt">${esc(nome(k))}: resultado oficial</div><div class="tr"><span>Votos válidos</span><b>${pf(off[k])}%</b></div><div class="tm">Projeção: ${pf(o.y)}% (erro de ${pf(o.y-off[k])} p.p.)</div>`)).on("mouseleave",hideTip);
+    }
+    labels.push({k, y:y(S.res && off[k]!=null ? off[k] : o.y), txt: S.res && off[k]!=null ? `${pf(off[k])}% · proj. ${pf(o.y,0)}%` : `proj. ${pf(o.y)}%`});
+  }
+  // rótulos sem sobreposição
+  labels.sort((a,b)=>a.y-b.y); for (let i=1;i<labels.length;i++) labels[i].y = Math.max(labels[i].y, labels[i-1].y+30);
+  const over = labels.length ? labels[labels.length-1].y - (H-mg.b) : 0; if (over>0) labels.forEach(l=>l.y-=over);
+  for (const l of labels){
+    const g = svg.append("g").attr("transform",`translate(${x(pr.E)+12},${l.y})`);
+    g.append("rect").attr("x",0).attr("y",-11).attr("width",9).attr("height",9).attr("rx",2).attr("fill",colorOf(l.k));
+    g.append("text").attr("class","lbl").attr("x",13).attr("y",-2).text(narrow ? nome(l.k).split(" ")[0] : nome(l.k));
+    g.append("text").attr("class","val").attr("x",13).attr("y",13).text(l.txt);
+  }
+  el.innerHTML = ""; el.append(svg.node());
+  // legenda
+  $("#keys").innerHTML = main.map(k=>`<span><i style="background:${colorOf(k)}"></i>${esc(nome(k))}</span>`).join("") +
+    `<span><svg width="26" height="10" aria-hidden="true"><line x1="0" y1="5" x2="26" y2="5" stroke="currentColor" stroke-width="2"/></svg>tendência</span>`+
+    `<span><svg width="26" height="10" aria-hidden="true"><line x1="0" y1="5" x2="26" y2="5" stroke="currentColor" stroke-width="2" stroke-dasharray="6 4"/></svg>projeção</span>`+
+    (S.res?`<span><svg width="12" height="12" aria-hidden="true"><path d="M6,0L12,6L6,12L0,6Z" fill="currentColor"/></svg>resultado oficial</span>`:"");
+  $("#chartNote").textContent = `${ps.length} pesquisas; ${pr.use.length} na janela da projeção (área sombreada), de ${fmtD(d3.min(pr.use,p=>p.t))} a ${fmtD(pr.last)}. ` +
+    `A última pesquisa terminou o campo ${Math.round((pr.E-pr.last)/DAY)} dias antes da eleição. ` + (S.tipo==="tend" && !pr.trend ? "Com menos de três semanas de pesquisas, a projeção usa a média ponderada, sem tendência." : "");
+  return {ps, pr, off};
+}
+function pollTip(p){
+  const main = MAIN();
+  return `<div class="tt">${esc(p.inst)}</div><div class="tm" style="margin:0 0 4px">${esc(p.rot.split(" · ")[1]||"")}${p.n?` · ${nf.format(p.n)} entrevistas`:""}</div>`+
+    main.filter(k=>p.s[k]!=null).sort((a,b)=>p.s[b]-p.s[a]).map(k=>`<div class="tr"><span><i style="background:${colorOf(k)}"></i>${esc(nome(k))}</span><b>${pf(p.s[k])}% <span style="color:var(--muted);font-weight:400">(${pf(p.v[k])}% do total)</span></b></div>`).join("")+
+    `<div class="tm">Válidos: percentual do candidato sobre a soma dos candidatos da pesquisa.</div>`;
+}
+
+// ---------- tabelas ----------
+function renderProj(ctx){
+  const {pr, off} = ctx, main = MAIN().filter(k=>pr.out[k]);
+  const projOrd = [...main].sort((a,b)=>pr.out[b].y-pr.out[a].y);
+  const offOrd = [...main].sort((a,b)=>(off[b]||0)-(off[a]||0));
+  const vagas = S.race==="sen1" ? 2 : 1;
+  $("#ptab").innerHTML = `<thead><tr><th>Proj.</th><th>Candidato</th><th>Projeção</th>${S.res?"<th>Resultado</th><th>Posição real</th><th>Erro</th>":""}</tr></thead><tbody>`+
+    projOrd.map((k,i)=>{ const o = pr.out[k], ri = offOrd.indexOf(k);
+      return `<tr><td><span class="pos ${i<vagas?"win":""}">${i+1}º</span></td><td><span class="chip"><i style="background:${colorOf(k)}"></i>${esc(nome(k))}</span></td>
+        <td><b>${pf(o.y)}%</b> <small>[${pf(o.lo,0)}–${pf(o.hi,0)}]</small></td>
+        ${S.res?`<td>${pf(off[k]||0)}%</td><td><span class="pos ${ri<vagas?"win":""}">${ri+1}º</span>${ri===i?' <span class="ok" title="mesma posição">✓</span>':""}</td><td>${(o.y-(off[k]||0))>0?"+":""}${pf(o.y-(off[k]||0))}</td>`:""}</tr>`; }).join("")+`</tbody>`;
+  const acertos = projOrd.filter((k,i)=>offOrd[i]===k).length;
+  const lider = projOrd[0], gap = pr.out[projOrd[0]].y - pr.out[projOrd[1]].y;
+  const sobrepoe = pr.out[projOrd[0]].lo < pr.out[projOrd[1]].hi;
+  let v = S.race==="sen1"
+    ? `A projeção indica <b>${esc(nome(projOrd[0]))}</b> e <b>${esc(nome(projOrd[1]))}</b> nas duas vagas.`
+    : `A projeção indica <b>${esc(nome(lider))}</b> à frente por ${pf(gap)} pontos dos válidos${sobrepoe?", mas as faixas de incerteza dos dois primeiros se sobrepõem: na prática, um empate técnico":""}.`;
+  if (S.res){
+    const certos = S.race==="sen1" ? projOrd.slice(0,2).filter(k=>offOrd.slice(0,2).includes(k)).length : (projOrd[0]===offOrd[0]?1:0);
+    v += S.race==="sen1" ? ` No resultado oficial foram eleitos <b>${esc(nome(offOrd[0]))}</b> e <b>${esc(nome(offOrd[1]))}</b>: a projeção acertou ${certos} das 2 vagas e ${acertos} de ${main.length} posições.`
+      : ` No resultado oficial, <b>${esc(nome(offOrd[0]))}</b> ficou em primeiro: a projeção ${certos?"acertou":"errou"} o primeiro lugar e ${acertos} de ${main.length} posições.`;
+  }
+  $("#verdict").innerHTML = v;
+  $("#projSub").textContent = `Projeção para ${fmtD(pr.E)} com ${pr.use.length} pesquisas (${S.tipo==="tend" && pr.trend ? "tendência linear" : "média ponderada"}).`;
+  // erros por pesquisa (mais recente de cada instituto)
+  const byInst = new Map(); for (const p of ctx.ps) byInst.set(p.inst, p);
+  const rows = [...byInst.values()].map(p=>{ const ks = main.filter(k=>p.s[k]!=null && off[k]!=null); return {p, e:d3.mean(ks,k=>Math.abs(p.s[k]-off[k]))}; }).filter(r=>r.e!=null).sort((a,b)=>a.e-b.e);
+  const em = d3.max(rows,r=>r.e)||1;
+  $("#erros").innerHTML = `<thead><tr><th>Instituto</th><th>Campo</th><th>Erro médio</th></tr></thead><tbody>`+
+    rows.slice(0,12).map(r=>`<tr><td>${esc(r.p.inst)}</td><td>${fmtD(r.p.t)}</td><td>${pf(r.e)} p.p.<span class="bar" style="width:${Math.round(60*r.e/em)}px"></span></td></tr>`).join("")+`</tbody>`;
+}
+const TS = {k:"d", dir:-1};
+function renderTable(ctx){
+  const main = MAIN(), all = P.pesquisas.filter(p=>p.c===S.race).map(p=>{ const tot=d3.sum(Object.values(p.v)); const s={}; for(const [k,v] of Object.entries(p.v)) s[k]=100*v/tot; return {...p,s}; });
+  const cols = [{k:"inst",t:"Instituto",v:p=>p.inst,f:p=>esc(p.inst)},{k:"d",t:"Fim do campo",v:p=>p.d,f:p=>fmtD(toD(p.d))},{k:"n",t:"Entrevistas",v:p=>p.n||0,f:p=>p.n?nf.format(p.n):"–"},
+    ...main.map(k=>({k, t:nome(k), v:p=>p.s[k]??-1, f:p=>p.s[k]!=null?pf(p.s[k]):"–"})),
+    {k:"ind",t:"Indecisos, brancos e nulos",v:p=>d3.sum(Object.values(p.o)),f:p=>Object.keys(p.o).length?pf(d3.sum(Object.values(p.o)))+"%":"–"}];
+  const col = cols.find(c=>c.k===TS.k) || cols[1];
+  all.sort((a,b)=>{ const x=col.v(a), y=col.v(b); return (typeof x==="string"? x.localeCompare(y,"pt-BR") : x-y)*TS.dir; });
+  $("#tbl thead").innerHTML = `<tr>${cols.map(c=>`<th data-k="${c.k}" aria-sort="${TS.k===c.k?(TS.dir>0?"ascending":"descending"):"none"}">${esc(c.t)}</th>`).join("")}</tr>`;
+  $("#tbl tbody").innerHTML = all.map(p=>`<tr class="${p.fora>5?"off":""}" title="${p.fora>5?"Cenário com candidatos que não concorreram":""}">${cols.map(c=>`<td>${c.f(p)}</td>`).join("")}</tr>`).join("");
+  $("#tcount").textContent = `${all.length} pesquisas${all.some(p=>p.fora>5)?` (em cinza, ${all.filter(p=>p.fora>5).length} ${all.filter(p=>p.fora>5).length===1?"cenário":"cenários"} com candidatos que não concorreram)`:""}.`;
+}
+$("#tbl thead").addEventListener("click", e=>{ const th=e.target.closest("th"); if(!th) return; TS.dir = TS.k===th.dataset.k ? -TS.dir : -1; TS.k = th.dataset.k; renderTable(); });
+
+// ---------- controles ----------
+$("#race").innerHTML = RACES.map(r=>`<button type="button" data-r="${r.id}" aria-pressed="${r.id===S.race}">${esc(r.nome)}<small>${esc(r.sub)} · ${P.pesquisas.filter(p=>p.c===r.id).length} pesquisas</small></button>`).join("");
+$("#race").addEventListener("click", e=>{ const b=e.target.closest("button"); if(!b) return; S.race=b.dataset.r; $("#race").querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x===b)); try{history.replaceState(null,"","#d="+S.race)}catch(e){} render(); });
+$("#win").addEventListener("change", e=>{ S.win=+e.target.value; render(); });
+$("#tipo").addEventListener("click", e=>{ const b=e.target.closest("button"); if(!b) return; S.tipo=b.dataset.t; $("#tipo").querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x===b)); render(); });
+$("#res").addEventListener("change", e=>{ S.res=e.target.checked; render(); });
+$("#fora").addEventListener("change", e=>{ S.fora=e.target.checked; render(); });
+function render(){
+  $("#foraLbl").style.display = P.pesquisas.some(p=>p.c===S.race && p.fora>5) ? "" : "none";
+  const ctx = draw(); renderProj(ctx); renderTable(ctx);
+}
+const btn = $("#themeBtn");
+const curTheme = () => document.documentElement.dataset.theme || (matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");
+const syncBtn = () => btn.textContent = curTheme()==="dark" ? "Tema claro" : "Tema escuro";
+try { const t = localStorage.getItem("tema"); if (t) document.documentElement.dataset.theme = t; } catch(e){}
+btn.addEventListener("click", ()=>{ const t = curTheme()==="dark"?"light":"dark"; document.documentElement.dataset.theme=t; try{localStorage.setItem("tema",t)}catch(e){} syncBtn(); render(); });
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ()=>{ syncBtn(); render(); });
+syncBtn(); render();
+let rz; addEventListener("resize", ()=>{ clearTimeout(rz); rz=setTimeout(draw,120); });
+})();
+</script>
+</body>
+</html>
