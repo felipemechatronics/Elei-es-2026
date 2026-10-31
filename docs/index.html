@@ -319,7 +319,7 @@ footer{margin-top:64px;padding:24px 0 48px;border-top:1px solid var(--line);font
         <p>Cada local de votação é posicionado pela coordenada do cadastro do TSE. Quando a coordenada falta ou cai fora do município, o local aparece com contorno tracejado em posição aproximada e não entra na soma de nenhum bairro.</p>
         <p>Os limites de bairros são os do IBGE (Censo 2022) e existem para os municípios que têm bairros oficialmente delimitados. Bairros sem local de votação ficam em branco. Nos demais municípios, a lista agrupa os locais pelo bairro informado no endereço do TSE.</p>
         <h3>Fontes</h3>
-        <p>Votos por seção: TSE, Dados Abertos (votacao_secao). Cadastro e coordenadas dos locais de votação: TSE. Malhas de municípios e bairros: IBGE. Base geográfica organizada a partir do projeto <a href="https://sousapfe.github.io/eleicoesRN/">Como o RN votou para governador</a>, de Peterson Sousa.</p>
+        <p id="fonteVotos">Votos por seção: TSE, Dados Abertos (votacao_secao).</p><p>Cadastro e coordenadas dos locais de votação: TSE. Malhas de municípios e bairros: IBGE. Base geográfica organizada a partir do projeto <a href="https://sousapfe.github.io/eleicoesRN/">Como o RN votou para governador</a>, de Peterson Sousa.</p>
       </div>
     </div>
   </section>
@@ -402,6 +402,7 @@ $("#cargoSeg").innerHTML = (window.CARGOS||[]).map(c=>`<button type="button" dat
 $("#cargoSeg").addEventListener("click", e=>{ const b=e.target.closest("button"); if(!b || b.dataset.c===window.CARGO_ATUAL) return; location.href = location.pathname + "?cargo=" + b.dataset.c; });
 ["resultado_municipios","resultado_bairros","resultado_locais"].forEach((f,i)=>$("#dl"+(i+1)).href = `dados/${D.meta.id}/${f}.csv`);
 {
+  const T1 = D.meta.t1;
   const rows = CANDS.map(c=>({c, v:EST.vt[c.k]})).slice(0,5);
   const rest = EST.v - d3.sum(rows,r=>r.v);
   const maxv = rows[0].v;
@@ -410,7 +411,7 @@ $("#cargoSeg").addEventListener("click", e=>{ const b=e.target.closest("button")
       <span><span class="nm">${esc(c.nome)}</span><span class="pt">${esc(c.partido)}</span></span>
       <span class="pc">${pf(100*v/EST.v)}%</span>
       <span class="bar"><i style="width:${100*v/maxv}%;background:${candVar(c.k)}"></i></span>
-      <span class="vv">${nf.format(v)} votos</span></div>`).join("") +
+      <span class="vv">${nf.format(v)} votos${T1 && T1.c[c.nr]!=null ? ` · 1º turno: ${nf.format(T1.c[c.nr])} (${pf(100*T1.c[c.nr]/T1.v)}%), ${T1.c[c.nr]<=v?"+":"−"}${nf.format(Math.abs(v-T1.c[c.nr]))}` : ""}</span></div>`).join("") +
     (rest>0 ? `<div class="result-row"><i class="sw" style="background:var(--outros)"></i><span class="nm" style="font-weight:500">Demais candidatos (${CANDS.length-rows.length})</span><span class="pc" style="font-size:16px">${pf(100*rest/EST.v)}%</span><span class="vv">${nf.format(rest)} votos</span></div>`:"");
   $("#turnout").innerHTML = `Compareceram <b>${nf.format(EST.cp)}</b> dos ${nf.format(EST.ap)} eleitores aptos (${pct(EST.cp,EST.ap)}). Abstenção de <b>${pct(EST.ab,EST.ap)}</b>. Brancos: ${pct(EST.b,EST.cp)} e nulos: ${pct(EST.nu,EST.cp)} dos votos.`;
 }
@@ -811,6 +812,8 @@ $("#tbl tbody").addEventListener("click", e=>{ const tr=e.target.closest("tr"); 
 $("#tq").addEventListener("input", e=>{ tstate.q=e.target.value; table(); });
 
 // ---------- textos finais ----------
+if (D.meta.turno > 1) $("#fonteVotos").textContent = "Votos do 2º turno: boletins de urna de cada seção publicados pelo TSE no site de resultados (resultados.tse.jus.br), somados por local de votação e conferidos com os totais oficiais de cada município.";
+if (D.meta.turno > 1) document.querySelector('a[href="relatorio/abstencao_RN_2026.pdf"]').textContent = "Relatório de abstenção do 1º turno (PDF)";
 $("#anulTxt").textContent = D.meta.anulados.length
   ? `Votos dados a candidatos com registro indeferido ou cassado (números ${D.meta.anulados.join(", ")}) foram somados aos nulos, como na totalização do TSE.`
   : `Nulos são os votos digitados como nulos na urna.`;

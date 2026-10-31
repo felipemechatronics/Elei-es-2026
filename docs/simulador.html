@@ -365,6 +365,8 @@ footer{padding-bottom:140px !important;margin-top:56px;padding:24px 0 48px;borde
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
 <script src="geo.js"></script>
+<script src="governador_2t.js"></script>
+<script>window.D2T = window.DADOS;</script>
 <script src="governador.js"></script>
 <script>
 (() => {
@@ -670,7 +672,16 @@ function renderResult(){
   $("#result").innerHTML = `<h2>${t.t>0.5?"Resultado do cenário":"Resultado simulado"}</h2>`+row(A,t.a,pa,t.toA,t.dA,t.mvA)+row(C,t.c,pc,t.toC,t.dC,t.mvC)+rowT+rowO+
     duelBar(t)+
     `<p class="verdict">${marginTxt(t).replace(/^./, x=>x.toUpperCase())}. ${t.t>0.5 && S.g.a===0 && S.g.c===0 && !S.rules.length && !nCustom() && !S.adj.a && !S.adj.c && !S.adj.t ? "Este é o resultado real do 1º turno; arraste a barra para transferir os votos de "+esc(T.nome)+". " : ""}${nCustom()?`${nCustom()} ${nCustom()===1?"município tem":"municípios têm"} ajustes próprios.`:""}</p>`+
-    `<p class="note">${S.rest==="t" ? `${nf.format(Math.round(t.t))} votos continuam com ${esc(T.nome)}${t.o>0.5?` e ${nf.format(Math.round(t.o))} com os demais candidatos`:""}. ` : ""}${Math.abs(t.dT)>=0.5?`Votos de ${esc(T.nome)} a dividir: ${nf.format(Math.round(t.tv))} (${signed(t.dT)} de ajuste sobre o 1º turno). `:""}${t.toN>=0.5?`${nf.format(Math.round(t.toN))} eleitores não votam em nenhum dos dois nesta simulação.`:""}</p>`;
+    `<p class="note">${S.rest==="t" ? `${nf.format(Math.round(t.t))} votos continuam com ${esc(T.nome)}${t.o>0.5?` e ${nf.format(Math.round(t.o))} com os demais candidatos`:""}. ` : ""}${Math.abs(t.dT)>=0.5?`Votos de ${esc(T.nome)} a dividir: ${nf.format(Math.round(t.tv))} (${signed(t.dT)} de ajuste sobre o 1º turno). `:""}${t.toN>=0.5?`${nf.format(Math.round(t.toN))} eleitores não votam em nenhum dos dois nesta simulação.`:""}</p>` + real2t();
+}
+function real2t(){
+  const R = window.D2T; if (!R || !R.estado || !R.meta || R.meta.turno !== 2) return "";
+  const vt = nr => { const c = R.cands.find(x=>x.nr===nr); return c ? R.estado.vt[c.k] : 0; };
+  const a = vt(A.nr), c = vt(C.nr), v = R.estado.v;
+  return `<div class="state" style="margin-top:14px"><div style="font:600 12.5px Archivo,system-ui,sans-serif;color:var(--ink-2)">Resultado oficial do 2º turno (25/10)</div>
+    <div class="duel sm"><i style="width:${100*a/v}%;background:${COL.A}"></i><i style="width:${100*c/v}%;background:${COL.C}"></i></div>
+    <div class="sline"><span>${esc(A.nome)}<b>${pf(100*a/v)}%</b></span><span>${esc(C.nome)}<b>${pf(100*c/v)}%</b></span></div>
+    <p class="snote">${nf.format(a)} × ${nf.format(c)} votos. <a href="index.html?cargo=governador_2t">Ver o 2º turno no mapa</a>.</p></div>`;
 }
 
 // ---------- mapa ----------

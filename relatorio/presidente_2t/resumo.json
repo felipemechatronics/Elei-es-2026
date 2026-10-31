@@ -1,0 +1,53 @@
+{
+  "meta": {
+    "id": "presidente_2t",
+    "cargo": "Presidente",
+    "uf": "RN",
+    "turno": 2,
+    "eleicao": "Eleição Ordinária Federal - 2026 2º Turno",
+    "data": "25/10/2026",
+    "formato": "boletim_urna",
+    "anulados": [],
+    "locais_sem_base": 0,
+    "t1": {
+      "data": "04/10/2026",
+      "v": 2071961,
+      "cp": 2171013,
+      "c": {
+        "13": 1237963,
+        "22": 720493
+      }
+    }
+  },
+  "cands": [
+    {
+      "k": 0,
+      "nr": 13,
+      "nome": "Lula",
+      "completo": "Lula",
+      "partido": "PT",
+      "cor": 1
+    },
+    {
+      "k": 1,
+      "nr": 22,
+      "nome": "Flávio Bolsonaro",
+      "completo": "Flavio Bolsonaro",
+      "partido": "PL",
+      "cor": 0
+    }
+  ],
+  "estado": {
+    "ap": 2659867,
+    "cp": 2232823,
+    "ab": 427044,
+    "v": 2151005,
+    "b": 19939,
+    "nu": 61879,
+    "se": 8115,
+    "vt": [
+      1413596,
+      737409
+    ]
+  }
+}

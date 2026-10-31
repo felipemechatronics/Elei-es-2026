@@ -1,1 +1,1 @@
-window.CARGOS=[{"id": "presidente", "rotulo": "Presidente"}, {"id": "governador", "rotulo": "Governador"}];
+window.CARGOS=[{"id": "presidente", "rotulo": "Presidente"}, {"id": "presidente_2t", "rotulo": "Presidente (2º turno)"}, {"id": "governador", "rotulo": "Governador"}, {"id": "governador_2t", "rotulo": "Governador (2º turno)"}];

@@ -1,0 +1,53 @@
+{
+  "meta": {
+    "id": "governador_2t",
+    "cargo": "Governador",
+    "uf": "RN",
+    "turno": 2,
+    "eleicao": "Eleição Ordinária Estadual - 2026 2º Turno",
+    "data": "25/10/2026",
+    "formato": "boletim_urna",
+    "anulados": [],
+    "locais_sem_base": 0,
+    "t1": {
+      "data": "04/10/2026",
+      "v": 1986441,
+      "cp": 2167714,
+      "c": {
+        "13": 718300,
+        "44": 733809
+      }
+    }
+  },
+  "cands": [
+    {
+      "k": 0,
+      "nr": 13,
+      "nome": "Cadu de Lula",
+      "completo": "Cadu de Lula",
+      "partido": "PT",
+      "cor": 1
+    },
+    {
+      "k": 1,
+      "nr": 44,
+      "nome": "Allyson Bezerra",
+      "completo": "Allyson",
+      "partido": "UNIÃO",
+      "cor": 0
+    }
+  ],
+  "estado": {
+    "ap": 2656286,
+    "cp": 2229510,
+    "ab": 426776,
+    "v": 2113423,
+    "b": 35873,
+    "nu": 80214,
+    "se": 8115,
+    "vt": [
+      1073024,
+      1040399
+    ]
+  }
+}

@@ -264,6 +264,13 @@ def main():
     meta = {"id": cid, "cargo": titulo(a.cargo), "uf": a.uf, "turno": a.turno,
             "eleicao": info.get("ds_eleicao", ""), "data": info.get("dt_eleicao", ""),
             "formato": formato, "anulados": sorted(anulados), "locais_sem_base": sem_base}
+    # no 2º turno, guarda o resultado estadual do 1º turno de cada candidato, para comparação
+    t1 = DOCS / f"{slug(a.cargo)}.js"
+    if a.turno > 1 and t1.exists():
+        d1 = json.loads(t1.read_text(encoding="utf-8").split("=", 1)[1].strip().rstrip(";"))
+        v1 = {c["nr"]: d1["estado"]["vt"][c["k"]] for c in d1["cands"]}
+        meta["t1"] = {"data": d1["meta"].get("data", ""), "v": d1["estado"]["v"], "cp": d1["estado"]["cp"],
+                      "c": {str(c["nr"]): v1.get(c["nr"], 0) for c in cands}}
     out = {"meta": meta, "cands": cands, "estado": est, "munis": list(munis.values()),
            "locais": locais, "bairros": list(bairros.values())}
     (DOCS / f"{cid}.js").write_text("window.DADOS=" + json.dumps(out, ensure_ascii=False, separators=(",", ":")) + ";\n",

@@ -1,6 +1,6 @@
 # Eleições 2026 Rio Grande do Norte
 
-Resultados do 1º turno (4/10/2026) no Rio Grande do Norte por município, bairro e local de votação, a partir dos boletins por seção do TSE.
+Resultados do 1º turno (4/10/2026) e do 2º turno (25/10/2026) no Rio Grande do Norte por município, bairro e local de votação, a partir dos boletins por seção do TSE.
 
 **Site interativo:** https://felipemechatronics.github.io/Elei-es-2026/
 
@@ -8,6 +8,8 @@ Resultados do 1º turno (4/10/2026) no Rio Grande do Norte por município, bairr
 |---|---|---|
 | Presidente | [abrir](https://felipemechatronics.github.io/Elei-es-2026/?cargo=presidente) | [relatorio/presidente/RELATORIO.md](relatorio/presidente/RELATORIO.md) |
 | Governador | [abrir](https://felipemechatronics.github.io/Elei-es-2026/?cargo=governador) | [relatorio/governador/RELATORIO.md](relatorio/governador/RELATORIO.md) |
+| Presidente, 2º turno | [abrir](https://felipemechatronics.github.io/Elei-es-2026/?cargo=presidente_2t) | [relatorio/presidente_2t/RELATORIO.md](relatorio/presidente_2t/RELATORIO.md) |
+| Governador, 2º turno | [abrir](https://felipemechatronics.github.io/Elei-es-2026/?cargo=governador_2t) | [relatorio/governador_2t/RELATORIO.md](relatorio/governador_2t/RELATORIO.md) |
 
 - **Site** (`docs/`): mapa do estado que desce até os bairros e os locais de votação, em percentual ou em quantidade de votos, com destaques, gráficos, tabela de todos os municípios e seletor de cargo.
 - **Simulador do 2º turno para Governador** (`docs/simulador.html`, [abrir](https://felipemechatronics.github.io/Elei-es-2026/simulador.html)): barra arrastável (ou valores digitados, em % ou votos) para dividir os votos de Álvaro Dias entre Allyson Bezerra, Cadu de Lula e "nenhum dos dois", e ajuste para mais ou para menos dos votos do 1º turno de Allyson, Cadu e Álvaro, mais uma ferramenta de transferência de votos de um candidato para outro em municípios escolhidos (no mapa, por nome ou por atalhos como "onde Álvaro venceu"). O mapa mostra em verde, com hachura, onde Álvaro venceu no 1º turno, e tem uma visão do 1º turno com os três candidatos, no estado todo ou com valores próprios em cada município. Mostra o resultado estadual, o mapa, os municípios que trocam de posição e um link para compartilhar a simulação. O simulador começa pelo resultado real do 1º turno (Álvaro Dias mantendo os votos) e os votos só mudam quando você os transfere; a parte não transferida pode continuar com o candidato ou virar "nenhum dos dois".
@@ -31,6 +33,8 @@ Requer Python 3.10+ e os arquivos do TSE em `dados_tse/`, que não vão para o G
 pip install -r requirements.txt
 python scripts/gerar_dados.py dados_tse/Urnas_Presidente.xlsx --cargo Presidente
 python scripts/gerar_dados.py dados_tse/votacao_secao_2026_RN.csv --cargo Governador --anulados 50,29
+python scripts/gerar_dados.py dados_tse/2turno/bu_2turno_RN_por_local.csv --cargo Presidente --turno 2
+python scripts/gerar_dados.py dados_tse/2turno/bu_2turno_RN_por_local.csv --cargo Governador --turno 2
 python scripts/gerar_relatorio.py
 python scripts/gerar_deputados.py dados_tse/votacao_secao_2026_RN.csv
 python scripts/gerar_lula.py dados_tse/Urnas_Presidente.xlsx dados_tse/votacao_secao_2026_RN.csv
@@ -56,6 +60,8 @@ Opções úteis:
 - `config/candidatos_<cargo>.json`: nome de urna, partido e cor de cada candidato. As cores seguem a paleta do site: 0 é azul, 1 é laranja e 2 é verde-água.
 
 ## Verificação
+
+- 2º turno (Presidente e Governador): os boletins de urna das 8.115 seções foram lidos do site de resultados do TSE (resultados.tse.jus.br, pleito 3221), somados por local de votação e conferidos município a município com os totais oficiais, sem divergências. O arquivo somado por local fica em `dados_tse/2turno/` (não versionado). No site, o resultado do 2º turno mostra também a votação de cada candidato no 1º turno, e o simulador mostra o resultado oficial ao lado do cenário simulado.
 
 - Presidente: votos por candidato, brancos, nulos, aptos e comparecimento conferidos município a município contra a planilha do TSE, sem divergências.
 - Governador: conferido município a município e local a local contra o projeto de referência, sem divergências.
