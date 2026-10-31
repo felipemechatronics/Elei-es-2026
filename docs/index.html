@@ -329,7 +329,7 @@ footer{margin-top:64px;padding:24px 0 48px;border-top:1px solid var(--line);font
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
 <script src="geo.js"></script>
-<script src="cargos.js"></script>
+<script src="cargos.js?v=20261031"></script>
 <script>
 (() => {
   const ids = (window.CARGOS||[]).map(c=>c.id);
@@ -337,7 +337,7 @@ footer{margin-top:64px;padding:24px 0 48px;border-top:1px solid var(--line);font
   if (!ids.includes(q)) q = ids[0];
   window.CARGO_ATUAL = q;
   const sc = document.createElement("script");
-  sc.src = q + ".js";
+  sc.src = q + ".js?v=20261031";
   sc.onload = () => window.iniciar();
   document.body.appendChild(sc);
 })();
