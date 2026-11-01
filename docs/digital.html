@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Acompanhamento digital</title>
+<meta name="description" content="Redes sociais dos candidatos ao Governo e ao Senado do RN em 2026: seguidores, publicações, engajamento, interações, posts com mais curtidas e gasto em anúncios na Meta, ao lado do resultado e das pesquisas.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme: light;
+  --bg:#f5f7f8; --surface:#ffffff; --ink:#15212c; --ink-2:#4a5966; --muted:#7a8792;
+  --line:#dce2e6; --line-2:#c3ccd3;
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100; --s5:#e87ba4;
+  --focus:#2a78d6;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --bg:#0e151b; --surface:#121a21; --ink:#e9eef1; --ink-2:#b4c0c9; --muted:#7f8c96;
+    --line:#24313b; --line-2:#33424e;
+    --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --bg:#0e151b; --surface:#121a21; --ink:#e9eef1; --ink-2:#b4c0c9; --muted:#7f8c96;
+  --line:#24313b; --line-2:#33424e;
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 15px/1.55 "Archivo",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-underline-offset:3px}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.wrap{max-width:1280px;margin:0 auto;padding:0 24px}
+.top{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;gap:24px;height:52px}
+.brand{font-weight:700;font-size:15px;font-stretch:112%;text-decoration:none}
+.top nav{display:flex;gap:18px;font-size:14px;color:var(--ink-2);overflow-x:auto;scrollbar-width:none}
+.top nav a{text-decoration:none;white-space:nowrap}
+.top nav a[aria-current]{color:var(--ink);font-weight:600}
+.theme{margin-left:auto;background:none;border:1px solid var(--line-2);color:var(--ink-2);border-radius:999px;font-size:13px;padding:5px 12px;cursor:pointer;white-space:nowrap}
+
+.head{display:flex;flex-wrap:wrap;gap:16px 28px;align-items:flex-end;justify-content:space-between;padding:28px 0 18px}
+.head h1{font-weight:800;font-stretch:118%;font-size:clamp(28px,3.6vw,42px);line-height:1;letter-spacing:-.025em;margin:0 0 6px}
+.head p{margin:0;color:var(--ink-2);font-size:14px}
+.filters{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;font-size:13px;color:var(--ink-2)}
+.useg{display:inline-flex;border:1px solid var(--line-2);border-radius:999px;padding:2px;gap:2px;background:var(--surface)}
+.useg button{border:0;background:none;color:var(--ink-2);font:500 13px "Archivo",system-ui,sans-serif;padding:5px 12px;border-radius:999px;cursor:pointer}
+.useg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.filters input[type=date],.filters select{font:400 13px "Archivo",system-ui,sans-serif;padding:5px 8px;border-radius:8px;border:1px solid var(--line-2);background:var(--surface);color:var(--ink)}
+
+.grid{display:grid;gap:16px}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g5{grid-template-columns:repeat(5,minmax(0,1fr))}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;min-width:0}
+.card h2{font:700 15px/1.2 "Archivo",system-ui,sans-serif;margin:0 0 2px;display:flex;align-items:center;gap:8px}
+.card h2::before{content:"";width:4px;height:16px;border-radius:2px;background:var(--ink);opacity:.8}
+.card .sub{font-size:12.5px;color:var(--muted);margin:0 0 10px}
+.span2{grid-column:span 2}
+.span3{grid-column:1/-1}
+
+.prof{display:flex;gap:12px;align-items:center}
+.av{width:42px;height:42px;border-radius:999px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:15px;flex:none}
+.prof .nm{font-weight:700;font-size:15px;line-height:1.2}
+.prof .hd{font-size:12.5px;color:var(--muted)}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px;border-top:1px solid var(--line);padding-top:10px}
+.kpis div{min-width:0}
+.kpis b{display:block;font:800 20px/1.15 "Archivo",system-ui,sans-serif;font-stretch:108%;font-variant-numeric:tabular-nums}
+.kpis span{font-size:11.5px;color:var(--muted);line-height:1.25;display:block}
+.delta{font-size:12px;font-variant-numeric:tabular-nums;color:var(--ink-2)}
+
+.res .big{display:flex;gap:16px;align-items:baseline;flex-wrap:wrap;margin:6px 0 4px}
+.res .big b{font:800 26px/1 "Archivo",system-ui,sans-serif;font-stretch:110%;font-variant-numeric:tabular-nums}
+.res .big span{font-size:12.5px;color:var(--ink-2)}
+.res .t2{font-size:12.5px;color:var(--ink-2);margin:2px 0 8px}
+.res .t2 b{color:var(--ink)}
+.mlist{max-height:228px;overflow:auto;margin-top:8px;border-top:1px solid var(--line);padding-top:6px}
+.mrow{display:grid;grid-template-columns:120px 1fr 44px;gap:8px;align-items:center;font-size:12.5px;padding:2px 0}
+.mrow span:first-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mrow i{display:block;height:10px;border-radius:0 4px 4px 0}
+.mrow em{font-style:normal;text-align:right;font-variant-numeric:tabular-nums}
+
+.chart svg{display:block;width:100%;height:auto;overflow:visible}
+.chart text{font:400 11.5px "Archivo",system-ui,sans-serif;fill:var(--ink-2)}
+.keys{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12.5px;color:var(--ink-2);margin:0 0 6px}
+.keys span{display:inline-flex;align-items:center;gap:6px}
+.keys i{width:10px;height:10px;border-radius:3px;display:inline-block}
+.cardtools{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap}
+.cardtools select{font:400 12.5px "Archivo",system-ui,sans-serif;padding:4px 8px;border-radius:8px;border:1px solid var(--line-2);background:var(--surface);color:var(--ink)}
+
+table.t{border-collapse:collapse;width:100%;font-size:13px}
+table.t th,table.t td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:right;font-variant-numeric:tabular-nums;vertical-align:top}
+table.t th:first-child,table.t td:first-child{text-align:left}
+table.t th{font-weight:600;color:var(--ink-2);position:sticky;top:0;background:var(--surface)}
+table.t td.txt{text-align:left;color:var(--ink-2);white-space:normal;min-width:240px}
+.chip{display:inline-flex;align-items:center;gap:7px;white-space:nowrap}
+.chip i{width:10px;height:10px;border-radius:3px;display:inline-block;flex:none}
+.tscroll{max-height:430px;overflow:auto}
+.adrow{display:grid;grid-template-columns:150px 1fr;gap:10px;align-items:center;margin:10px 0;font-size:13px}
+.adrow .chip{overflow:hidden;min-width:0}
+.adrow .bar{height:30px;border-radius:0 6px 6px 0;display:flex;align-items:center;justify-content:flex-end;padding:0 10px;color:#fff;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap;min-width:max-content}
+.note{font-size:12px;color:var(--muted);margin:8px 0 0}
+.method{max-width:820px;padding:28px 0 0}
+.method h2{font-weight:800;font-stretch:115%;font-size:26px;margin:0 0 10px}
+.method p{color:var(--ink-2);margin:0 0 .8em;font-family:"Literata",Georgia,serif;font-size:15.5px}
+footer{margin-top:48px;padding:24px 0 48px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
+.tip{position:fixed;z-index:50;pointer-events:none;background:var(--surface);color:var(--ink);border:1px solid var(--line-2);border-radius:10px;padding:9px 11px;font-size:12.5px;line-height:1.4;box-shadow:0 6px 22px rgba(0,0,0,.14);max-width:300px;opacity:0}
+.tip .tt{font-weight:700;font-size:13px;margin-bottom:3px}
+.tip .tr{display:flex;justify-content:space-between;gap:14px}
+.tip .tr i{width:8px;height:8px;border-radius:2px;display:inline-block;margin-right:6px}
+@media (max-width:1100px){ .g5{grid-template-columns:repeat(3,minmax(0,1fr))} }
+@media (max-width:900px){ .g3,.g5{grid-template-columns:1fr 1fr} .span2{grid-column:1/-1} }
+@media (max-width:600px){
+  .wrap{padding:0 16px}
+  .g3,.g5{grid-template-columns:1fr}
+  .top nav{gap:12px;font-size:13px}
+  .brand{display:none}
+  .adrow{grid-template-columns:110px 1fr}
+}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="brand" href="index.html">RN 2026</a>
+  <nav aria-label="Páginas"><a href="index.html">Resultados</a><a href="deputados.html">Deputados</a><a href="simulador.html">Simulador 2º turno</a><a href="lula.html">Lula × Governo</a><a href="pesquisas.html">Pesquisas</a><a href="digital.html" aria-current="page">Digital</a><a href="gestao.html">Gestão</a></nav>
+  <button class="theme" id="themeBtn" type="button">Tema escuro</button>
+</div></header>
+
+<main class="wrap">
+<div class="head">
+  <div>
+    <h1>Acompanhamento digital</h1>
+    <p>Instagram dos candidatos: seguidores, publicações, engajamento e interações, com anúncios na Meta, resultado e pesquisas.</p>
+  </div>
+  <div class="filters">
+    <span class="useg" id="grp"><button type="button" data-g="gov" aria-pressed="true">Governo</button><button type="button" data-g="sen">Senado</button></span>
+    <span class="useg" id="per"></span>
+    <label>de <input type="date" id="d0"></label><label>a <input type="date" id="d1"></label>
+  </div>
+</div>
+
+<div class="grid" id="profiles"></div>
+<p class="note" id="profNote"></p>
+
+<section style="padding-top:16px">
+  <div class="grid" id="results"></div>
+</section>
+
+<section style="padding-top:16px">
+  <div class="grid g3" id="charts">
+    <div class="card"><h2>Evolução de seguidores</h2><p class="sub">Novos seguidores por dia</p><div class="keys k"></div><div class="chart" id="cFol"></div></div>
+    <div class="card"><h2>Posts por semana</h2><p class="sub" id="postSub">Publicações no feed (fotos, carrosséis e reels)</p><div class="keys k"></div><div class="chart" id="cPosts"></div></div>
+    <div class="card"><div class="cardtools"><div><h2>Pesquisa eleitoral</h2><p class="sub">Votos válidos em cada pesquisa</p></div><select id="inst" aria-label="Instituto"></select></div><div class="keys k"></div><div class="chart" id="cPesq"></div></div>
+    <div class="card"><h2>Engajamento por dia</h2><p class="sub">Interações a cada mil seguidores</p><div class="keys k"></div><div class="chart" id="cEng"></div></div>
+    <div class="card"><h2>Interações</h2><p class="sub" id="intSub">Curtidas e comentários no último dia do período</p><div class="chart" id="cInt"></div></div>
+    <div class="card"><h2>Métricas comparativas</h2><p class="sub">Curtidas e comentários no último dia; interações, posts e engajamento médio (por mil seguidores) no período</p><div style="overflow-x:auto"><table class="t" id="tMet"></table></div></div>
+    <div class="card span2"><div class="cardtools"><div><h2>Top posts</h2><p class="sub">Publicações com mais curtidas no período</p></div><select id="tpSel" aria-label="Candidato"></select></div><div class="tscroll"><table class="t" id="tTop"></table></div></div>
+    <div class="card"><h2>Investimentos · Meta</h2><p class="sub" id="adSub"></p><div id="ads"></div><div class="chart" id="cAds"></div></div>
+  </div>
+</section>
+
+<section class="method">
+  <h2>Como foi feito</h2>
+  <p>Os dados de redes sociais vêm do painel público "Acompanhamento Eleitoral · Governo RN · Redes Sociais", publicado no Power BI, e foram extraídos com as mesmas consultas que o painel usa. São coletas diárias dos perfis de Instagram dos candidatos, de 10 de junho a 25 de outubro de 2026 (os perfis dos candidatos ao Senado vão até 4 de outubro). "Novos seguidores" é a variação de seguidores entre duas coletas; "interações" somam curtidas e comentários registrados na coleta; o engajamento é o número de interações a cada mil seguidores.</p>
+  <p>Os cartões do alto mostram o último dia do período escolhido, como no painel original ("últimas 24 horas"). As publicações aparecem uma vez cada, com o maior número de curtidas registrado. Perfis que trocaram de conta durante a campanha (Samanda Alves e Coronel Hélio) foram somados.</p>
+  <p>O gasto em anúncios vem da Biblioteca de Anúncios da Meta, que informa o valor acumulado numa janela móvel; por isso ele sobe e depois cai. O valor em destaque é o maior registrado no período. Os resultados são do TSE e as pesquisas, da página de pesquisas deste site.</p>
+  <p>Dados: <code>docs/digital.js</code>, gerado por <code>scripts/gerar_digital.py</code>.</p>
+</section>
+</main>
+<footer><div class="wrap">Redes sociais: painel público "Acompanhamento Eleitoral · Governo RN · Redes Sociais" (Power BI). Anúncios: Biblioteca de Anúncios da Meta. Resultados: TSE. Pesquisas: planilha "PESQUISAS RN 2026".</div></footer>
+<div class="tip" id="tip" role="tooltip"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script src="digital.js?v=20261031"></script>
+<script src="pesquisas.js?v=20261031"></script>
+<script>
+(() => {
+const D = window.DIG, PQ = window.PESQ;
+const nf = new Intl.NumberFormat("pt-BR");
+const pf = (x,d=1) => (isFinite(x)?x:0).toLocaleString("pt-BR",{minimumFractionDigits:d,maximumFractionDigits:d});
+const kf = x => x>=1e6 ? pf(x/1e6,2)+" mi" : x>=1e4 ? pf(x/1e3,1)+" mil" : nf.format(Math.round(x));
+const brl = x => "R$ " + nf.format(Math.round(x));
+const $ = s => document.querySelector(s);
+const esc = s => String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const DAY = 864e5, toD = s => new Date(s+"T12:00:00"), iso = d => d.toISOString().slice(0,10);
+const fmtD = d => d.toLocaleDateString("pt-BR",{day:"numeric",month:"short"}).replace(".","");
+const DIAS = d3.range(D.n).map(i=>iso(new Date(+toD(D.dias[0]) + i*DAY)));
+const S = {g:"gov", d0:"2026-10-04", d1:D.dias[1], inst:"", tp:""};
+const PERS = {gov:[["2t","2º turno","2026-10-04","2026-10-25"],["camp","Campanha","2026-08-16","2026-10-25"],["tudo","Tudo",D.dias[0],D.dias[1]]],
+              sen:[["fim","Reta final","2026-09-04","2026-10-04"],["camp","Campanha","2026-08-16","2026-10-04"],["tudo","Tudo",D.dias[0],"2026-10-04"]]};
+const cands = () => D.grupos[S.g];
+const col = i => css(`--s${i+1}`);
+const colOf = id => col(cands().findIndex(c=>c.id===id));
+const idx = () => { const a = DIAS.indexOf(S.d0), b = DIAS.indexOf(S.d1); return [Math.max(0,a), b<0?DIAS.length-1:b]; };
+const ini = n => n.split(" ").filter(w=>w.length>2).slice(0,2).map(w=>w[0]).join("").toUpperCase();
+const lastIdx = (arr, b) => { for (let i=b;i>=0;i--) if (arr && arr[i]!=null) return i; return -1; };
+
+// ---------- tooltip ----------
+const tip = $("#tip");
+function showTip(ev, html){ tip.innerHTML=html; tip.style.opacity=1; const w=tip.offsetWidth,h=tip.offsetHeight; let x=ev.clientX+14,y=ev.clientY+14; if(x+w>innerWidth-8)x=ev.clientX-w-14; if(y+h>innerHeight-8)y=ev.clientY-h-14; tip.style.left=Math.max(8,x)+"px"; tip.style.top=Math.max(8,y)+"px"; }
+const hideTip = () => tip.style.opacity = 0;
+
+// ---------- cartões ----------
+function renderProfiles(){
+  const [a,b] = idx(), cs = cands();
+  $("#profiles").className = "grid " + (cs.length>3 ? "g5" : "g3");
+  $("#profiles").innerHTML = cs.map((c,i)=>{
+    const s = D.serie[c.id]; const li = lastIdx(s.seg, b), fi = lastIdx(s.seg, a);
+    const nov = s.nov[li] ?? 0, seg = s.seg[li] ?? 0, it = s.int[lastIdx(s.int,b)] ?? 0;
+    const ganho = seg - (s.seg[fi] ?? seg);
+    return `<div class="card"><div class="prof"><div class="av" style="background:${col(i)}">${ini(c.nome)}</div><div><div class="nm">${esc(c.nome)}</div><div class="hd">@${esc(c.perfil)} · Instagram</div></div></div>
+      <div class="kpis"><div><b>${nf.format(nov)}</b><span>novos seguidores em ${fmtD(toD(DIAS[li]))}</span></div><div><b>${kf(seg)}</b><span>seguidores</span></div><div><b>${kf(it)}</b><span>interações no dia</span></div></div>
+      <div class="delta">No período: ${ganho>=0?"+":"−"}${nf.format(Math.abs(ganho))} seguidores</div></div>`;
+  }).join("");
+  $("#profNote").textContent = `Última coleta no período: ${fmtD(toD(DIAS[Math.min(b, lastIdx(D.serie[cs[0].id].seg,b))]))}.`;
+}
+function renderResults(){
+  const cs = cands();
+  $("#results").className = "grid " + (cs.length>3 ? "g5" : "g3");
+  $("#results").innerHTML = cs.map((c,i)=>{
+    const r = D.res[c.id], t = r.t1, mx = t.top[0][1];
+    return `<div class="card res"><h2>Resultado · 1º turno</h2>
+      <div class="big"><b>${nf.format(t.v)}</b><span>votos · ${pf(t.p,2)}% dos válidos</span></div>
+      ${r.t2 ? `<div class="t2">2º turno: <b>${pf(r.t2.p,2)}%</b> (${nf.format(r.t2.v)} votos), ${r.t2.mun} municípios</div>` : ""}
+      <div class="t2">Municípios em que ficou em 1º: <b>${t.mun}</b></div>
+      <div class="mlist">${t.top.map(m=>`<div class="mrow"><span title="${esc(m[0])}">${esc(m[0])}</span><i style="width:${100*m[1]/mx}%;background:${col(i)}"></i><em>${pf(m[1])}%</em></div>`).join("")}</div>
+      <p class="note">Maiores percentuais por município.</p></div>`;
+  }).join("");
+}
+
+// ---------- gráficos de linha ----------
+function lineChart(el, series, opt={}){
+  const W = Math.max(260, el.clientWidth), H = opt.h || 210, mg = {l:44,r:10,t:8,b:24};
+  const xs = series[0].pts.map(p=>p.t);
+  const x = d3.scaleTime(d3.extent(xs),[mg.l, W-mg.r]);
+  const ymax = d3.max(series.flatMap(s=>s.pts.map(p=>p.y))) || 1;
+  const ymin = Math.min(0, d3.min(series.flatMap(s=>s.pts.map(p=>p.y)).filter(v=>v!=null)) ?? 0);
+  const y = d3.scaleLinear([opt.y0 ?? ymin, opt.ymax ?? ymax*1.08],[H-mg.b, mg.t]).nice();
+  const svg = d3.create("svg").attr("viewBox",`0 0 ${W} ${H}`).attr("role","img").attr("aria-label",opt.label||"");
+  y.ticks(4).forEach(t=>{ svg.append("line").attr("x1",mg.l).attr("x2",W-mg.r).attr("y1",y(t)).attr("y2",y(t)).attr("stroke",css("--line")); svg.append("text").attr("x",mg.l-6).attr("y",y(t)+4).attr("text-anchor","end").text(opt.fy?opt.fy(t):kf(t)); });
+  x.ticks(W<420?3:5).forEach(t=>svg.append("text").attr("x",x(t)).attr("y",H-6).attr("text-anchor","middle").text(fmtD(t)));
+  for (const s of series){
+    const ln = d3.line().defined(p=>p.y!=null).x(p=>x(p.t)).y(p=>y(p.y)).curve(d3.curveMonotoneX);
+    if (opt.area) svg.append("path").attr("d",d3.area().defined(p=>p.y!=null).x(p=>x(p.t)).y0(y(0)).y1(p=>y(p.y)).curve(d3.curveMonotoneX)(s.pts)).attr("fill",s.c).attr("opacity",.12);
+    svg.append("path").attr("d",ln(s.pts)).attr("fill","none").attr("stroke",s.c).attr("stroke-width",2);
+  }
+  const cross = svg.append("line").attr("y1",mg.t).attr("y2",H-mg.b).attr("stroke",css("--ink")).attr("opacity",0);
+  const dots = svg.append("g");
+  svg.append("rect").attr("x",mg.l).attr("y",mg.t).attr("width",W-mg.l-mg.r).attr("height",H-mg.t-mg.b).attr("fill","transparent")
+    .on("mousemove",ev=>{
+      const [mx] = d3.pointer(ev); const t = x.invert(mx); const i = d3.bisector(d=>d).center(xs, t);
+      cross.attr("x1",x(xs[i])).attr("x2",x(xs[i])).attr("opacity",.35);
+      dots.selectAll("circle").data(series.filter(s=>s.pts[i] && s.pts[i].y!=null)).join("circle").attr("cx",x(xs[i])).attr("cy",s=>y(s.pts[i].y)).attr("r",4).attr("fill",s=>s.c).attr("stroke",css("--surface")).attr("stroke-width",2);
+      showTip(ev, `<div class="tt">${fmtD(xs[i])}</div>`+series.filter(s=>s.pts[i]).sort((a,b)=>(b.pts[i].y??-1)-(a.pts[i].y??-1)).map(s=>`<div class="tr"><span><i style="background:${s.c}"></i>${esc(s.n)}</span><b>${s.pts[i].y==null?"–":(opt.ft?opt.ft(s.pts[i].y):nf.format(s.pts[i].y))}</b></div>`).join(""));
+    }).on("mouseleave",()=>{ hideTip(); cross.attr("opacity",0); dots.selectAll("circle").remove(); });
+  el.innerHTML = ""; el.append(svg.node());
+}
+function keys(){ document.querySelectorAll(".keys.k").forEach(k=>k.innerHTML = cands().map((c,i)=>`<span><i style="background:${col(i)}"></i>${esc(c.nome)}</span>`).join("")); }
+function serieOf(id, key, a, b){ const s = D.serie[id][key]||[]; return d3.range(a,b+1).map(i=>({t:toD(DIAS[i]), y:s[i]??null})); }
+
+function renderCharts(){
+  const [a,b] = idx(), cs = cands();
+  lineChart($("#cFol"), cs.map((c,i)=>({n:c.nome, c:col(i), pts:serieOf(c.id,"nov",a,b)})), {label:"Novos seguidores por dia"});
+  lineChart($("#cEng"), cs.map((c,i)=>({n:c.nome, c:col(i), pts:serieOf(c.id,"eng",a,b)})), {label:"Engajamento por mil seguidores", area:true, ft:v=>pf(v,1), fy:t=>nf.format(t)});
+  // posts por semana (barras agrupadas)
+  const weeks = []; for (let i=a;i<=b;i+=7) weeks.push([i, Math.min(b,i+6)]);
+  const el = $("#cPosts"), W = Math.max(260, el.clientWidth), H = 210, mg = {l:30,r:8,t:8,b:24};
+  const data = weeks.map(([i,j])=>({t:toD(DIAS[i]), t1:toD(DIAS[j]), v:cs.map(c=>d3.sum(d3.range(i,j+1), k=>D.serie[c.id].np?.[k]||0))}));
+  const x0 = d3.scaleBand(data.map((_,i)=>i),[mg.l, W-mg.r]).paddingInner(.25), x1 = d3.scaleBand(cs.map((_,i)=>i),[0,x0.bandwidth()]).padding(.08);
+  const y = d3.scaleLinear([0, (d3.max(data,d=>d3.max(d.v))||1)*1.1],[H-mg.b,mg.t]).nice();
+  const svg = d3.create("svg").attr("viewBox",`0 0 ${W} ${H}`).attr("role","img").attr("aria-label","Posts por semana");
+  y.ticks(4).forEach(t=>{ svg.append("line").attr("x1",mg.l).attr("x2",W-mg.r).attr("y1",y(t)).attr("y2",y(t)).attr("stroke",css("--line")); svg.append("text").attr("x",mg.l-6).attr("y",y(t)+4).attr("text-anchor","end").text(t); });
+  const step = Math.ceil(data.length/(W<420?3:6));
+  data.forEach((d,i)=>{ if (i%step===0) svg.append("text").attr("x",x0(i)+x0.bandwidth()/2).attr("y",H-6).attr("text-anchor","middle").text(fmtD(d.t));
+    const g = svg.append("g").attr("transform",`translate(${x0(i)},0)`);
+    d.v.forEach((v,k)=>g.append("rect").attr("x",x1(k)).attr("y",y(v)).attr("width",x1.bandwidth()).attr("height",Math.max(0,y(0)-y(v))).attr("rx",Math.min(3,x1.bandwidth()/2)).attr("fill",col(k)));
+    g.append("rect").attr("width",x0.bandwidth()).attr("height",H-mg.b).attr("fill","transparent")
+      .on("mousemove",ev=>showTip(ev,`<div class="tt">${fmtD(d.t)} a ${fmtD(d.t1)}</div>`+cs.map((c,k)=>`<div class="tr"><span><i style="background:${col(k)}"></i>${esc(c.nome)}</span><b>${d.v[k]} posts</b></div>`).join(""))).on("mouseleave",hideTip);
+  });
+  el.innerHTML=""; el.append(svg.node());
+  const ultPost = d3.max(cs.flatMap(c=>{ const np=D.serie[c.id].np||[]; return d3.range(np.length).filter(k=>np[k]); }));
+  $("#postSub").textContent = "Publicações no feed (fotos, carrosséis e reels)" + (ultPost!=null && ultPost < b ? `; a coleta de publicações vai até ${fmtD(toD(DIAS[ultPost]))}` : "");
+  renderPesq();
+  // interações no último dia
+  const ints = cs.map((c,i)=>{ const s=D.serie[c.id]; const li = lastIdx(s.int,b); return {c, i, v:s.int[li]||0, lk:s.lik[li]||0, cm:s.com[li]||0, d:DIAS[li]}; });
+  const mx = d3.max(ints,r=>r.v)||1;
+  $("#intSub").textContent = `Curtidas e comentários registrados na última coleta do período (${fmtD(toD(ints[0].d))})`;
+  $("#cInt").innerHTML = ints.map(r=>`<div class="adrow"><span class="chip"><i style="background:${col(r.i)}"></i>${esc(r.c.nome)}</span><div class="bar" style="width:${Math.max(18,100*r.v/mx)}%;background:${col(r.i)}">${nf.format(r.v)}</div></div>`).join("");
+  // métricas comparativas
+  $("#tMet").innerHTML = `<thead><tr><th>Candidato</th><th>Curtidas</th><th>Coment.</th><th>Interações</th><th>Posts</th><th>Engaj.</th></tr></thead><tbody>`+
+    cs.map((c,i)=>{ const s=D.serie[c.id]; const li=lastIdx(s.int,b); const it=d3.sum(d3.range(a,b+1),k=>s.int[k]||0), np=d3.sum(d3.range(a,b+1),k=>s.np?.[k]||0), en=d3.mean(d3.range(a,b+1).map(k=>s.eng[k]).filter(v=>v!=null));
+      return `<tr><td><span class="chip"><i style="background:${col(i)}"></i>${esc(c.nome)}</span></td><td>${nf.format(s.lik[li]||0)}</td><td>${nf.format(s.com[li]||0)}</td><td>${kf(it)}</td><td>${np}</td><td>${en==null?"–":pf(en,1)}</td></tr>`; }).join("")+`</tbody>`;
+  renderTop(); renderAds();
+}
+function renderPesq(){
+  const races = S.g==="gov" ? ["gov1","gov2"] : ["sen1"];
+  const map = {allyson:"allysonbezerra.rn", cadu:"caduxavier", alvaro:"alvarodiasrn", styvenson:"senadorstyvensonvalentim", samanda:"samanda", zenaide:"drazenaide", helio:"coronelheliorn", rafael:"rafaelmottarn"};
+  const all = PQ.pesquisas.filter(p=>races.includes(p.c) && p.fora<=5);
+  const insts = [...new Set(all.map(p=>p.inst))].sort((a,b)=>a.localeCompare(b,"pt-BR"));
+  const sel = $("#inst"); const cur = S.inst;
+  sel.innerHTML = `<option value="">Todos os institutos</option>` + insts.map(i=>`<option ${i===cur?"selected":""}>${esc(i)}</option>`).join("");
+  const ps = all.filter(p=>!S.inst || p.inst===S.inst).map(p=>{ const tot=d3.sum(Object.values(p.v)); return {p, t:toD(p.d), s:Object.fromEntries(Object.entries(p.v).map(([k,v])=>[k,100*v/tot]))}; });
+  const el = $("#cPesq"), W = Math.max(260, el.clientWidth), H = 210, mg = {l:34,r:10,t:8,b:24};
+  if (!ps.length){ el.innerHTML = `<p class="note">Sem pesquisas deste instituto.</p>`; return; }
+  const x = d3.scaleTime([d3.min(ps,d=>d.t), toD(S.g==="gov"?"2026-10-25":"2026-10-04")],[mg.l,W-mg.r]), y = d3.scaleLinear([0,70],[H-mg.b,mg.t]);
+  const svg = d3.create("svg").attr("viewBox",`0 0 ${W} ${H}`).attr("role","img").attr("aria-label","Pesquisas eleitorais");
+  [0,20,40,60].forEach(t=>{ svg.append("line").attr("x1",mg.l).attr("x2",W-mg.r).attr("y1",y(t)).attr("y2",y(t)).attr("stroke",css("--line")); svg.append("text").attr("x",mg.l-6).attr("y",y(t)+4).attr("text-anchor","end").text(t+"%"); });
+  x.ticks(W<420?3:5).forEach(t=>svg.append("text").attr("x",x(t)).attr("y",H-6).attr("text-anchor","middle").text(fmtD(t)));
+  cands().forEach((c,i)=>{
+    const k = Object.keys(map).find(z=>map[z]===c.id); if (!k) return;
+    for (const race of races){
+      const pts = ps.filter(d=>d.p.c===race && d.s[k]!=null).sort((a,b)=>a.t-b.t);
+      if (pts.length>1) svg.append("path").attr("d",d3.line().x(d=>x(d.t)).y(d=>y(d.s[k])).curve(d3.curveMonotoneX)(pts)).attr("fill","none").attr("stroke",col(i)).attr("stroke-width",1.5).attr("opacity",.55).attr("stroke-dasharray",race==="gov2"?"4 3":null);
+      pts.forEach(d=>svg.append("circle").attr("cx",x(d.t)).attr("cy",y(d.s[k])).attr("r",3.5).attr("fill",col(i)).attr("stroke",css("--surface")).attr("stroke-width",1.2)
+        .on("mousemove",ev=>showTip(ev,`<div class="tt">${esc(d.p.inst)}</div><div class="tr"><span>${esc(c.nome)}</span><b>${pf(d.s[k])}%</b></div><div style="color:var(--muted)">${fmtD(d.t)} · ${race==="gov2"?"2º turno":"1º turno"}</div>`)).on("mouseleave",hideTip));
+    }
+  });
+  el.innerHTML=""; el.append(svg.node());
+}
+function renderTop(){
+  const [a,b] = idx(), cs = cands();
+  const sel = $("#tpSel"); sel.innerHTML = `<option value="">Todos</option>` + cs.map(c=>`<option value="${c.id}" ${c.id===S.tp?"selected":""}>${esc(c.nome)}</option>`).join("");
+  const rows = cs.filter(c=>!S.tp || c.id===S.tp).flatMap(c=>(D.top[c.id]||[]).map(p=>({c, p}))).filter(r=>{ const d=r.p[0].slice(0,10); return d>=DIAS[a] && d<=DIAS[b]; }).sort((x,y)=>y.p[2]-x.p[2]).slice(0,25);
+  $("#tTop").innerHTML = `<thead><tr><th>Candidato</th><th>Curtidas</th><th>Comentários</th><th>Data</th><th style="text-align:left">Publicação</th></tr></thead><tbody>`+
+    (rows.length ? rows.map(({c,p})=>`<tr><td><span class="chip"><i style="background:${colOf(c.id)}"></i>${esc(c.nome)}</span></td><td>${nf.format(p[2])}</td><td>${nf.format(p[3])}</td><td>${fmtD(toD(p[0].slice(0,10)))}</td><td class="txt">${esc(String(p[5]||"").replace(/\[\.\.\.\]$/,"…"))} ${p[4]?`<a href="${esc(p[4])}" target="_blank" rel="noopener">ver</a>`:""}</td></tr>`).join("")
+      : `<tr><td colspan="5" class="txt">Nenhuma das publicações com mais curtidas de cada perfil caiu neste período.</td></tr>`)+`</tbody>`;
+}
+function renderAds(){
+  const cs = cands(), [a,b] = idx();
+  const vals = cs.map((c,i)=>{ const s=(D.ads[c.id]||[]).filter(x=>x[0]>=DIAS[a] && x[0]<=DIAS[b]); return {c,i,s, mx:d3.max(s,x=>x[1])||0}; });
+  const mx = d3.max(vals,v=>v.mx)||1;
+  const any = vals.some(v=>v.s.length);
+  $("#adSub").textContent = any ? "Maior valor acumulado na Biblioteca de Anúncios no período" : "A Biblioteca de Anúncios só tem registros de 26 de setembro a 16 de outubro.";
+  $("#ads").innerHTML = vals.filter(v=>v.mx>0).sort((p,q)=>q.mx-p.mx).map(v=>`<div class="adrow"><span class="chip"><i style="background:${col(v.i)}"></i>${esc(v.c.nome)}</span><div class="bar" style="width:${Math.max(30,100*v.mx/mx)}%;background:${col(v.i)}">${brl(v.mx)}</div></div>`).join("");
+  const series = vals.filter(v=>v.s.length>1).map(v=>({n:v.c.nome, c:col(v.i), pts:v.s.map(x=>({t:toD(x[0]), y:x[1]}))}));
+  if (series.length){ lineChart($("#cAds"), series, {h:170, label:"Gasto acumulado em anúncios", ft:brl, fy:t=>kf(t)}); } else $("#cAds").innerHTML="";
+}
+
+// ---------- controles ----------
+function renderPer(){
+  $("#per").innerHTML = PERS[S.g].map(([k,l,x0,x1])=>`<button type="button" data-p="${k}" aria-pressed="${S.d0===x0 && S.d1===x1}">${l}</button>`).join("");
+  $("#d0").value = S.d0; $("#d1").value = S.d1; $("#d0").min = $("#d1").min = D.dias[0]; $("#d0").max = $("#d1").max = D.dias[1];
+}
+$("#per").addEventListener("click", e=>{ const b=e.target.closest("button"); if(!b) return; const p = PERS[S.g].find(x=>x[0]===b.dataset.p); S.d0=p[2]; S.d1=p[3]; render(); });
+$("#grp").addEventListener("click", e=>{ const b=e.target.closest("button"); if(!b) return; S.g=b.dataset.g; $("#grp").querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x===b)); const p = PERS[S.g][0]; S.d0=p[2]; S.d1=p[3]; S.inst=""; S.tp=""; render(); });
+$("#d0").addEventListener("change", e=>{ if (e.target.value && e.target.value<=S.d1){ S.d0=e.target.value; render(); } });
+$("#d1").addEventListener("change", e=>{ if (e.target.value && e.target.value>=S.d0){ S.d1=e.target.value; render(); } });
+$("#inst").addEventListener("change", e=>{ S.inst=e.target.value; renderPesq(); });
+$("#tpSel").addEventListener("change", e=>{ S.tp=e.target.value; renderTop(); });
+function render(){ renderPer(); keys(); renderProfiles(); renderResults(); renderCharts(); }
+
+const btn = $("#themeBtn");
+const curTheme = () => document.documentElement.dataset.theme || (matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");
+const syncBtn = () => btn.textContent = curTheme()==="dark" ? "Tema claro" : "Tema escuro";
+try { const t = localStorage.getItem("tema"); if (t) document.documentElement.dataset.theme = t; } catch(e){}
+btn.addEventListener("click", ()=>{ const t = curTheme()==="dark"?"light":"dark"; document.documentElement.dataset.theme=t; try{localStorage.setItem("tema",t)}catch(e){} syncBtn(); render(); });
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ()=>{ syncBtn(); render(); });
+syncBtn(); render();
+let rz; addEventListener("resize", ()=>{ clearTimeout(rz); rz=setTimeout(renderCharts,150); });
+})();
+</script>
+</body>
+</html>
