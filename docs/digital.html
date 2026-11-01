@@ -140,7 +140,7 @@ footer{margin-top:48px;padding:24px 0 48px;border-top:1px solid var(--line);font
 <div class="head">
   <div>
     <h1>Acompanhamento digital</h1>
-    <p>Instagram dos candidatos: seguidores, publicações, engajamento e interações, com anúncios na Meta, resultado e pesquisas.</p>
+    <p>Instagram dos candidatos: seguidores, publicações, engajamento e interações, com anúncios na Meta e pesquisas.</p>
   </div>
   <div class="filters">
     <span class="useg" id="grp"><button type="button" data-g="gov" aria-pressed="true">Governo</button><button type="button" data-g="sen">Senado</button></span>
@@ -151,10 +151,6 @@ footer{margin-top:48px;padding:24px 0 48px;border-top:1px solid var(--line);font
 
 <div class="grid" id="profiles"></div>
 <p class="note" id="profNote"></p>
-
-<section style="padding-top:16px">
-  <div class="grid" id="results"></div>
-</section>
 
 <section style="padding-top:16px">
   <div class="grid g3" id="charts">
@@ -173,11 +169,11 @@ footer{margin-top:48px;padding:24px 0 48px;border-top:1px solid var(--line);font
   <h2>Como foi feito</h2>
   <p>Os dados de redes sociais vêm do painel público "Acompanhamento Eleitoral · Governo RN · Redes Sociais", publicado no Power BI, e foram extraídos com as mesmas consultas que o painel usa. São coletas diárias dos perfis de Instagram dos candidatos, de 10 de junho a 25 de outubro de 2026 (os perfis dos candidatos ao Senado vão até 4 de outubro). "Novos seguidores" é a variação de seguidores entre duas coletas; "interações" somam curtidas e comentários registrados na coleta; o engajamento é o número de interações a cada mil seguidores.</p>
   <p>Os cartões do alto mostram o último dia do período escolhido, como no painel original ("últimas 24 horas"). As publicações aparecem uma vez cada, com o maior número de curtidas registrado. Perfis que trocaram de conta durante a campanha (Samanda Alves e Coronel Hélio) foram somados.</p>
-  <p>O gasto em anúncios vem da Biblioteca de Anúncios da Meta, que informa o valor acumulado numa janela móvel; por isso ele sobe e depois cai. O valor em destaque é o maior registrado no período. Os resultados são do TSE e as pesquisas, da página de pesquisas deste site.</p>
+  <p>O gasto em anúncios vem da Biblioteca de Anúncios da Meta, que informa o valor acumulado numa janela móvel; por isso ele sobe e depois cai. O valor em destaque é o maior registrado no período. As pesquisas vêm da página de pesquisas deste site.</p>
   <p>Dados: <code>docs/digital.js</code>, gerado por <code>scripts/gerar_digital.py</code>.</p>
 </section>
 </main>
-<footer><div class="wrap">Redes sociais: painel público "Acompanhamento Eleitoral · Governo RN · Redes Sociais" (Power BI). Anúncios: Biblioteca de Anúncios da Meta. Resultados: TSE. Pesquisas: planilha "PESQUISAS RN 2026".</div></footer>
+<footer><div class="wrap">Redes sociais: painel público "Acompanhamento Eleitoral · Governo RN · Redes Sociais" (Power BI). Anúncios: Biblioteca de Anúncios da Meta. Pesquisas: planilha "PESQUISAS RN 2026".</div></footer>
 <div class="tip" id="tip" role="tooltip"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
@@ -225,20 +221,6 @@ function renderProfiles(){
   }).join("");
   $("#profNote").textContent = `Última coleta no período: ${fmtD(toD(DIAS[Math.min(b, lastIdx(D.serie[cs[0].id].seg,b))]))}.`;
 }
-function renderResults(){
-  const cs = cands();
-  $("#results").className = "grid " + (cs.length>3 ? "g5" : "g3");
-  $("#results").innerHTML = cs.map((c,i)=>{
-    const r = D.res[c.id], t = r.t1, mx = t.top[0][1];
-    return `<div class="card res"><h2>Resultado · 1º turno</h2>
-      <div class="big"><b>${nf.format(t.v)}</b><span>votos · ${pf(t.p,2)}% dos válidos</span></div>
-      ${r.t2 ? `<div class="t2">2º turno: <b>${pf(r.t2.p,2)}%</b> (${nf.format(r.t2.v)} votos), ${r.t2.mun} municípios</div>` : ""}
-      <div class="t2">Municípios em que ficou em 1º: <b>${t.mun}</b></div>
-      <div class="mlist">${t.top.map(m=>`<div class="mrow"><span title="${esc(m[0])}">${esc(m[0])}</span><i style="width:${100*m[1]/mx}%;background:${col(i)}"></i><em>${pf(m[1])}%</em></div>`).join("")}</div>
-      <p class="note">Maiores percentuais por município.</p></div>`;
-  }).join("");
-}
-
 // ---------- gráficos de linha ----------
 function lineChart(el, series, opt={}){
   const W = Math.max(260, el.clientWidth), H = opt.h || 210, mg = {l:44,r:10,t:8,b:24};
@@ -358,7 +340,7 @@ $("#d0").addEventListener("change", e=>{ if (e.target.value && e.target.value<=S
 $("#d1").addEventListener("change", e=>{ if (e.target.value && e.target.value>=S.d0){ S.d1=e.target.value; render(); } });
 $("#inst").addEventListener("change", e=>{ S.inst=e.target.value; renderPesq(); });
 $("#tpSel").addEventListener("change", e=>{ S.tp=e.target.value; renderTop(); });
-function render(){ renderPer(); keys(); renderProfiles(); renderResults(); renderCharts(); }
+function render(){ renderPer(); keys(); renderProfiles(); renderCharts(); }
 
 const btn = $("#themeBtn");
 const curTheme = () => document.documentElement.dataset.theme || (matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");
