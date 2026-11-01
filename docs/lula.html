@@ -210,12 +210,19 @@ footer{margin-top:56px;padding:24px 0 48px;border-top:1px solid var(--line);font
   .scat canvas{height:340px}
   .res .pc{font-size:28px}
 }
+
+/* atalho destacado para a página Digital */
+.navcta{flex:none;display:inline-flex;align-items:center;gap:7px;font:600 13px/1 "Archivo",system-ui,sans-serif;text-decoration:none;padding:7px 14px 7px 11px;border-radius:999px;background:var(--ink);color:var(--bg);white-space:nowrap;box-shadow:0 1px 0 rgba(0,0,0,.08)}
+.navcta::before{content:"";width:8px;height:8px;border-radius:999px;background:#1baf7a;box-shadow:0 0 0 3px color-mix(in srgb,#1baf7a 35%,transparent)}
+.navcta:hover{opacity:.9}
+.navcta[aria-current]{background:color-mix(in srgb,var(--ink) 12%,transparent);color:var(--ink)}
 </style>
 </head>
 <body>
 <header class="top"><div class="wrap">
   <a class="brand" href="index.html">RN 2026</a>
-  <nav aria-label="Páginas"><a href="index.html">Resultados</a><a href="deputados.html">Deputados</a><a href="simulador.html">Simulador 2º turno</a><a href="lula.html" aria-current="page">Lula × Governo</a><a href="pesquisas.html">Pesquisas</a><a href="digital.html">Digital</a><a href="gestao.html">Gestão</a></nav>
+  <a class="navcta" href="digital.html">Digital</a>
+  <nav aria-label="Páginas"><a href="index.html">Resultados</a><a href="deputados.html">Deputados</a><a href="simulador.html">Simulador 2º turno</a><a href="lula.html" aria-current="page">Lula × Governo</a><a href="pesquisas.html">Pesquisas</a><a href="gestao.html">Gestão</a></nav>
   <button class="theme" id="themeBtn" type="button">Tema escuro</button>
 </div></header>
 
